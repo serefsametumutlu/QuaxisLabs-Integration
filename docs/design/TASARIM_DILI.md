@@ -151,3 +151,48 @@ kalır.
 Bu belge **Faz 2'nin girdisidir.** Faz 2'de önce bir Artifact maketi üretilip
 onaya sunulacak, sonra `apps/web` token seti ve bileşen kütüphanesi bu dokuz
 ilkeye göre kodlanacak. Kod yazılmadan önce maket onaylanmazsa kod yazılmaz.
+
+---
+
+## 5. Aksan kararı — turkuaz (2026-09-12)
+
+**Karar: aksan turkuaz `#2ED3C0`** (açık temada `#0E8C81`), logodan alınmış.
+Kullanıcı üç seçeneği maket üzerinde canlı karşılaştırdı ve turkuazı seçti.
+
+### Çözülen gerçek sorun
+
+İlk maket turunda somut bir çakışma vardı: turkuaz (~173°) ile yükseliş yeşili
+(`#3DBE74`, ~146°) arasında yalnızca **27° ton farkı** kalıyordu. Bir tarama
+aracında bu, marka renginin **yön anlamıyla** karışması demek — ve kullanıcının
+kendi eski şartnamesinin "aksan ile semantik yeşil/kırmızı ayrı token aileleri
+olmalı" kuralının doğrudan ihlali. (Not: TradingView'in kendi varsayılan
+yükseliş rengi `#26A69A`, yani fiilen turkuazdır — çakışmanın tesadüf olmadığının
+kanıtı.)
+
+Aksanı bozmak yerine **çevresi** ona göre yeniden kuruldu:
+
+| # | Değişiklik | Gerekçe |
+|---|---|---|
+| 1 | Yükseliş yeşili yaprak yeşiline kaydırıldı: `#6CBF4F` (~100°), açık temada `#3D8B2A` | Aksanla arası 27° → **73°**. Mumda ve rozette karışması mümkün değil. |
+| 2 | `0.618` fibo seviyesi **aksanın kendisi** oldu | Altın oran zaten "karara değer" seviye. Eskiden orada duran ayrı bir teal, aksanla yarışıyordu. Çakışma anlama çevrildi. |
+| 3 | `0.786` saf maviye kaydırıldı (`#5B8CFF` / `#2E5BD4`) | 0.618 aksan olunca altın bölgenin iki ucu net ayrılsın. |
+| 4 | Nötrler turkuaza doğru hafifçe yanlandı (`#080B0C`, `#0F1315`, `#161B1E`) | Saf gri "seçilmemiş", hafif yanlı gri "seçilmiş" görünür. |
+
+### Renkten bağımsız ikinci ayrım katmanı
+
+Renk tek başına yeterli değil (renk körlüğü, düşük kaliteli ekran, küçük ölçek).
+Bu yüzden **şekil ve opaklık** de ayırıyor:
+
+- **Aksan hiçbir zaman mum ölçeğinde dolu bir leke değildir** — formasyon gövdesi
+  %10 opaklıkta geniş dolgu, seviyeler 1px çizgi, rozetler hap formu.
+- **Yön renkleri her zaman dolu ve mum boyutundadır.**
+
+Bu kural bağlayıcıdır: yeni bir komposer aksanı mum büyüklüğünde dolu bir
+işaret olarak kullanamaz.
+
+### Aksan değişirse
+
+Kehribar ya da elektrik mavisine dönülürse **fibo paleti yeniden ölçülmelidir** —
+maket bunu zaten yapıyor (mavi seçilince `0.786`, kehribar seçilince `0.500`
+kaydırılıyor). Aksan ile yükseliş arasındaki ton farkı her değişiklikte
+**yeniden ölçülmeli**, gözle onaylanmamalı.
