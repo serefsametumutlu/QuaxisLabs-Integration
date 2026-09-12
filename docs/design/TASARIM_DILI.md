@@ -196,3 +196,92 @@ Kehribar ya da elektrik mavisine dönülürse **fibo paleti yeniden ölçülmeli
 maket bunu zaten yapıyor (mavi seçilince `0.786`, kehribar seçilince `0.500`
 kaydırılıyor). Aksan ile yükseliş arasındaki ton farkı her değişiklikte
 **yeniden ölçülmeli**, gözle onaylanmamalı.
+
+---
+
+## 6. Derin geçiş — sayfa yapıları (2026-09-12, ikinci tur)
+
+İlk turda yalnızca hero'lar görülebilmişti; derin bölümlerin ekran görüntüsü
+kaydırma animasyonları yüzünden boş çıkıyordu. İkinci turda animasyon süreleri
+enjekte edilen CSS ile sıfırlandı ve **sayfa yapıları DOM'dan** çıkarıldı
+(başlık akışı + y konumu + toplam yükseklik). Ekran görüntüsünden daha
+güvenilir ve tasarım kararı için zaten gereken bilgi bu.
+
+### Sayfa uzunlukları — ve ne anlama geliyorlar
+
+| Site | Toplam yükseklik | Başlık sayısı | Karakter |
+|---|---:|---:|---|
+| Dovetail | **17 443 px** | 16 | H1 y=330, sonraki başlık y=**9635** |
+| Slash | 12 142 px | 30 | düzenli ritim, ~600–900 px'de bir H2 |
+| LuxAlgo (gösterge sayfası) | 5 057 px | 24 | yoğun, işlevsel |
+| V7 Labs | **4 979 px** | 5 | en kısa, en disiplinli |
+
+**Dovetail'deki 9 300 px'lik başlıksız boşluk** bir hata değil: sabitlenmiş
+(pinned) kaydırmayla ilerleyen sinematik bir ürün anlatımı. Sayfanın yarısından
+fazlası tek bir animasyona ayrılmış. Etkileyici bir pazarlama tekniği ama
+**bizde karşılığı yok ve olmamalı** — bir tarama aracında kullanıcı veriye
+gitmek ister, gösteriye değil.
+
+### Başlık formülü — dördünde de aynı kalıp
+
+İki kısa cümle, nokta ile ayrılmış, ikincisi birinciyi keskinleştiriyor:
+
+- V7: *"Complex workflows. Zero room for error."* · *"Build once. Deploy across teams. Improve over time."*
+- Dovetail: *"Build with facts, not vibes"*
+- LuxAlgo: *"Trading shouldn't be a guessing game."*
+
+Bizim `"Sinyali de gösteririz, isabetini de."` cümlesi aynı kalıpta — tesadüf
+değil, bu kalıp bilinçli seçildi.
+
+### Olgu şeridi — Slash'te de var, doğrulandı
+
+Slash `$35bn+ / 5m+ / 10k+ / $100m+` diye dört büyük sayıyı yan yana koyuyor
+(y=4729). Bizim giriş ekranındaki `648 / 4S+1G / 7 / 586` şeridi aynı desen —
+farkımız sayıların **ölçülmüş ve doğrulanabilir** olması.
+
+### Tablo kullanımı — sıfır
+
+Slash'te ve V7'de **hiç `<table>` yok**; fiyatlandırma bile kart ızgarası.
+Bu bizim için bir uyarı değil bir ayrım: onlar pazarlama sitesi, biz tarama
+aracıyız. **Bizde tablo birinci sınıf bir bileşendir** ve öyle kalacak.
+
+---
+
+## 7. Strateji sayfası iskeleti — LuxAlgo gösterge sayfasından
+
+En değerli bulgu bu. `luxalgo.com/library/indicator/<ad>/` sayfasının tam
+yapısı (y konumlarıyla):
+
+| y | Öğe |
+|---:|---|
+| 180 | `H1` — gösterge adı |
+| 298 | Sekme: **Chart · Source code** |
+| 300–1000 | Büyük **canlı grafik** |
+| 1025 | CTA — *"Open on Quant Charts · Add this indicator to a live chart in one click"* |
+| 1217 | Açıklayıcı görsel |
+| 1400 | `H3` — **"How to Trade the X?"** |
+| 1780 | `H3` — **"X Settings"** |
+| 1824 / 2064 / 2228 | `H4` parametre **grupları** — her grubun altında düz dille yazılmış madde listesi (*"Wick tolerance (ticks): Sets the maximum allowed distance, in ticks, between the candle body and its high or low"*) |
+| 2428 | `H3` — **Sık Sorulan Sorular** (akordeon) |
+| 2699 | "Back to top" |
+| 3675+ | Footer, 6 kolon grubu |
+
+### Bizim uyarlamamız — ve eklediğimiz bölüm
+
+```
+Başlık + paket rozeti + istatistik rozeti
+Sekme:  Grafik · Kaynak · Parametreler · Ölçüm
+────────────────────────────────────────────
+Canlı grafik (ChartSpec ile)
+"Nereye bak / Ne ölçer / Sinyal ne zaman doğar / Değerler ne demek"
+Parametreler — gruplu, her biri düz Türkçe açıklamalı
+KAYNAK — hangi kitap, hangi sayfa, hangi eşik alıntılandı   ← K0 kapısının çıktısı
+ÖLÇÜM  — tam evrende aday sayısı (K3) + sembol-kümelenmiş
+          OOS testi, p değeri, FDR sonucu (K4)               ← ONLARDA YOK
+Sık sorulan sorular
+```
+
+İki bölüm bizi ayırıyor: **Kaynak** ("bu eşik nereden geldi?") ve **Ölçüm**
+("işe yarıyor mu?"). LuxAlgo 874 gösterge yayınlıyor ve hiçbirinin ileriye
+dönük getirisini göstermiyor. Strateji Pasaportu'nun K0 ve K4 kapıları bu
+sayfada doğrudan görünür hâle geliyor — süreç, ürünün yüzeyine çıkıyor.
