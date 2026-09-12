@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./bilesenler.css";
+
+/* Token'ları Tailwind'in kendi sözlüğüne de bağla — böylece sınıf yazarken
+   hardcoded renk kullanma ihtimali kalmaz (bg-surface, text-text-2, …).
+   Tek kaynak yine tokens.css; burada yalnızca ad bağlama yapılıyor. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-up: var(--up);
+  --color-down: var(--down);
+
+  --font-display-face: var(--f-display);
+  --font-ui-face: var(--f-ui);
+  --font-mono-face: var(--f-mono);
+
+  --radius-panel: var(--r-panel);
+  --radius-media: var(--r-media);
+  --radius-pill: var(--r-pill);
+}

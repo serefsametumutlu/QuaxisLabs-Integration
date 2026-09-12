@@ -1,0 +1,127 @@
+/* ============================================================
+   QuaxisLabs — token sistemi
+   Kaynak: docs/design/maket_v1.html (ONAYLANMIŞ maket) <style> bloğu.
+   Değerler BİREBİR taşındı; yeniden yorumlanmadı.
+
+   Üç durum korunur:
+     1. bare :root ................................ koyu, VARSAYILAN
+     2. @media (prefers-color-scheme: light) içinde
+        :root:not([data-theme="dark"]) ............ sistem açıksa açık tema
+     3. :root[data-theme="light"] ................. açıkça seçilmiş açık tema
+
+   Maketten TEK fark: her seçici listesine `:root` olmayan bir eş
+   (`[data-theme="…"]`) eklendi. Bu, /tasarim vitrininde üç temanın YAN YANA
+   gösterilebilmesi için gerekli — token'ların kendisi değişmez, yalnızca
+   kapsamlanabilir hâle gelir. `[data-theme="system"]` işletim sistemini izler.
+   ============================================================ */
+
+/* ---------- 1. KOYU (varsayılan) ----------
+   Nötrler saf gri değil: aksana doğru çok hafif cyan yanlı. */
+:root,
+[data-theme="dark"],
+[data-theme="system"] {
+  --ground: #080B0C;
+  --surface: #0F1315;
+  --surface-2: #161B1E;
+  --surface-3: #1D2326;
+  --line: rgba(226, 244, 242, .09);
+  --line-strong: rgba(226, 244, 242, .17);
+  --text: #E4EBEB;
+  --text-2: rgba(228, 235, 235, .62);
+  --text-3: rgba(228, 235, 235, .34);
+  --grid: rgba(226, 244, 242, .05);
+
+  /* aksan — logodan; KARAR: turkuaz */
+  --accent: #2ED3C0;
+  --accent-ink: #04231F;
+  --accent-soft: rgba(46, 211, 192, .14);
+  --accent-line: rgba(46, 211, 192, .42);
+
+  /* semantik — aksandan BAĞIMSIZ, yön anlamı taşır.
+     Yükseliş yeşili turkuazdan KAÇIRILDI: yaprak yeşili (~100°),
+     aksan turkuaz (~173°) — aradaki fark 70°'nin üstünde. */
+  --up: #6CBF4F;
+  --down: #E8505B;
+  --up-soft: rgba(108, 191, 79, .15);
+  --down-soft: rgba(232, 80, 91, .14);
+
+  /* fibo merdiveni — oran-renkli.
+     0.618 BİLİNÇLİ olarak aksanın kendisi: altın oran, "karara değer" seviye. */
+  --fib-0: #8A8F98;
+  --fib-236: #C2607A;
+  --fib-382: #D08A3C;
+  --fib-500: #C9B13F;
+  --fib-786: #5B8CFF;
+  --fib-1: #D08A3C;
+  --fib-ext: #9B7BE0;
+
+  --r-panel: 2px;
+  --r-media: 8px;
+  --r-pill: 999px;
+
+  --f-display: var(--font-display), "Segoe UI", system-ui, sans-serif;
+  --f-ui: var(--font-ui), "Segoe UI", system-ui, sans-serif;
+  --f-mono: var(--font-mono), ui-monospace, "Cascadia Mono", monospace;
+}
+
+/* ---------- 2. Sistem açık tema ---------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]),
+  [data-theme="system"] {
+    --ground: #F1F5F5; --surface: #FFFFFF; --surface-2: #F6F9F9; --surface-3: #E9EFEF;
+    --line: rgba(10, 26, 25, .12); --line-strong: rgba(10, 26, 25, .22);
+    --text: #101617; --text-2: rgba(16, 22, 23, .66); --text-3: rgba(16, 22, 23, .4);
+    --grid: rgba(10, 26, 25, .07);
+    --accent-ink: #FFFFFF;
+    --accent-soft: rgba(14, 140, 129, .13); --accent-line: rgba(14, 140, 129, .5);
+    --up: #3D8B2A; --down: #C8303C;
+    --up-soft: rgba(61, 139, 42, .13); --down-soft: rgba(200, 48, 60, .12);
+    --fib-0: #6B7079; --fib-236: #A8405C; --fib-382: #B06A18; --fib-500: #9C8615;
+    --fib-786: #2E5BD4; --fib-1: #B06A18; --fib-ext: #6B4FC0;
+  }
+}
+
+/* ---------- 3. Açıkça seçilmiş açık tema ---------- */
+:root[data-theme="light"],
+[data-theme="light"] {
+  --ground: #F1F5F5; --surface: #FFFFFF; --surface-2: #F6F9F9; --surface-3: #E9EFEF;
+  --line: rgba(10, 26, 25, .12); --line-strong: rgba(10, 26, 25, .22);
+  --text: #101617; --text-2: rgba(16, 22, 23, .66); --text-3: rgba(16, 22, 23, .4);
+  --grid: rgba(10, 26, 25, .07);
+  /* Makette --accent açık blokta değil, altta aksan bölümünde veriliyordu
+     (kök her zaman data-accent taşıdığı için). Kapsamlanmış kullanım için
+     varsayılanı burada da yazılı: data-accent verilmezse turkuazın açık
+     karşılığı geçerli olur; daha spesifik aksan kuralları bunu ezer. */
+  --accent: #0E8C81;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(14, 140, 129, .13); --accent-line: rgba(14, 140, 129, .5);
+  --up: #3D8B2A; --down: #C8303C;
+  --up-soft: rgba(61, 139, 42, .13); --down-soft: rgba(200, 48, 60, .12);
+  --fib-0: #6B7079; --fib-236: #A8405C; --fib-382: #B06A18; --fib-500: #9C8615;
+  --fib-786: #2E5BD4; --fib-1: #B06A18; --fib-ext: #6B4FC0;
+}
+
+/* ---------- aksan varyantları ----------
+   KARAR turkuaz; kehribar/mavi karşılaştırma için duruyor.
+   Mavi seçilirse 0.786 fibo çizgisi, kehribar seçilirse 0.500 kaydırılıyor ki
+   aksan ile fibo merdiveni aynı renge düşmesin. */
+:root[data-accent="amber"], [data-accent="amber"] {
+  --accent: #E9A93A; --accent-ink: #221703;
+  --accent-soft: rgba(233, 169, 58, .15); --accent-line: rgba(233, 169, 58, .45);
+  --fib-500: #8FB0C4;
+}
+:root[data-accent="blue"], [data-accent="blue"] {
+  --accent: #5B8CFF; --accent-ink: #04122E;
+  --accent-soft: rgba(91, 140, 255, .16); --accent-line: rgba(91, 140, 255, .46);
+  --fib-786: #3FA9B8;
+}
+
+:root[data-theme="light"][data-accent="teal"], [data-theme="light"][data-accent="teal"] { --accent: #0E8C81; }
+:root[data-theme="light"][data-accent="amber"], [data-theme="light"][data-accent="amber"] { --accent: #A9720A; --accent-ink: #fff; }
+:root[data-theme="light"][data-accent="blue"], [data-theme="light"][data-accent="blue"] { --accent: #2E5BD4; --accent-ink: #fff; }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]), [data-theme="system"] { --accent: #0E8C81; }
+  :root:not([data-theme="dark"])[data-accent="amber"], [data-theme="system"][data-accent="amber"] { --accent: #A9720A; --accent-ink: #fff; }
+  :root:not([data-theme="dark"])[data-accent="blue"], [data-theme="system"][data-accent="blue"] { --accent: #2E5BD4; --accent-ink: #fff; }
+}

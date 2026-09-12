@@ -1,0 +1,84 @@
+/* /tasarim — iç vitrin. Ürün yüzeyi değil, tasarım sisteminin kendisi.
+   Buradaki her renk yine token'dan gelir. */
+
+.tsayfa { max-width: 1400px; margin: 0 auto; padding: 0 22px 90px; }
+
+.tust {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 0; margin-bottom: 6px;
+  background: var(--ground); border-bottom: 1px solid var(--line);
+}
+.tust h1 {
+  font-family: var(--f-display); font-weight: 500; font-size: 20px;
+  letter-spacing: -.6px; margin: 4px 0 0;
+}
+.tust .sag { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.tbolum { padding: 30px 0 0; }
+.tbolum > header { margin-bottom: 14px; }
+.tbolum h2 {
+  font-family: var(--f-display); font-weight: 500; font-size: 17px;
+  letter-spacing: -.4px; margin: 6px 0 4px;
+}
+.tbolum > header p { margin: 0; color: var(--text-2); font-size: 13px; max-width: 76ch; }
+
+/* --- üç tema yan yana --- */
+.temalar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1080px) { .temalar { grid-template-columns: 1fr; } }
+
+.temakutu {
+  background: var(--ground); border: 1px solid var(--line);
+  border-radius: var(--r-panel); overflow: hidden;
+}
+.temakutu > .bas {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--ground);
+}
+.temakutu > .bas .ad {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--text-3);
+}
+.temakutu > .bas .themeseg { margin-left: auto; }
+.temakutu > .ic { padding: 13px; display: flex; flex-direction: column; gap: 13px; color: var(--text); }
+
+.vblok { border: 1px solid var(--line); border-radius: var(--r-panel); background: var(--surface); padding: 11px 12px 13px; }
+.vblok > .vb {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--text-3); margin: 0 0 9px;
+}
+
+/* --- aksan seçici --- */
+.swatchrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 11px 6px 7px;
+  border: 1px solid var(--line); border-radius: var(--r-pill); background: transparent;
+  color: var(--text-2); font-size: 12.5px; cursor: pointer; font-family: var(--f-ui);
+}
+.swatch i { width: 14px; height: 14px; border-radius: var(--r-pill); display: block; }
+.swatch[aria-pressed="true"] { color: var(--text); border-color: var(--text-3); }
+.swatch .hex { font-family: var(--f-mono); font-size: 10.5px; color: var(--text-3); }
+
+/* --- ölçüm kutusu --- */
+.olcum {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 11px 13px; border: 1px solid var(--line); border-top: 0;
+  background: var(--surface); font-size: 12.5px; color: var(--text-2);
+}
+.olcum .deger { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--text); }
+.olcum .ayrac { width: 1px; height: 16px; background: var(--line); }
+
+/* --- token ızgarası --- */
+.tokenlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px;
+  background: var(--line); border: 1px solid var(--line); border-radius: var(--r-panel); overflow: hidden; }
+.tokenkart { background: var(--surface); padding: 12px 14px 14px; }
+.tokenkart .ad { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-3); }
+.tokenkart .sira { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.tokenkart .ornek { flex: 1 1 auto; min-width: 34px; height: 30px; border-radius: 2px; border: 1px solid var(--line); }
+.tokenkart .alt { font-family: var(--f-mono); font-size: 10.5px; color: var(--text-3); margin-top: 8px; }
+
+.yaricap { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.yaricap figure { margin: 0; text-align: center; }
+.yaricap .kutu { width: 64px; height: 40px; background: var(--surface-2); border: 1px solid var(--line-strong); }
+.yaricap figcaption { font-family: var(--f-mono); font-size: 10px; color: var(--text-3); margin-top: 6px; }
