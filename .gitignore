@@ -1,0 +1,55 @@
+# --- Veri ve önbellek (ASLA commit edilmez) ---
+data/
+outputs/
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.csv.gz
+
+# --- Kitaplar / büyük ikili dosyalar (ev dizini deposundaki 4 GB .git hatası tekrarlanmasın) ---
+*.pdf
+*.epub
+*.mobi
+*.zip
+*.mp4
+kitaplar/
+books/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# --- Ortam ve sırlar ---
+.env
+.env.*
+!.env.example
+
+# --- Editör / işletim sistemi ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- Görsel kabul döngüsü geçici çıktıları ---
+tools/_snapshots/
+docs/design/_gecici/
