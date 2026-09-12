@@ -66,8 +66,8 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 | 0 | Kuruluş — depo, iskelet, ADR'ler | ✅ bitti |
 | 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | ✅ bitti |
 | 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | ✅ bitti |
-| 3 | Uygulama kabuğu ve sayfa iskeletleri | **sırada** |
-| 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | bekliyor |
+| 3 | Uygulama kabuğu ve sayfa iskeletleri | ✅ bitti |
+| 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | **sırada** |
 
 ### Bölüm B — Altyapı
 
@@ -91,7 +91,7 @@ yalnızca karşılaştırma için bakılır.
 ```bash
 cd apps/web
 npm install
-npm run dev            # http://localhost:3000  ·  /tasarim = bileşen vitrini
+npm run dev            # http://localhost:3000
 npm run build          # üretim derlemesi
 npm run lint
 
@@ -100,6 +100,21 @@ npm run build:vitrin                          # statik dışa aktarım -> out/
 python ../../tools/ekran_goruntusu.py --etiket i1
 python ../../tools/tablo_olcum.py             # DataTable 500 satır ölçümü
 ```
+
+### Yüzeyler
+
+| Yol | Ne | Durum |
+|---|---|---|
+| `/` | Giriş ekranı — hero, olgu şeridi, 7 kapı, rozet açıklaması | iskelet ✅ |
+| `/tarama` | Tarama tablosu + sağdan açılan grafik çekmecesi | iskelet ✅ |
+| `/grafik` | Grafik levhası: çubuk, HUD, durum kutusu, 4 not, K4 verdikti | iskelet ✅ · **levhanın içi Faz 4** |
+| `/stratejiler` | Strateji kütüphanesi (kart ızgarası) | iskelet ✅ |
+| `/stratejiler/<ad>` | Strateji künyesi: parametreler, **Kaynak** (K0), **Ölçüm** (K4), SSS | iskelet ✅ |
+| `/tasarim` | Bileşen vitrini — 15 bileşen, üç tema yan yana | ✅ |
+
+Kabuk her yüzeyde ortak: yapışkan üst şerit, `Ctrl+K` hızlı geçiş, sol ray,
+tema (sistem/açık/koyu) ve aksan anahtarı. **Veri hâlâ örnektir** ve arayüzde
+her yerde öyle etiketlenir.
 
 Next.js 16 + React 19 + TypeScript + Tailwind 4. Token sistemi
 [`apps/web/app/tokens.css`](apps/web/app/tokens.css)'te ve onaylanmış maketten

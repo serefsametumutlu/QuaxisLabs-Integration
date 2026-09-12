@@ -60,7 +60,19 @@ def main() -> int:
     ap.add_argument("--etiket", default="i1", help="iterasyon etiketi: i1, i2, i3…")
     ap.add_argument("--ad", default="tasarim")
     ap.add_argument("--pencere", action="store_true", help="tam sayfa yerine yalnız görünen pencere")
+    ap.add_argument(
+        "--tema",
+        default=None,
+        choices=[t[0] for t in TEMALAR],
+        help="yalnız bu temayı al (varsayılan: üçü de)",
+    )
     args = ap.parse_args()
+
+    temalar = [t for t in TEMALAR if args.tema is None or t[0] == args.tema]
+
+    # Git Bash, "/tarama.html" gibi baştan eğik çizgili argümanları Windows
+    # yoluna çevirir. Eğik çizgisiz de kabul edip burada tamamlıyoruz.
+    yol = args.yol if args.yol.startswith("/") else "/" + args.yol
 
     kaynak = pathlib.Path(args.kaynak)
     if not (kaynak / "tasarim.html").exists():
@@ -76,7 +88,7 @@ def main() -> int:
         with sync_playwright() as p:
             tarayici = p.chromium.launch()
             try:
-                for ek, tema, sema in TEMALAR:
+                for ek, tema, sema in temalar:
                     for w in GENISLIKLER:
                         ctx = tarayici.new_context(
                             viewport={"width": w, "height": 900},
@@ -86,7 +98,7 @@ def main() -> int:
                             locale="tr-TR",
                         )
                         sayfa = ctx.new_page()
-                        url = f"http://127.0.0.1:{port}{args.yol}?tema={tema}"
+                        url = f"http://127.0.0.1:{port}{yol}?tema={tema}"
                         sayfa.goto(url, wait_until="networkidle")
                         sayfa.wait_for_timeout(400)  # font yüklemesi otursun
                         hedef = cikti / f"{args.ad}-{ek}-{w}-{args.etiket}.png"

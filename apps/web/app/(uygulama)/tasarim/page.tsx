@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import "./tasarim.css";
-import {
-  Card,
-  CardGrid,
-  Eyebrow,
-  Pill,
-  ThemeSegment,
-} from "@/components/ui";
+import { Card, CardGrid, Eyebrow, Pill, ThemeSegment } from "@/components/ui";
 import { VitrinKompakt } from "@/components/vitrin-kompakt";
 import { BuyukTablo } from "@/components/buyuk-tablo";
 import { StratejiKucukResim } from "@/components/strateji-kucuk-resim";
@@ -45,6 +39,8 @@ export default function TasarimSayfasi() {
           <Eyebrow>Tasarım Sistemi · iç vitrin</Eyebrow>
           <h1>Token&apos;lar ve bileşenler</h1>
         </div>
+        {/* Tema ve aksan anahtarları kabuğun üst şeridinde; burada yalnız
+            aksanın hex'i okunabilsin diye adlı seçici duruyor. */}
         <div className="sag">
           <span className="swatchrow">
             {AKSANLAR.map((a) => (
@@ -60,7 +56,6 @@ export default function TasarimSayfasi() {
               </button>
             ))}
           </span>
-          <ThemeSegment />
         </div>
       </header>
 

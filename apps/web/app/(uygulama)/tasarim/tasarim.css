@@ -3,8 +3,9 @@
 
 .tsayfa { max-width: 1400px; margin: 0 auto; padding: 0 22px 90px; }
 
+/* Kabuğun kendi yapışkan üst şeridi 52px; vitrinin başlığı onun altına oturur. */
 .tust {
-  position: sticky; top: 0; z-index: 40;
+  position: sticky; top: 52px; z-index: 30;
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   padding: 14px 0; margin-bottom: 6px;
   background: var(--ground); border-bottom: 1px solid var(--line);

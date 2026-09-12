@@ -1,0 +1,96 @@
+/* ============================================================
+   QuaxisLabs — strateji sayfası (Faz 3)
+   İskelet LuxAlgo'nun gösterge sayfasından alındı; KAYNAK (K0) ve ÖLÇÜM (K4)
+   bölümleri bizim eklememiz. Bkz. TASARIM_DILI §7.
+   ============================================================ */
+
+.stratHead { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.stratHead h2 { margin: 6px 0 0; font-size: 23px; }
+.stratHead p { margin: 6px 0 0; font-size: 13px; max-width: 64ch; color: var(--text-2); line-height: 1.55; }
+.stratHead .rt { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.sect { border: 1px solid var(--line); border-top: 0; background: var(--surface); padding: 18px 20px 20px; }
+.sect:first-of-type { border-top: 1px solid var(--line); }
+.sect > h3 {
+  margin: 0 0 4px; font-family: var(--f-display); font-size: 15px; font-weight: 500;
+  letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.sect > h3 .gate {
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 1.6px;
+  padding: 2.5px 8px; border-radius: var(--r-pill);
+  background: var(--accent-soft); color: var(--accent);
+}
+.sect > .lede { margin: 0 0 14px; font-size: 12.5px; color: var(--text-2); max-width: 76ch; line-height: 1.55; }
+
+.params { display: grid; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); gap: 20px; }
+.params h4 { margin: 0 0 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--text-3); font-weight: 400; }
+.params dl { margin: 0; font-size: 12.5px; }
+.params dt { font-family: var(--f-mono); font-size: 12px; color: var(--text); margin-top: 9px; }
+.params dt:first-child { margin-top: 0; }
+.params dt .def { color: var(--accent); margin-left: 7px; }
+.params dd { margin: 2px 0 0; color: var(--text-2); line-height: 1.5; }
+.params dd b { color: var(--text); font-weight: 500; }
+
+.src { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.srcbox { border: 1px solid var(--line); border-left: 2px solid var(--accent);
+  background: var(--surface-2); padding: 11px 14px 13px; }
+.srcbox .k { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-3); }
+.srcbox p { margin: 7px 0 0; font-size: 12.5px; color: var(--text-2); line-height: 1.55; }
+.srcbox p b { color: var(--text); font-weight: 500; }
+.srcbox code { font-family: var(--f-mono); font-size: 11.5px; color: var(--accent); overflow-wrap: anywhere; }
+/* Kapanmamış kapı: kesikli kenarlık, aksan şeridi YOK — "burada bir şey eksik". */
+.srcbox.gap { border: 1px dashed var(--line-strong); background: transparent; border-left-width: 1px; }
+.srcbox.gap .k { color: var(--text-3); }
+.srcbox.gap code { color: var(--text-2); }
+
+.measure { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 760px) { .measure { grid-template-columns: 1fr; } }
+.mtable { width: 100%; min-width: 0; border-collapse: collapse; font-size: 12.5px; }
+.mtable th { text-align: left; font-family: var(--f-mono); font-size: 10px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-3); font-weight: 400; padding: 0 0 7px; }
+.mtable td { padding: 6px 0; border-top: 1px solid var(--line); color: var(--text-2); }
+.mtable td:last-child { text-align: right; color: var(--text); font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums; }
+
+pre.code {
+  margin: 0; padding: 13px 15px; overflow-x: auto;
+  background: var(--surface-2); border: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 11.5px; line-height: 1.65; color: var(--text-2);
+}
+pre.code .kw { color: var(--fib-786); }
+pre.code .st { color: var(--up); }
+pre.code .cm { color: var(--text-3); }
+pre.code .fn { color: var(--accent); }
+
+/* ---------- sağdan açılan grafik çekmecesi ---------- */
+.cekmece-perde {
+  position: fixed; inset: 0; z-index: 60;
+  background: color-mix(in srgb, var(--ground) 62%, transparent);
+}
+.cekmece {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: min(720px, 100vw); display: flex; flex-direction: column;
+  background: var(--ground); border-left: 1px solid var(--line-strong);
+}
+.cekmece > header {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  padding: 11px 14px; border-bottom: 1px solid var(--line);
+}
+.cekmece > header .sym { font-family: var(--f-mono); font-size: 14px; font-weight: 500; letter-spacing: .3px; }
+.cekmece .kapat {
+  margin-left: auto; width: 26px; height: 26px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: var(--r-pill); background: transparent;
+  color: var(--text-2); cursor: pointer; font-family: var(--f-mono); font-size: 13px; line-height: 1;
+}
+.cekmece .kapat:hover { color: var(--text); border-color: var(--line-strong); }
+.cekmece .govde { overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.cekmece .satirlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel); overflow: hidden; }
+.cekmece .satirlar > div { padding: 10px 13px 12px; background: var(--surface);
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line); margin: -1px 0 0 -1px; }
+.cekmece .satirlar .k { font-family: var(--f-mono); font-size: 10px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-3); }
+.cekmece .satirlar .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+  font-size: 16px; margin-top: 6px; }

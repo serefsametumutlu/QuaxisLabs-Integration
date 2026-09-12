@@ -7,6 +7,17 @@
  * "kanıtlanmış" diye sunulmaz.
  */
 
+/** Kapanış taraması saati. Tek yerde dursun: duyuru şeridi ve üst bar okur. */
+export const TARAMA_SAATI = { saat: 18, dakika: 15, metin: "18:15" } as const;
+
+/** Giriş ekranındaki olgu şeridi — hepsi doğrulanabilir sayılar. */
+export const OLGULAR = [
+  { n: "648", t: "BIST sembolü" },
+  { n: "4S + 1G", t: "zaman dilimi" },
+  { n: "7", t: "kapılı strateji süreci" },
+  { n: "586", t: "sembolde OOS ölçümü" },
+] as const;
+
 export type Yon = "up" | "down";
 export type Verdikt = "izlenen aday" | "kanıtlanmadı" | "ölçülmedi";
 

@@ -1,15 +1,24 @@
-# Görsel kabul döngüsü — `/tasarim` vitrini (Faz 2)
+# Görsel kabul döngüsü
 
-**Tarih:** 2026-09-12
 **Kural:** README madde 5 — her görsel iş ekran görüntüsüyle doğrulanır,
 **en az 3 iterasyon**.
+
+Bu dosya iki turu kaydeder: **Faz 2** (`/tasarim` vitrini, `*-i5.png`) ve
+**Faz 3** (beş ürün yüzeyi, `*-f3.png`).
 
 ## Nasıl üretilir
 
 ```bash
 cd apps/web && npm run build:vitrin      # statik dışa aktarım -> apps/web/out
-python tools/ekran_goruntusu.py --etiket i5
+
+# tek yüzey, üç tema × iki genişlik
+python tools/ekran_goruntusu.py --yol tarama.html --ad tarama --etiket f3
+
+# yalnız bir tema
+python tools/ekran_goruntusu.py --yol index.html --ad giris --etiket f3 --tema koyu
+
 python tools/tablo_olcum.py              # DataTable kabul ölçümü
+python tools/kirp.py <png> x y w h --olcek 2.6 --ad yakin.png   # yakından bak
 python tools/gorsel_kucult.py docs/design/ui
 ```
 
@@ -99,3 +108,67 @@ karşılaştırılabilsin diye duruyor.
 
 Ölçüm sentetik bir sayı değil: sayfanın kendi `requestAnimationFrame` kare
 aralıkları. "2 sn kaydır ve ölç" düğmesiyle vitrinde de tekrarlanabilir.
+
+---
+
+# Faz 3 — beş ürün yüzeyi (`*-f3.png`)
+
+**Tarih:** 2026-09-12
+
+| Yüzey | Yol | Dosya |
+|---|---|---|
+| Giriş ekranı | `/` | `giris-*-f3.png` |
+| Tarama | `/tarama` | `tarama-*-f3.png` |
+| Grafik | `/grafik` | `grafik-*-f3.png` |
+| Strateji kütüphanesi | `/stratejiler` | `kutuphane-*-f3.png` |
+| Strateji sayfası | `/stratejiler/altin-bolge` | `strateji-*-f3.png` |
+
+Her yüzey için koyu 1440 + açık 1440 + koyu 768 saklandı. Sistem teması Faz
+2'de doğrulandı (`tasarim-sistem-*`), tema kapsamlaması değişmedi.
+
+## İterasyonlar — ne görüldü, ne düzeltildi
+
+### f3i1 → f3i2 (on kusur)
+1. **Fiyat paneli neredeyse boştu.** Örnek seri sabit bir eksene çiziliyordu;
+   rastgele yürüyüş panelin ortasında ince bir şerit olarak kalıyor, levhanın
+   yarısı boş duruyordu. Eksen artık seriye OTURUR (min/max + %6 pay).
+2. **Hacim şeridi levhanın yarısını yiyordu** — yükseklikten türetilen sabit
+   oran (%24).
+3. **Son fiyat rozetinin rengi sayfadaki yön rozetiyle çelişiyordu.** Giriş
+   ekranı "SAT" diyor, grafikteki rozet yeşil çıkıyordu. Yön artık ÇAĞIRANDAN
+   gelir; bir tarama aracında rozetin rengi rastgele bir serinin son barına
+   bırakılamaz.
+4. **"ChartSpec katmanı · Faz 4" bindirmesi mumları kapatıyordu** → levha
+   çubuğuna kesikli hap olarak taşındı.
+5. **Durum kutusu son fiyat rozetinin üstüne biniyordu** → sağ konum fiyat
+   oluğunun dışına alındı.
+6. **Pazarlama başlıklarının satır aralığı gövde metninden miras kalmıştı**
+   (1.5) → 1.12.
+7. **Yedi kapı 6 + 1 diziliyordu** → sütun eşiği düşürüldü, `auto-fit` boş izi
+   topluyor, yedisi tek satırda.
+8. **Tarama tablosunun "Tarihsel isabet" kolonu 1440'ta kesiliyordu** — kolon
+   genişlikleri toplamı levhadan genişti. K4 çıktısını taşıyan kolonun
+   görünmesi için toplam daraltıldı.
+9. **Filtre şeridinde "Bugünü tara" tek başına alt satıra düşüyordu** → iki
+   eylem tek gruba alındı.
+10. **Yön çipleri "Yön: Tümü / Yön: AL / Yön: SAT"** — grup etiketi zaten "YÖN"
+    diyordu; çipler sadeleşti.
+
+### f3i2 → f3i3
+11. **Durum kutusu ve HUD son barların üstüne biniyordu.** Bir tarama aracında
+    en önemli barlar tam da onlar. Levhaya üst ve sağ pay eklendi
+    (`padUst` / `padSag`); katmanlar artık boş alanı kaplıyor.
+12. **Kaynak kutusunda dosya yolu cümlenin başına düşüyordu** ("…10_pesavento…
+    Larry Pesavento — …") → kod, cümlenin doğal yerine alındı.
+
+### f3i3 → f3i4
+13. **Makette olan hero arama kutusu atlanmıştı** → geri kondu ve gerçek bir
+    davranışa bağlandı (girilen metin taramaya sorgu olarak taşınır). Altındaki
+    iki CTA maketteki hâline döndü.
+
+### Doğrulanıp kusur bulunmayanlar
+- Sol rayda yalnız bulunulan yüzey vurgulu (2.6× büyütmeyle bakıldı).
+- Açık/koyu temada beş yüzeyin tamamı; 768'de ray gizleniyor, tablo kendi
+  içinde yatay kayıyor, hiçbir ızgarada yarım satır kalmıyor.
+- Duyuru şeridi geri sayımı sunucuda boş, istemcide dönüyor — hidrasyon
+  uyuşmazlığı yok.
