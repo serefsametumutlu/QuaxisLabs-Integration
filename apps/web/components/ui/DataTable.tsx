@@ -102,6 +102,33 @@ export function DataTable<T>({
     });
   }, [rows, columns, sort]);
 
+  /**
+   * Hücre önbelleği — kaydırmanın asıl maliyeti burada.
+   * Pencere her karede kaydığı için `cell(row)` saniyede onlarca kez yeniden
+   * koşuyordu (sparkline SVG'leri dahil). `<td>` ELEMANLARI satır nesnesine
+   * göre bir kez üretilir; aynı referans geri verilince React o alt ağacı hiç
+   * diff'lemez. Sıralama satır nesnelerini değil sırayı değiştirdiği için
+   * önbellek sıralamada da geçerli kalır — yalnız satır kümesi ya da kolonlar
+   * değişince yeniden kurulur.
+   */
+  const hucreler = useMemo(() => {
+    const harita = new Map<T, ReactNode[]>();
+    for (const row of rows) {
+      harita.set(
+        row,
+        columns.map((c) => (
+          <td
+            key={c.id}
+            className={[c.align === "right" ? "r" : null, c.className].filter(Boolean).join(" ") || undefined}
+          >
+            {c.cell(row)}
+          </td>
+        )),
+      );
+    }
+    return harita;
+  }, [rows, columns]);
+
   const toplam = sirali.length;
   const ilk = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
   const gorunen = Math.ceil(height / rowHeight) + overscan * 2;
@@ -109,10 +136,22 @@ export function DataTable<T>({
   const ustDolgu = ilk * rowHeight;
   const altDolgu = Math.max(0, (toplam - son) * rowHeight);
 
+  // Kaydırma olayı bir karede defalarca gelebilir; pencereyi kare başına bir
+  // kez güncelleriz. Aksi hâlde tek karede birden fazla React turu doğuyor.
+  const kaydirmaBekleyen = useRef(false);
   const kaydir = useCallback(() => {
-    const el = scrollRef.current;
-    if (el) setScrollTop(el.scrollTop);
+    if (kaydirmaBekleyen.current) return;
+    kaydirmaBekleyen.current = true;
+    requestAnimationFrame(() => {
+      kaydirmaBekleyen.current = false;
+      const el = scrollRef.current;
+      if (el) setScrollTop(el.scrollTop);
+    });
   }, []);
+
+  /** Sticky <thead> pencerenin üst şeridini kapatır; hesaplara dahil edilir. */
+  const baslikYuksekligi = () =>
+    (bodyRef.current?.parentElement as HTMLTableElement | null)?.tHead?.offsetHeight ?? 0;
 
   const siralamayiDegistir = useCallback((kolonId: string) => {
     setSort((s) =>
@@ -134,9 +173,13 @@ export function DataTable<T>({
       setOdakIstendi(true);
       const el = scrollRef.current;
       if (!el) return;
-      const ust = i * rowHeight;
+      // Satırın içerik koordinatı başlık yüksekliği kadar aşağıdadır; görünür
+      // bölge de yapışkan başlığın ALTINDA başlar. İkisi hesaba katılmazsa
+      // "End" sonrası odaklı satır pencerenin dışında kalıyordu.
+      const bas = baslikYuksekligi();
+      const ust = bas + i * rowHeight;
       const alt = ust + rowHeight;
-      if (ust < el.scrollTop) el.scrollTop = ust;
+      if (ust < el.scrollTop + bas) el.scrollTop = ust - bas;
       else if (alt > el.scrollTop + el.clientHeight) el.scrollTop = alt - el.clientHeight;
     },
     [toplam, rowHeight],
@@ -161,7 +204,19 @@ export function DataTable<T>({
     setAktif(-1);
   }
 
-  const tus = (e: React.KeyboardEvent<HTMLTableRowElement>, index: number, row: T) => {
+  /** Olay hedefinden satır sırasını okur. Dinleyiciler satırlarda değil
+   *  `<tbody>`'de duruyor: her karede 25 satıra dört kapanış bağlamak
+   *  kaydırmayı yavaşlatıyordu. */
+  const sira = (e: { target: EventTarget | null }): number => {
+    const tr = (e.target as HTMLElement | null)?.closest?.("tr[data-index]");
+    const v = tr?.getAttribute("data-index");
+    return v == null ? -1 : Number(v);
+  };
+
+  const tus = (e: React.KeyboardEvent<HTMLTableSectionElement>) => {
+    const index = sira(e);
+    if (index < 0) return;
+    const row = sirali[index];
     const sayfa = Math.max(1, Math.floor(height / rowHeight) - 1);
     switch (e.key) {
       case "ArrowDown":
@@ -250,7 +305,23 @@ export function DataTable<T>({
               })}
             </tr>
           </thead>
-          <tbody ref={bodyRef}>
+          <tbody
+            ref={bodyRef}
+            onKeyDown={tus}
+            // mouseenter kabarmaz; olay devri için mouseover kullanılır.
+            onMouseOver={(e) => {
+              const i = sira(e);
+              if (i >= 0) onRowHover?.(sirali[i]);
+            }}
+            onFocus={(e) => {
+              const i = sira(e);
+              if (i >= 0) setAktif(i);
+            }}
+            onClick={(e) => {
+              const i = sira(e);
+              if (i >= 0) onRowActivate?.(sirali[i]);
+            }}
+          >
             {ustDolgu > 0 ? (
               <tr className="pad" aria-hidden="true">
                 <td colSpan={columns.length} style={{ height: ustDolgu }} />
@@ -266,19 +337,8 @@ export function DataTable<T>({
                   data-active={index === aktif ? "true" : undefined}
                   aria-rowindex={index + 2}
                   tabIndex={aktif === -1 ? (k === 0 ? 0 : -1) : index === aktif ? 0 : -1}
-                  onFocus={() => setAktif(index)}
-                  onMouseEnter={() => onRowHover?.(row)}
-                  onClick={() => onRowActivate?.(row)}
-                  onKeyDown={(e) => tus(e, index, row)}
                 >
-                  {columns.map((c) => (
-                    <td
-                      key={c.id}
-                      className={[c.align === "right" ? "r" : null, c.className].filter(Boolean).join(" ") || undefined}
-                    >
-                      {c.cell(row)}
-                    </td>
-                  ))}
+                  {hucreler.get(row)}
                 </tr>
               );
             })}

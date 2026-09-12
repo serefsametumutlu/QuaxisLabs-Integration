@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:vitrin": "node scripts/vitrin-derle.mjs",
     "start": "next start",
     "lint": "eslint"
   },

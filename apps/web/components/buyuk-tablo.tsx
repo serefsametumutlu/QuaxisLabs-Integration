@@ -207,7 +207,7 @@ export function BuyukTablo() {
             </span>
           </>
         ) : (
-          <span className="dim">
+          <span>
             {SATIR_SAYISI} satır yüklü; DOM&apos;da yalnızca görünen pencere + taşma payı çizilir.
           </span>
         )}
@@ -215,10 +215,11 @@ export function BuyukTablo() {
         <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
       </div>
 
-      <p className="dim" style={{ fontSize: 12, margin: "10px 0 0", maxWidth: "78ch", lineHeight: 1.55 }}>
-        Satır üzerine gelmek <b className="mut">onRowHover</b> kancasını tetikler — Faz 3&apos;te sağdan
-        açılan grafik çekmecesi buna bağlanacak. Klavye: <b className="mut">↑ ↓ Home End PageUp
-        PageDown</b> satır değiştirir, <b className="mut">Enter</b> satırı açar; odak pencere dışına
+      <p className="mut" style={{ fontSize: 12, margin: "10px 0 0", maxWidth: "78ch", lineHeight: 1.55 }}>
+        Satır üzerine gelmek <b style={{ fontWeight: 500 }}>onRowHover</b> kancasını tetikler — Faz
+        3&apos;te sağdan açılan grafik çekmecesi buna bağlanacak. Klavye:{" "}
+        <b style={{ fontWeight: 500 }}>↑ ↓ Home End PageUp PageDown</b> satır değiştirir,{" "}
+        <b style={{ fontWeight: 500 }}>Enter</b> satırı açar; odak pencere dışına
         çıkarsa liste kendini kaydırır. Kolon başlıkları üç durumlu: artan → azalan → sırasız.
       </p>
     </div>

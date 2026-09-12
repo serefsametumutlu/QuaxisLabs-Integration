@@ -65,8 +65,8 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 |---|---|---|
 | 0 | Kuruluş — depo, iskelet, ADR'ler | ✅ bitti |
 | 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | ✅ bitti |
-| 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | maket ✅ onaylandı · kod **sırada** |
-| 3 | Uygulama kabuğu ve sayfa iskeletleri | bekliyor |
+| 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | ✅ bitti |
+| 3 | Uygulama kabuğu ve sayfa iskeletleri | **sırada** |
 | 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | bekliyor |
 
 ### Bölüm B — Altyapı
@@ -85,6 +85,30 @@ yalnızca karşılaştırma için bakılır.
 | Faz | Strateji | Durum |
 |---|---|---|
 | 7.1 | *(sıra Bölüm B bitince belirlenecek)* | bekliyor |
+
+## Web uygulaması
+
+```bash
+cd apps/web
+npm install
+npm run dev            # http://localhost:3000  ·  /tasarim = bileşen vitrini
+npm run build          # üretim derlemesi
+npm run lint
+
+# görsel kabul döngüsü
+npm run build:vitrin                          # statik dışa aktarım -> out/
+python ../../tools/ekran_goruntusu.py --etiket i1
+python ../../tools/tablo_olcum.py             # DataTable 500 satır ölçümü
+```
+
+Next.js 16 + React 19 + TypeScript + Tailwind 4. Token sistemi
+[`apps/web/app/tokens.css`](apps/web/app/tokens.css)'te ve onaylanmış maketten
+**birebir** taşınmıştır. Fontlar (Archivo · Inter · JetBrains Mono)
+`next/font/local` ile yereldir; CDN bağımlılığı yoktur. Bileşenler
+[`apps/web/components/ui/`](apps/web/components/ui) altında; hepsi
+[`/tasarim`](apps/web/app/tasarim/page.tsx) vitrininde üç temada yan yana
+gösterilir. Görsel kabul kaydı:
+[`docs/design/ui/README.md`](docs/design/ui/README.md).
 
 Tam plan: [`docs/00_RAPOR_VE_YOL_HARITASI.md`](docs/00_RAPOR_VE_YOL_HARITASI.md)
 Sonraki oturumun promptu: [`docs/SONRAKI_OTURUM_PROMPTU.md`](docs/SONRAKI_OTURUM_PROMPTU.md)

@@ -129,12 +129,21 @@ body {
 .tabpanel { padding: 14px 0 0; }
 
 /* ---------- stat tile ---------- */
+/* Saç teli ayrım, konteyner zemininden DEĞİL çocuk kenarlığından gelir:
+   "1px boşluk + çizgi renkli zemin" numarası, satır dolmadığında boş gözleri
+   düz bir gri blok olarak boyuyordu (i1 bulgusu). Negatif margin her çocuğun
+   kenarlığını komşusunun/konteynerin kenarlığıyla ÜST ÜSTE getirir; çizgi yine
+   1px kalır, boş göz ise hiç boyanmaz. */
 .tiles {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px;
-  background: var(--line); border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-panel); overflow: hidden;
 }
-.tile { background: var(--surface); padding: 13px 15px 15px; }
+.tile {
+  background: var(--surface); padding: 13px 15px 15px;
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  margin: -1px 0 0 -1px;
+}
 .tile .k {
   font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 1.8px;
   text-transform: uppercase; color: var(--text-3);
@@ -149,24 +158,36 @@ body {
   display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 
 /* ---------- kart (Card) ---------- */
+/* auto-FIT (auto-fill değil): auto-fill boş kolon rezerve ettiği için dört
+   kart 1440'ta beş kolonluk ızgaranın dördünü doldurup sağda bir şerit boş
+   bırakıyordu (i4 bulgusu). auto-fit boş izleri toplar, kartlar genişler. */
 .cards {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 1px;
-  background: var(--line); border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-panel); overflow: hidden;
 }
-.card { background: var(--surface); padding: 0 0 15px; display: flex; flex-direction: column; }
+.card {
+  background: var(--surface); padding: 0 0 15px; display: flex; flex-direction: column;
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  margin: -1px 0 0 -1px;
+}
 .card .thumb { background: var(--surface-2); border-bottom: 1px solid var(--line); }
 .card .thumb svg, .card .thumb img { display: block; width: 100%; height: auto; }
 .card .meta {
   padding: 11px 15px 0; font-family: var(--f-mono); font-size: 10px;
   letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-3);
+  /* iki satırlık pay: kaynak künyesi bir kartta tek, diğerinde iki satır
+     olunca başlıklar birbirini tutmuyordu (i3 bulgusu). */
+  min-height: 30px;
 }
 .card h3 {
   margin: 7px 15px 0; font-family: var(--f-display); font-size: 14.5px;
   font-weight: 500; letter-spacing: -.2px;
 }
 .card p { margin: 6px 15px 0; font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
-.card .foot { margin: 12px 15px 0; display: flex; align-items: center; gap: 8px; }
+/* margin-top:auto — meta ve başlık satır sayısı kartlar arasında değişse bile
+   altlıklar aynı hizada durur (i1 bulgusu). */
+.card .foot { margin: auto 15px 0; padding-top: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .card .foot a { margin-left: auto; color: var(--accent); font-size: 12.5px; text-decoration: none; }
 .card .foot a:hover { text-decoration: underline; }
 
@@ -177,9 +198,11 @@ body {
 .skel {
   height: 11px; border-radius: 2px;
   background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
-  background-size: 200% 100%; animation: sh 1.4s linear infinite;
+  /* Sabit px: yüzde verilince farklı genişlikteki çubuklar farklı parlaklıkta
+     duruyordu (i1 bulgusu). */
+  background-size: 320px 100%; animation: sh 1.4s linear infinite;
 }
-@keyframes sh { to { background-position: -200% 0; } }
+@keyframes sh { to { background-position: -320px 0; } }
 
 /* ---------- boş durum (EmptyState) ---------- */
 .empty { text-align: center; padding: 18px 10px; color: var(--text-3); font-size: 12.5px; }
@@ -200,8 +223,19 @@ details.faq p { margin: 8px 0 0 22px; font-size: 12.5px; color: var(--text-2); m
    Satır yüksekliği SABİT (--dt-row): sanallaştırma buna dayanır.
    ============================================================ */
 .dt { --dt-row: 33px; border: 1px solid var(--line); border-radius: var(--r-panel); overflow: hidden; }
-.dt .dtscroll { overflow: auto; background: var(--surface); overscroll-behavior: contain; }
-.dt table { border-collapse: collapse; width: 100%; background: var(--surface); }
+/* contain — ölçümün gösterdiği asıl darboğaz buydu: sanal pencere her karede
+   değişince tarayıcı, tablonun DIŞINDAKİ alanı da geçersiz kılıyor ve uzun bir
+   sayfada kare süresi 38 ms'e çıkıyordu. Kapsama, geçersiz kılmayı kaydırma
+   kutusunun içinde tutar. */
+.dt .dtscroll {
+  overflow: auto; background: var(--surface); overscroll-behavior: contain;
+  contain: layout paint style;
+}
+/* table-layout: fixed — kolon genişlikleri <colgroup>'tan gelir. Otomatik
+   yerleşimde tarayıcı, sanal pencere her karede değiştiği için 10 kolonluk
+   tabloyu baştan ölçüyordu; kaydırma 60 fps'in altına düşüyordu. */
+.dt table { border-collapse: collapse; width: 100%; table-layout: fixed; background: var(--surface); }
+.dt tbody td { overflow: hidden; text-overflow: ellipsis; }
 .dt thead th {
   position: sticky; top: 0; z-index: 2; background: var(--surface);
   text-align: left; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 1.6px;
@@ -244,17 +278,24 @@ details.faq p { margin: 8px 0 0 22px; font-size: 12.5px; color: var(--text-2); m
 
 /* ---------- vitrin ızgarası (/tasarim) ---------- */
 .specgrid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 1px;
-  background: var(--line); border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+  background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-panel); overflow: hidden;
 }
-.spec { background: var(--surface); padding: 14px 15px 16px; }
+.spec {
+  background: var(--surface); padding: 14px 15px 16px;
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  margin: -1px 0 0 -1px;
+}
 .spec h5 {
   margin: 0 0 11px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 1.8px;
   text-transform: uppercase; color: var(--text-3); font-weight: 400;
 }
-.spec .note { font-size: 12px; color: var(--text-3); margin: 10px 0 0; line-height: 1.5; }
-.spec .note b { color: var(--text-2); font-weight: 500; }
+/* Üçüncül kademe ETİKET içindir (etiket, birim, zaman damgası). Açıklayıcı
+   cümle ikincil kademede durur: açık temada %40 siyah, 12px'lik üç satırlık
+   bir paragrafta okunmuyordu (i2 bulgusu). */
+.spec .note { font-size: 12px; color: var(--text-2); margin: 10px 0 0; line-height: 1.5; }
+.spec .note b { color: var(--text); font-weight: 500; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .stack { display: flex; flex-direction: column; gap: 9px; }
 .scale { list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--text-2); }
