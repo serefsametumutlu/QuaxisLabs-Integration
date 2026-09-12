@@ -172,7 +172,11 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
     for i, k in enumerate(KAPILAR):
         if k in gecilen and i > 0 and KAPILAR[i - 1] not in gecilen:
             b.append(
-                Bulgu(p.slug, k, f"geçilmiş ama {KAPILAR[i - 1]} ({KAPI_ADI[KAPILAR[i-1]]}) açık — kapı atlanamaz")
+                Bulgu(
+                    p.slug, k,
+                    f"geçilmiş ama {KAPILAR[i - 1]} ({KAPI_ADI[KAPILAR[i - 1]]}) açık "
+                    "— kapı atlanamaz",
+                )
             )
 
     # --- 2. kanıt dosyaları ---
@@ -203,7 +207,10 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
         b.append(Bulgu(p.slug, "K4", "kapı geçilmiş ama verdikt hâlâ 'olculmedi'"))
     if "K4" not in gecilen and verdikt != "olculmedi":
         b.append(
-            Bulgu(p.slug, "K4", f"kapı açılmadan verdikt yazılmış: {verdikt!r} — ölçülmeden etiket konmaz")
+            Bulgu(
+                p.slug, "K4",
+                f"kapı açılmadan verdikt yazılmış: {verdikt!r} — ölçülmeden etiket konmaz",
+            )
         )
 
     # --- 5. K5: kullanıcı onayı + en az üç iterasyon ---
@@ -225,7 +232,11 @@ def tek_strateji_kurali(hepsi: list[Pasaport]) -> list[Bulgu]:
     if len(yolda) > 1:
         adlar = ", ".join(f"{p.slug} ({p.son_kapi})" for p in yolda)
         return [
-            Bulgu("(depo)", "", f"aynı anda {len(yolda)} strateji yolda: {adlar}. Biri K6'ya varmadan diğeri başlayamaz.")
+            Bulgu(
+                "(depo)", "",
+                f"aynı anda {len(yolda)} strateji yolda: {adlar}. "
+                "Biri K6'ya varmadan diğeri başlayamaz.",
+            )
         ]
     return []
 
@@ -269,7 +280,10 @@ def komut_durum() -> int:
         print("Henüz pasaport yok.")
         return 0
     basliklar = ["strateji", *KAPILAR, "verdikt"]
-    print(" | ".join(f"{b:<12}" if b == "strateji" else f"{b:<4}" for b in basliklar[:-1]) + " | verdikt")
+    baslik_satiri = " | ".join(
+        f"{b:<12}" if b == "strateji" else f"{b:<4}" for b in basliklar[:-1]
+    )
+    print(baslik_satiri + " | verdikt")
     for p in hepsi:
         gecilen = set(p.gecilen)
         hucreler = ["✓ " if k in gecilen else "· " for k in KAPILAR]

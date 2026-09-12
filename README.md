@@ -74,7 +74,7 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 | Faz | İş | Durum |
 |---|---|---|
 | 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | ✅ bitti |
-| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | **sırada** |
+| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | ✅ bitti |
 
 ### Bölüm C — Stratejiler (birer birer, **sayı sınırı yok**)
 
@@ -84,7 +84,7 @@ yalnızca karşılaştırma için bakılır.
 
 | Faz | Strateji | Durum |
 |---|---|---|
-| 7.1 | *(sıra Bölüm B bitince belirlenecek)* | bekliyor |
+| 7.1 | *(sıra birlikte belirlenecek)* | **sırada** |
 
 ## Web uygulaması
 
@@ -149,7 +149,7 @@ gösterilir. Görsel kabul kaydı:
 
 ```bash
 # depo kökünden — kurulum gerekmez
-python -m pytest              # 140 test (ağ testleri hariç)
+python -m pytest              # 171 test (ağ testleri hariç)
 python -m pytest -m network   # yalnız ağa çıkanlar
 python -m ruff check packages/
 ```
@@ -165,6 +165,28 @@ olarak birleşir; kökteki `conftest.py` paketleri `sys.path`'e koyar.
 **Gösterge katmanı henüz yok.** ADR-002 gereği sıfırdan yazılacak; motor
 bunu bir katalog ARAYÜZÜ üzerinden bekliyor ve tek bir gösterge olmadan da
 uçtan uca test ediliyor.
+
+## Strateji Pasaportu
+
+Her strateji `docs/strateji/<slug>.md` dosyasında yaşar ve **yedi kapıdan**
+geçer. Kapılar denetlenir — "geçti" yazmak yetmez, kanıtı diskte bulunmak
+zorunda.
+
+```bash
+python tools/pasaport.py yeni <slug> --ad "<Ad>" --paket yapi
+python tools/pasaport.py dogrula     # kapı tutarlılığı
+python tools/pasaport.py durum       # kim nerede
+
+python tools/kalibrasyon.py --sentetik   # K3 koşucusu
+python tools/istatistik.py --sentetik    # K4 ölçüm makinesi
+```
+
+Şablon: [`docs/strateji/_SABLON.md`](docs/strateji/_SABLON.md) ·
+Süreç: `.claude/skills/strateji-pasaportu/`
+
+Doğrulayıcının reddettikleri: kapı atlama · kanıtsız kapı · **ezberden sayı**
+(eşiğin kaynağı ya sayfa alıntısı ya K3 ölçümü) · **ölçülmeden etiket** ·
+**onaysız görsel kapısı** · aynı anda iki strateji.
 
 Tam plan: [`docs/00_RAPOR_VE_YOL_HARITASI.md`](docs/00_RAPOR_VE_YOL_HARITASI.md)
 Sonraki oturumun promptu: [`docs/SONRAKI_OTURUM_PROMPTU.md`](docs/SONRAKI_OTURUM_PROMPTU.md)

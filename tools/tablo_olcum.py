@@ -24,6 +24,9 @@ import threading
 from playwright.sync_api import sync_playwright
 
 KOK = pathlib.Path(__file__).resolve().parents[1]
+
+#: Odaklı satırın sırasını döndüren tarayıcı ifadesi.
+ODAK_SIRASI = "document.activeElement?.getAttribute('data-index')"
 KAYNAK = KOK / "apps" / "web" / "out"
 
 
@@ -33,7 +36,8 @@ class Sessiz(http.server.SimpleHTTPRequestHandler):
 
 
 def sunucu_ac(dizin: pathlib.Path):
-    httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Sessiz, directory=str(dizin)))
+    islem = functools.partial(Sessiz, directory=str(dizin))
+    httpd = socketserver.TCPServer(("127.0.0.1", 0), islem)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd, httpd.server_address[1]
 
@@ -79,7 +83,8 @@ def main() -> int:
             # 2b — kaydırma kare süresi (sayfanın kendi ölçümü)
             sayfa.get_by_role("button", name="2 sn kaydır ve ölç").click()
             sayfa.wait_for_timeout(2600)
-            rapor["olcum_satiri"] = tablo.locator("xpath=../div[@class='olcum']").inner_text().replace("\n", " ")
+            olcum = tablo.locator("xpath=../div[@class='olcum']").inner_text()
+            rapor["olcum_satiri"] = olcum.replace("\n", " ")
             rapor["kaydirmada_dom_satir"] = tablo.locator("tbody tr:not(.pad)").count()
 
             # 3 — sıralama: fiyat kolonu artan → azalan → sırasız
@@ -113,7 +118,7 @@ def main() -> int:
             )
             sayfa.keyboard.press("End")
             sayfa.wait_for_timeout(120)
-            rapor["klavye_end_index"] = sayfa.evaluate("document.activeElement?.getAttribute('data-index')")
+            rapor["klavye_end_index"] = sayfa.evaluate(ODAK_SIRASI)
             rapor["klavye_end_gorunur"] = sayfa.evaluate(
                 """() => {
                   const tr = document.activeElement;
@@ -125,7 +130,7 @@ def main() -> int:
             )
             sayfa.keyboard.press("Home")
             sayfa.wait_for_timeout(120)
-            rapor["klavye_home_index"] = sayfa.evaluate("document.activeElement?.getAttribute('data-index')")
+            rapor["klavye_home_index"] = sayfa.evaluate(ODAK_SIRASI)
 
             ctx.close()
             tarayici.close()

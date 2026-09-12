@@ -34,7 +34,8 @@ def main() -> int:
     kutu = (args.x, args.y, min(args.x + args.w, im.width), min(args.y + args.h, im.height))
     parca = im.crop(kutu)
     if args.olcek != 1.0:
-        parca = parca.resize((int(parca.width * args.olcek), int(parca.height * args.olcek)), Image.LANCZOS)
+        boy = (int(parca.width * args.olcek), int(parca.height * args.olcek))
+        parca = parca.resize(boy, Image.LANCZOS)
 
     ad = args.ad or f"{pathlib.Path(args.kaynak).stem}-{args.x}x{args.y}.png"
     hedef = CIKTI / ad

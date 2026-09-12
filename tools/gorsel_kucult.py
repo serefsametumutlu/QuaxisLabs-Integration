@@ -24,7 +24,8 @@ def main() -> int:
     for p in sorted(klasor.glob("*.png")):
         once = p.stat().st_size
         im = Image.open(p).convert("RGB")
-        im.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.Dither.NONE).save(p, optimize=True)
+        kucuk = im.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.Dither.NONE)
+        kucuk.save(p, optimize=True)
         sonra = p.stat().st_size
         toplam_once += once
         toplam_sonra += sonra

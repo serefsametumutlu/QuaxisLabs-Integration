@@ -59,7 +59,9 @@ def main() -> int:
     ap.add_argument("--cikti", default=str(KOK / "docs" / "design" / "ui"))
     ap.add_argument("--etiket", default="i1", help="iterasyon etiketi: i1, i2, i3…")
     ap.add_argument("--ad", default="tasarim")
-    ap.add_argument("--pencere", action="store_true", help="tam sayfa yerine yalnız görünen pencere")
+    ap.add_argument(
+        "--pencere", action="store_true", help="tam sayfa yerine yalnız görünen pencere"
+    )
     ap.add_argument(
         "--tema",
         default=None,
@@ -76,7 +78,11 @@ def main() -> int:
 
     kaynak = pathlib.Path(args.kaynak)
     if not (kaynak / "tasarim.html").exists():
-        print(f"HATA: {kaynak} içinde dışa aktarım yok. Önce: cd apps/web && npm run build:vitrin", file=sys.stderr)
+        print(
+            f"HATA: {kaynak} içinde dışa aktarım yok. "
+            "Önce: cd apps/web && npm run build:vitrin",
+            file=sys.stderr,
+        )
         return 2
 
     cikti = pathlib.Path(args.cikti)
