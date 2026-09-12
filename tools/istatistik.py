@@ -8,6 +8,10 @@
 
 Çıktı: `docs/olcum/<slug>-K4-<tarih>.md`
 
+Sinyaller `payload` içinde `stop` ve `hedef` taşıyorsa rapora ayrıca
+**üç bariyerli R-katsayısı** bölümü eklenir. İleri getiri tek başına
+stop/hedef asimetrisini göremez; taşımıyorsa rapor bunu açıkça yazar.
+
 **Eleme değil etiketleme.** Sonuç ne çıkarsa pasaporta ve siteye o yazılır.
 Ölçüm mantığı `quaxis.teknik.olcum.ileri_getiri`'de ve kendi testleri var:
 gerçek bir kenarı bulduğu, olmayan bir kenarı uydurmadığı ve yükselen piyasayı
@@ -28,6 +32,7 @@ import numpy as np  # noqa: E402
 from quaxis.teknik.core.types import Market, Timeframe  # noqa: E402
 from quaxis.teknik.data.providers.yfinance_provider import YFinanceProvider  # noqa: E402
 from quaxis.teknik.data.store import Store  # noqa: E402
+from quaxis.teknik.olcum.bariyer import RResult, measure_r  # noqa: E402
 from quaxis.teknik.olcum.ileri_getiri import ForwardReturnResult, bh_fdr, measure  # noqa: E402
 from quaxis.teknik.scanner import engine  # noqa: E402
 
@@ -36,14 +41,14 @@ OLCUM_KOK = KOK / "docs" / "olcum"
 
 def kosu(
     katalog: str, gosterge: str, evren: list[str], tf: Timeframe, market: Market, ufuk: int
-) -> ForwardReturnResult:
+) -> tuple[ForwardReturnResult, RResult | None]:
     scan = engine.run(
         run_id=f"k4_{gosterge}_{dt.date.today().isoformat()}",
         universe=evren, timeframes=[tf], indicator_names=[gosterge],
         market=market, catalog=katalog, workers=1,
     )
     store = Store(YFinanceProvider())
-    seri, sinyaller = {}, {}
+    seri, sinyaller, ohlc, islemler = {}, {}, {}, {}
     for r in scan.results:
         if r.error or r.result is None:
             continue
@@ -53,10 +58,55 @@ def kosu(
             continue
         seri[r.symbol] = df["close"]
         sinyaller[r.symbol] = r.result.signals
-    return measure(seri, sinyaller, horizon=ufuk)
+        # R ölçümü ancak strateji kendi stop/hedefini BİLDİRİRSE yapılır.
+        # Ölçüm bunları uydurmaz; uydurursa ölçtüğü şey strateji olmaz.
+        kayit = [
+            (s, float(s.payload["stop"]), float(s.payload["hedef"]))
+            for s in r.result.signals
+            if "stop" in s.payload and "hedef" in s.payload
+        ]
+        if kayit:
+            ohlc[r.symbol] = df
+            islemler[r.symbol] = kayit
+
+    ig = measure(seri, sinyaller, horizon=ufuk)
+    rs = measure_r(ohlc, islemler, max_bars=ufuk) if islemler else None
+    return ig, rs
 
 
-def rapor(s: ForwardReturnResult, slug: str, gosterge: str, fdr: bool | None) -> str:
+def r_bolumu(r: RResult | None) -> str:
+    if r is None:
+        return """## R-katsayısı (üç bariyer)
+
+Ölçülmedi — strateji sinyallerinde `stop` ve `hedef` bildirilmemiş.
+
+> İleri getiri, stop/hedef asimetrisini **göremez**. %35 isabetle 3R kazandıran
+> bir sistem 20 barlık ileri getiride sıfır görünür. Bir stratejinin iddiası
+> asimetrik R ise, K4 bu bölüm doldurulmadan kapanamaz.
+"""
+    return f"""## R-katsayısı (üç bariyer: stop / hedef / zaman)
+
+| Ölçüt | Değer |
+|---|---|
+| İşlem | {r.n_trades} ({r.n_symbols} sembol) |
+| İsabet | %{r.win_rate * 100:.1f} |
+| **İşlem başına beklenen R** | **{r.expectancy:+.3f}R** |
+| Ortanca R | {r.median_r:+.3f}R |
+| Adil baz (aynı risk, rastgele bar) | {r.baseline_mean_r:+.3f}R |
+| Hedefte çıkış | %{r.target_rate * 100:.1f} |
+| Stopta çıkış | %{r.stop_rate * 100:.1f} |
+| Zamanda çıkış | %{r.time_rate * 100:.1f} |
+| Permütasyon p değeri | {r.p_value:.4f} ({r.permutations} tur) |
+| **Verdikt (R)** | **{r.verdict}** |
+
+> Aynı barda hem stop hem hedef vurulduysa **stop** sayıldı. Bar içi sıralamayı
+> bilmiyoruz; emin olmadığımız yerde stratejinin lehine varsaymıyoruz.
+"""
+
+
+def rapor(
+    s: ForwardReturnResult, slug: str, gosterge: str, fdr: bool | None, r: RResult | None = None
+) -> str:
     fdr_metin = "—" if fdr is None else ("geçti" if fdr else "geçemedi")
     verdikt = s.verdict if fdr is not False else "kanitlanmadi"
     ham = (
@@ -84,6 +134,7 @@ def rapor(s: ForwardReturnResult, slug: str, gosterge: str, fdr: bool | None) ->
 | BH-FDR (q=0.05) | {fdr_metin} |
 | **Verdikt** | **{verdikt}** |
 
+{r_bolumu(r)}
 ## Ne çıkarsa o
 
 *(Sonuç olumsuzsa da aynı açıklıkla yaz. "Zarar ettiriyor" ile "işe
@@ -148,7 +199,7 @@ def main() -> int:
 
         evren = load_universe(market)
 
-    sonuc = kosu(a.katalog, a.gosterge, evren, Timeframe(a.zaman_dilimi), market, a.ufuk)
+    sonuc, r_sonuc = kosu(a.katalog, a.gosterge, evren, Timeframe(a.zaman_dilimi), market, a.ufuk)
 
     fdr: bool | None = None
     if a.aile:
@@ -161,9 +212,14 @@ def main() -> int:
 
     OLCUM_KOK.mkdir(parents=True, exist_ok=True)
     hedef = OLCUM_KOK / f"{a.slug}-K4-{dt.date.today().isoformat()}.md"
-    hedef.write_text(rapor(sonuc, a.slug, a.gosterge, fdr), encoding="utf-8")
+    hedef.write_text(rapor(sonuc, a.slug, a.gosterge, fdr, r_sonuc), encoding="utf-8")
     print(f"n={sonuc.independent_observations} sembol · fark %{sonuc.mean_difference * 100:+.2f} "
           f"· p={sonuc.p_value:.4f} · verdikt={sonuc.verdict}")
+    if r_sonuc is None:
+        print("R ÖLÇÜLMEDİ: sinyaller stop/hedef bildirmiyor — asimetri görünmez.")
+    else:
+        print(f"R: {r_sonuc.expectancy:+.3f}R/işlem · isabet %{r_sonuc.win_rate * 100:.1f} "
+              f"· p={r_sonuc.p_value:.4f} · verdikt={r_sonuc.verdict}")
     print(f"\n{hedef.relative_to(KOK)} yazıldı.")
     print("Pasaportun K4 kapısına bağla ve künyedeki `verdikt` alanını GÜNCELLE.")
     return 0

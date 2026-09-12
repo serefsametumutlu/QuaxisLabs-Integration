@@ -1,0 +1,171 @@
+"""Üç bariyerli R ölçümünün testleri.
+
+Kritik olanlar: **aynı barda iki bariyer de vurulduğunda stop kazanıyor mu**
+(iyimserlik testi) ve **gerçek bir asimetrik kenarı bulup olmayanı
+uydurmuyor mu**.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+from quaxis.teknik.core.types import Signal
+from quaxis.teknik.olcum.bariyer import barrier_outcome, measure_r
+
+TUR = 200  # testte hız için düşük; üretimde 2000
+
+
+def _ohlc(kapanis: list[float], *, yuksek=None, dusuk=None) -> pd.DataFrame:
+    idx = pd.date_range("2024-01-01", periods=len(kapanis), freq="1D", tz="UTC")
+    k = np.asarray(kapanis, dtype=float)
+    return pd.DataFrame(
+        {
+            "open": k,
+            "high": k if yuksek is None else np.asarray(yuksek, dtype=float),
+            "low": k if dusuk is None else np.asarray(dusuk, dtype=float),
+            "close": k,
+            "volume": np.ones(len(k)),
+        },
+        index=idx,
+    )
+
+
+def _sinyal(t, yon="long") -> Signal:
+    return Signal(t, t, yon, "confirmed", 1.0, {})
+
+
+# ------------------------------------------------------------ tek işlem
+
+
+def test_hedefe_ulasan_islem_pozitif_r() -> None:
+    df = _ohlc([100, 101, 102, 103, 104, 105])
+    s = barrier_outcome(df, df.index[0], stop=98.0, target=104.0)
+    assert s is not None
+    assert s.outcome == "hedef"
+    assert s.r_multiple == 2.0  # (104-100)/(100-98)
+    assert s.bars_held == 4
+
+
+def test_stopa_carpan_islem_eksi_bir_r() -> None:
+    df = _ohlc([100, 99, 98, 97])
+    s = barrier_outcome(df, df.index[0], stop=98.0, target=110.0)
+    assert s is not None
+    assert s.outcome == "stop"
+    assert s.r_multiple == -1.0
+
+
+def test_ayni_barda_iki_bariyer_de_vurulursa_stop_kazanir() -> None:
+    """Bar içi sıralamayı bilmiyoruz; emin olmadığımız yerde stratejinin
+    LEHİNE varsaymak backtest'i yalancı yapar."""
+    df = _ohlc([100, 100], yuksek=[100, 120], dusuk=[100, 90])
+    s = barrier_outcome(df, df.index[0], stop=95.0, target=110.0)
+    assert s is not None
+    assert s.outcome == "stop"
+    assert s.r_multiple == -1.0
+
+
+def test_hicbir_bariyer_vurulmazsa_zaman_cikisi() -> None:
+    df = _ohlc([100, 100.5, 101, 100.2, 100.8])
+    s = barrier_outcome(df, df.index[0], stop=90.0, target=120.0, max_bars=3)
+    assert s is not None
+    assert s.outcome == "zaman"
+    assert s.bars_held == 3
+    assert s.r_multiple == (100.2 - 100) / 10
+
+
+def test_short_yonu_dogru_isaretlenir() -> None:
+    """Düşüşte açılan short hedefe ulaşır; R pozitif olmalı."""
+    df = _ohlc([100, 98, 96, 94])
+    s = barrier_outcome(df, df.index[0], stop=102.0, target=96.0, direction="short")
+    assert s is not None
+    assert s.outcome == "hedef"
+    assert s.r_multiple == 2.0  # (100-96)/(102-100)
+
+
+def test_stop_yanlis_tarafta_ise_olculmez() -> None:
+    """Long'ta stop girişin üstündeyse sinyal geçersizdir; sıfır risk
+    sonsuz R üretir — ölçüme sokulmaz."""
+    df = _ohlc([100, 101, 102])
+    assert barrier_outcome(df, df.index[0], stop=105.0, target=110.0) is None
+
+
+def test_ileri_bar_yoksa_none() -> None:
+    df = _ohlc([100, 101])
+    assert barrier_outcome(df, df.index[1], stop=98.0, target=110.0) is None
+
+
+def test_max_bars_seri_sonunu_asamaz() -> None:
+    df = _ohlc([100, 101, 102])
+    s = barrier_outcome(df, df.index[0], stop=90.0, target=120.0, max_bars=999)
+    assert s is not None
+    assert s.exit_t == df.index[-1]
+
+
+# --------------------------------------------------- evren geneli ölçüm
+
+
+def _rastgele_ohlc(n=400, tohum=1, egim=0.0) -> pd.DataFrame:
+    r = np.random.default_rng(tohum)
+    k = 100 + np.cumsum(r.normal(egim, 1.0, n))
+    gurultu = np.abs(r.normal(0, 0.4, n))
+    return _ohlc(list(k), yuksek=list(k + gurultu), dusuk=list(k - gurultu))
+
+
+def test_gercek_asimetrik_kenari_bulur() -> None:
+    """Sinyaller bilerek yükselişin hemen öncesine konursa hedef oranı
+    yükselir ve ölçüm bunu adil baza karşı görmeli."""
+    ohlc, islemler = {}, {}
+    for i in range(20):
+        df = _rastgele_ohlc(tohum=i)
+        ohlc[f"S{i}"] = df
+        k = df["close"].to_numpy()
+        ileri = k[30:] / k[:-30] - 1.0
+        en_iyi = np.argsort(ileri)[-5:]
+        kayit = []
+        for b in en_iyi:
+            t = df.index[int(b)]
+            giris = float(k[int(b)])
+            kayit.append((_sinyal(t), giris * 0.98, giris * 1.04))
+        islemler[f"S{i}"] = kayit
+
+    s = measure_r(ohlc, islemler, max_bars=30, permutations=TUR, seed=7)
+    assert s.n_symbols == 20
+    assert s.mean_r > s.baseline_mean_r
+    assert s.p_value < 0.05, s
+    assert s.verdict == "kenar-var"
+
+
+def test_kenar_yokken_kenar_uydurmaz() -> None:
+    r = np.random.default_rng(42)
+    ohlc, islemler = {}, {}
+    for i in range(20):
+        df = _rastgele_ohlc(tohum=100 + i)
+        ohlc[f"S{i}"] = df
+        kayit = []
+        for b in r.integers(50, 340, size=5):
+            t = df.index[int(b)]
+            giris = float(df["close"].iloc[int(b)])
+            kayit.append((_sinyal(t), giris * 0.98, giris * 1.04))
+        islemler[f"S{i}"] = kayit
+
+    s = measure_r(ohlc, islemler, max_bars=30, permutations=TUR, seed=7)
+    assert s.p_value > 0.05, s
+    assert s.verdict == "kanitlanmadi"
+
+
+def test_cikis_oranlari_toplami_bire_esittir() -> None:
+    """Her işlem üç bariyerden BİRİNDEN çıkar; kaçak işlem olmamalı."""
+    df = _rastgele_ohlc(tohum=3)
+    kayit = []
+    for b in (50, 120, 200):
+        giris = float(df["close"].iloc[b])
+        kayit.append((_sinyal(df.index[b]), giris * 0.98, giris * 1.04))
+    s = measure_r({"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1)
+    assert s.target_rate + s.stop_rate + s.time_rate == 1.0
+    assert s.n_trades == 3
+
+
+def test_islemsiz_evren_olculmedi_doner() -> None:
+    s = measure_r({}, {}, permutations=10)
+    assert s.n_trades == 0
+    assert s.verdict == "olculmedi"

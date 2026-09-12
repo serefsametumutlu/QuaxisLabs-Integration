@@ -165,6 +165,24 @@ testinin neyi kanıtlaması gerektiğini tarif eder.)*
 | BH-FDR (q=0.05) | *(geçti / geçemedi)* |
 | **Verdikt** | *(künyedeki `verdikt` alanıyla AYNI olmalı)* |
 
+### R-katsayısı (üç bariyer)
+
+> **Strateji bir stop ve hedef bildiriyorsa bu tablo ZORUNLUDUR.** İleri getiri
+> asimetriyi göremez: %35 isabetle 3R kazandıran bir sistem 20 barlık ileri
+> getiride sıfır görünür. ICT/SMC kavramlarını "kenar yok" diye bulan en geniş
+> çalışma (648 backtest) tam olarak bu hatayı yaptı — zaman bazlı çıkış kullandı,
+> stop/hedef koymadı. Aynı barda iki bariyer de vurulduysa **stop** sayılır.
+
+| | |
+|---|---|
+| İşlem sayısı | *(kaç işlem / kaç sembol)* |
+| İsabet | *(%)* |
+| **İşlem başına beklenen R** | |
+| Adil baz (aynı risk, rastgele bar) | |
+| Stop / hedef / zaman çıkış oranı | |
+| Permütasyon p değeri | |
+| **Verdikt (R)** | |
+
 ### Ne çıkarsa o
 
 *(Sonuç olumsuzsa da burada aynı açıklıkla yazılır. "Zarar ettiriyor" ile
