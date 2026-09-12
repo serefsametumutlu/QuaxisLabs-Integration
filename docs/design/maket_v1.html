@@ -1,0 +1,1029 @@
+<title>QuaxisLabs Arayüz Maketi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* ============================================================
+   QuaxisLabs — arayüz maketi v1
+   Token sistemi: docs/design/TASARIM_DILI.md'deki 9 ilkeye göre.
+   Koyu tema varsayılan (dark-first), açık tema tam karşılığıyla.
+   ============================================================ */
+
+:root{
+  /* --- KOYU (varsayılan) --- */
+  --ground:#0A0B0D;
+  --surface:#121417;
+  --surface-2:#191C21;
+  --surface-3:#20242A;
+  --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.16);
+  --text:#E8EAED;
+  --text-2:rgba(232,234,237,.62);
+  --text-3:rgba(232,234,237,.34);
+  --grid:rgba(255,255,255,.05);
+
+  /* aksan — üç seçenek arasında canlı değişir */
+  --accent:#2ED3C0;
+  --accent-ink:#04231F;
+  --accent-soft:rgba(46,211,192,.14);
+  --accent-line:rgba(46,211,192,.42);
+
+  /* semantik — aksandan BAĞIMSIZ, yön anlamı taşır */
+  --up:#3DBE74;
+  --down:#E8505B;
+  --up-soft:rgba(61,190,116,.14);
+  --down-soft:rgba(232,80,91,.14);
+
+  /* fibo merdiveni — oran-renkli, sabit */
+  --fib-0:#8A8F98;
+  --fib-236:#C2607A;
+  --fib-382:#D08A3C;
+  --fib-500:#C9B13F;
+  --fib-618:#46A88A;
+  --fib-786:#4C7FB5;
+  --fib-1:#D08A3C;
+  --fib-ext:#7C6BC4;
+
+  --r-panel:2px;
+  --r-media:8px;
+  --r-pill:999px;
+
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-ui:"Inter","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",monospace;
+}
+
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --ground:#F4F5F6; --surface:#FFFFFF; --surface-2:#F7F8F9; --surface-3:#EDEFF1;
+    --line:rgba(15,20,26,.11); --line-strong:rgba(15,20,26,.2);
+    --text:#14181D; --text-2:rgba(20,24,29,.66); --text-3:rgba(20,24,29,.4);
+    --grid:rgba(15,20,26,.07);
+    --accent-ink:#FFFFFF;
+    --accent-soft:rgba(21,150,134,.13); --accent-line:rgba(21,150,134,.5);
+    --up:#1D8A4E; --down:#C8303C;
+    --up-soft:rgba(29,138,78,.12); --down-soft:rgba(200,48,60,.12);
+    --fib-0:#6B7079; --fib-236:#A8405C; --fib-382:#B06A18; --fib-500:#9C8615;
+    --fib-618:#1F7F64; --fib-786:#2F5F92; --fib-1:#B06A18; --fib-ext:#5B4AA8;
+  }
+}
+:root[data-theme="light"]{
+  --ground:#F4F5F6; --surface:#FFFFFF; --surface-2:#F7F8F9; --surface-3:#EDEFF1;
+  --line:rgba(15,20,26,.11); --line-strong:rgba(15,20,26,.2);
+  --text:#14181D; --text-2:rgba(20,24,29,.66); --text-3:rgba(20,24,29,.4);
+  --grid:rgba(15,20,26,.07);
+  --accent-ink:#FFFFFF;
+  --accent-soft:rgba(21,150,134,.13); --accent-line:rgba(21,150,134,.5);
+  --up:#1D8A4E; --down:#C8303C;
+  --up-soft:rgba(29,138,78,.12); --down-soft:rgba(200,48,60,.12);
+  --fib-0:#6B7079; --fib-236:#A8405C; --fib-382:#B06A18; --fib-500:#9C8615;
+  --fib-618:#1F7F64; --fib-786:#2F5F92; --fib-1:#B06A18; --fib-ext:#5B4AA8;
+}
+
+/* aksan varyantları */
+:root[data-accent="amber"]{ --accent:#E9A93A; --accent-ink:#221703;
+  --accent-soft:rgba(233,169,58,.15); --accent-line:rgba(233,169,58,.45); }
+:root[data-accent="blue"]{ --accent:#5B8CFF; --accent-ink:#04122E;
+  --accent-soft:rgba(91,140,255,.16); --accent-line:rgba(91,140,255,.46); }
+:root[data-theme="light"][data-accent="teal"],
+:root:not([data-theme="dark"])[data-accent="teal"]{ --accent:#12867A; }
+:root[data-theme="light"][data-accent="amber"]{ --accent:#A9720A; --accent-ink:#fff; }
+:root[data-theme="light"][data-accent="blue"]{ --accent:#2E5BD4; --accent-ink:#fff; }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --accent:#12867A; }
+  :root:not([data-theme="dark"])[data-accent="amber"]{ --accent:#A9720A; --accent-ink:#fff; }
+  :root:not([data-theme="dark"])[data-accent="blue"]{ --accent:#2E5BD4; --accent-ink:#fff; }
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--text);
+  font-family:var(--f-ui); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+
+/* ---------- ortak parçacıklar ---------- */
+.eyebrow{
+  font-family:var(--f-mono); font-size:11px; letter-spacing:2.2px;
+  text-transform:uppercase; color:var(--text-3);
+}
+.num{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.mut{color:var(--text-2)}
+.dim{color:var(--text-3)}
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  height:22px; padding:0 10px; border-radius:var(--r-pill);
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.4px;
+  border:1px solid var(--line-strong); color:var(--text-2); background:transparent;
+  white-space:nowrap;
+}
+.pill.up{color:var(--up); border-color:transparent; background:var(--up-soft)}
+.pill.down{color:var(--down); border-color:transparent; background:var(--down-soft)}
+.pill.acc{color:var(--accent); border-color:transparent; background:var(--accent-soft)}
+
+.chip{
+  height:30px; padding:0 14px; border-radius:var(--r-pill);
+  background:var(--surface); border:.8px solid var(--line);
+  color:var(--text-2); font-size:13px; font-family:var(--f-ui);
+  cursor:pointer; transition:color .12s, border-color .12s;
+}
+.chip:hover{color:var(--text); border-color:var(--line-strong)}
+.chip[aria-pressed="true"]{background:var(--text); color:var(--ground); border-color:transparent}
+
+.btn{
+  height:34px; padding:0 16px; border-radius:var(--r-pill); cursor:pointer;
+  font-family:var(--f-ui); font-size:13px; font-weight:500;
+  background:var(--accent); color:var(--accent-ink); border:1px solid transparent;
+}
+.btn.ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
+.btn.ghost:hover{border-color:var(--text-3)}
+
+.panel{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-panel);
+}
+
+/* ---------- uygulama kabuğu ---------- */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; gap:18px;
+  height:52px; padding:0 16px;
+  background:var(--ground); border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:center; gap:9px; flex:0 0 auto}
+.brand .mark{width:22px; height:22px; flex:0 0 auto}
+.brand .word{
+  font-family:var(--f-display); font-weight:600; font-size:15px;
+  letter-spacing:-.4px; white-space:nowrap;
+}
+.brand .word em{font-style:normal; color:var(--accent); font-weight:500}
+
+.omni{
+  flex:1 1 420px; max-width:480px; height:32px;
+  display:flex; align-items:center; gap:9px; padding:0 12px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-pill);
+  color:var(--text-3); font-size:13px; cursor:text;
+}
+.omni kbd{
+  margin-left:auto; font-family:var(--f-mono); font-size:10px;
+  border:1px solid var(--line); border-radius:3px; padding:1px 5px; color:var(--text-3);
+}
+.topbar .spacer{flex:1 1 auto}
+.tset{display:flex; align-items:center; gap:6px}
+.sw{
+  width:18px; height:18px; border-radius:var(--r-pill); cursor:pointer;
+  border:1px solid var(--line-strong); padding:0;
+}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ground),0 0 0 3.5px currentColor}
+
+.shell{display:grid; grid-template-columns:216px minmax(0,1fr)}
+@media (max-width:900px){ .shell{grid-template-columns:1fr} .rail{display:none} }
+
+.rail{
+  border-right:1px solid var(--line); padding:18px 12px 40px;
+  position:sticky; top:52px; align-self:start; height:calc(100vh - 52px); overflow:auto;
+}
+.rail h4{margin:0 0 8px 8px}
+.rail + main{min-width:0}
+.rail nav{display:flex; flex-direction:column; gap:1px; margin-bottom:22px}
+.rail a{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 9px; border-radius:var(--r-panel);
+  color:var(--text-2); text-decoration:none; font-size:13px;
+}
+.rail a:hover{background:var(--surface-2); color:var(--text)}
+.rail a[aria-current]{background:var(--surface-2); color:var(--text)}
+.rail a .cnt{margin-left:auto; font-family:var(--f-mono); font-size:11px; color:var(--text-3)}
+.rail a .dot{width:5px; height:5px; border-radius:var(--r-pill); background:currentColor; opacity:.55}
+
+main{padding:0 0 80px}
+.board{border-bottom:1px solid var(--line); padding:26px 22px 34px}
+.board > header{margin-bottom:18px}
+.board h2{
+  font-family:var(--f-display); font-weight:600; font-size:19px;
+  letter-spacing:-.5px; margin:6px 0 4px;
+}
+.board > header p{margin:0; color:var(--text-2); font-size:13px; max-width:68ch}
+
+/* ---------- stat tile ---------- */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden}
+.tile{background:var(--surface); padding:13px 15px 15px}
+.tile .k{font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.8px;
+  text-transform:uppercase; color:var(--text-3)}
+.tile .v{font-family:var(--f-mono); font-variant-numeric:tabular-nums;
+  font-size:27px; font-weight:500; letter-spacing:-1px; margin-top:7px; line-height:1}
+.tile .d{font-size:12px; color:var(--text-2); margin-top:6px}
+
+/* ---------- filtre şeridi ---------- */
+.filters{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:18px 0 12px}
+.filters .cg{display:flex; flex-wrap:wrap; gap:8px}
+.filters .sep{width:1px; height:18px; background:var(--line); margin:0 4px}
+.filters .lab{font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.8px;
+  text-transform:uppercase; color:var(--text-3); margin-right:2px}
+
+/* ---------- tablo ---------- */
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-panel)}
+table{border-collapse:collapse; width:100%; min-width:980px; background:var(--surface)}
+thead th{
+  background:var(--surface);
+  text-align:left; font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--text-3); font-weight:400;
+  padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap;
+}
+thead th.r, tbody td.r{text-align:right}
+tbody td{padding:9px 12px; border-bottom:1px solid var(--line); font-size:13px; white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+tbody tr{cursor:pointer}
+td.sym{font-family:var(--f-mono); font-weight:500; letter-spacing:.2px}
+td .sub{color:var(--text-3); font-size:11.5px; margin-left:7px}
+.spark{width:62px; height:18px; display:block}
+
+/* ---------- grafik levhası ---------- */
+.chartframe{border:1px solid var(--line); border-radius:var(--r-panel); background:var(--surface); overflow:hidden}
+.chartbar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:8px 12px; border-bottom:1px solid var(--line);
+}
+.chartbar .sym{font-family:var(--f-mono); font-size:14px; font-weight:500; letter-spacing:.3px}
+.tfgroup{display:flex; gap:2px; background:var(--surface-2); border-radius:var(--r-pill); padding:2px}
+.tfgroup button{
+  height:24px; padding:0 11px; border:0; background:transparent; cursor:pointer;
+  border-radius:var(--r-pill); font-family:var(--f-mono); font-size:11.5px; color:var(--text-3);
+}
+.tfgroup button[aria-pressed="true"]{background:var(--surface-3); color:var(--text)}
+.chartbody{position:relative; background:var(--surface)}
+#chart{display:block; width:100%; height:auto}
+.hud{
+  position:absolute; left:12px; top:10px; pointer-events:none;
+  font-family:var(--f-mono); font-size:11.5px; line-height:1.75;
+}
+.hud .l1{color:var(--text)}
+.hud .l2{color:var(--text-2)}
+.hud b{font-weight:500}
+.statbox{
+  position:absolute; right:16.8%; top:10px; pointer-events:none;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  border:1px solid var(--line); border-radius:var(--r-panel);
+  font-family:var(--f-mono); font-size:10.5px; min-width:194px;
+}
+.statbox .h{display:flex; justify-content:space-between; padding:5px 9px;
+  border-bottom:1px solid var(--line); color:var(--text-3); letter-spacing:1.2px}
+.statbox .r{display:flex; justify-content:space-between; gap:14px; padding:3.5px 9px; color:var(--text-2)}
+.statbox .r span:last-child{color:var(--text)}
+
+.notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-top:0}
+.note{background:var(--surface); padding:12px 15px 14px}
+.note h5{margin:0 0 6px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.8px;
+  text-transform:uppercase; color:var(--text-3); font-weight:400}
+.note p{margin:0; font-size:12.5px; color:var(--text-2); line-height:1.55}
+.note p b{color:var(--text); font-weight:500}
+
+.verdict{
+  display:flex; align-items:flex-start; gap:13px; padding:13px 15px;
+  border:1px solid var(--line); border-top:0; background:var(--surface);
+  border-left:2px solid var(--accent);
+}
+.verdict p{margin:0; font-size:12.5px; color:var(--text-2); max-width:74ch}
+.verdict p b{color:var(--text); font-weight:500}
+
+/* ---------- kütüphane kartları ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(268px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden}
+.card{background:var(--surface); padding:0 0 15px; display:flex; flex-direction:column}
+.card .thumb{background:var(--surface-2); border-bottom:1px solid var(--line)}
+.card .thumb svg{display:block; width:100%; height:auto}
+.card .meta{padding:11px 15px 0; font-family:var(--f-mono); font-size:10px;
+  letter-spacing:1.6px; text-transform:uppercase; color:var(--text-3)}
+.card h3{margin:7px 15px 0; font-family:var(--f-display); font-size:14.5px;
+  font-weight:500; letter-spacing:-.2px}
+.card p{margin:6px 15px 0; font-size:12.5px; color:var(--text-2); line-height:1.5}
+.card .foot{margin:12px 15px 0; display:flex; align-items:center; gap:8px}
+.card .foot a{margin-left:auto; color:var(--accent); font-size:12.5px; text-decoration:none}
+.card .foot a:hover{text-decoration:underline}
+
+/* ---------- bileşen vitrini ---------- */
+.specgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden}
+.spec{background:var(--surface); padding:14px 15px 16px}
+.spec h5{margin:0 0 11px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.8px;
+  text-transform:uppercase; color:var(--text-3); font-weight:400}
+.row{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.stack{display:flex; flex-direction:column; gap:9px}
+.skel{height:11px; border-radius:2px;
+  background:linear-gradient(90deg,var(--surface-2),var(--surface-3),var(--surface-2));
+  background-size:200% 100%; animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center; padding:18px 10px; color:var(--text-3); font-size:12.5px}
+.empty b{display:block; color:var(--text-2); font-size:13px; font-weight:500; margin-bottom:4px}
+.scale li{display:flex; justify-content:space-between; gap:12px; padding:3px 0;
+  border-bottom:1px dashed var(--line)}
+.scale{list-style:none; margin:0; padding:0; font-size:12.5px; color:var(--text-2)}
+.scale li:last-child{border-bottom:0}
+.scale code{font-family:var(--f-mono); font-size:11px; color:var(--text-3)}
+
+.accentnote{
+  margin-top:14px; padding:12px 14px; border:1px dashed var(--line-strong);
+  border-radius:var(--r-panel); font-size:12.5px; color:var(--text-2); max-width:78ch;
+}
+.accentnote b{color:var(--text); font-weight:500}
+.swatchrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+.swatch{display:flex; align-items:center; gap:8px; padding:6px 11px 6px 7px;
+  border:1px solid var(--line); border-radius:var(--r-pill); background:transparent;
+  color:var(--text-2); font-size:12.5px; cursor:pointer; font-family:var(--f-ui)}
+.swatch i{width:14px; height:14px; border-radius:var(--r-pill); display:block}
+.swatch[aria-pressed="true"]{color:var(--text); border-color:var(--text-3)}
+.swatch .hex{font-family:var(--f-mono); font-size:10.5px; color:var(--text-3)}
+</style>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10.2" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="12" cy="12" r="6.4" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity=".8"/>
+      <path d="M7 16.4 L10.4 11.6 L13.1 14 L18 6.6" fill="none" stroke="var(--accent)"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M14.4 6.2 L18.6 6 L18.4 10.2" fill="none" stroke="var(--accent)"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M13.6 13.4 L18.4 18.6" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span class="word">QUAXIS<em>LABS</em></span>
+  </div>
+
+  <div class="omni" role="search">
+    <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    Sembol ya da strateji ara
+    <kbd>Ctrl K</kbd>
+  </div>
+
+  <span class="spacer"></span>
+  <span class="pill">BIST</span>
+  <span class="eyebrow" style="letter-spacing:1.4px">son tarama 18:15</span>
+
+  <div class="tset" role="group" aria-label="Aksan rengi">
+    <button class="sw" data-acc="teal"  style="background:#2ED3C0;color:#2ED3C0" aria-pressed="true"  title="Turkuaz"></button>
+    <button class="sw" data-acc="amber" style="background:#E9A93A;color:#E9A93A" aria-pressed="false" title="Kehribar"></button>
+    <button class="sw" data-acc="blue"  style="background:#5B8CFF;color:#5B8CFF" aria-pressed="false" title="Elektrik mavi"></button>
+  </div>
+  <button class="btn ghost" id="themebtn" style="height:28px;padding:0 12px">Açık tema</button>
+</header>
+
+<div class="shell">
+  <aside class="rail">
+    <h4 class="eyebrow">Yüzeyler</h4>
+    <nav>
+      <a href="#tarama" aria-current="page"><span class="dot"></span>Tarama<span class="cnt">47</span></a>
+      <a href="#grafik"><span class="dot"></span>Grafik</a>
+      <a href="#kutuphane"><span class="dot"></span>Strateji Kütüphanesi<span class="cnt">9</span></a>
+      <a href="#bilesenler"><span class="dot"></span>Tasarım Sistemi</a>
+    </nav>
+
+    <h4 class="eyebrow">Paketler</h4>
+    <nav>
+      <a href="#kutuphane">Yapı<span class="cnt">4</span></a>
+      <a href="#kutuphane">Formasyon<span class="cnt">3</span></a>
+      <a href="#kutuphane">Trend &amp; Momentum<span class="cnt">2</span></a>
+      <a href="#kutuphane" class="dim">İstatistiksel Arbitraj<span class="cnt">0</span></a>
+    </nav>
+
+    <h4 class="eyebrow">Evren</h4>
+    <nav>
+      <a href="#tarama">BIST Tümü<span class="cnt">648</span></a>
+      <a href="#tarama">Takip listem<span class="cnt">21</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <!-- ══════════════ TARAMA ══════════════ -->
+    <section class="board" id="tarama">
+      <header>
+        <span class="eyebrow">Yüzey · Tarama</span>
+        <h2>Bugün hangi hissede hangi strateji sinyal verdi</h2>
+        <p>Ürünün giriş noktası. Tazelik birinci sınıf filtre, varsayılan <b>son 3 mum</b>.
+           Satıra tıklayınca sağdan grafik çekmecesi açılır — sayfa değişmez.</p>
+      </header>
+
+      <div class="tiles">
+        <div class="tile"><div class="k">Yeni sinyal</div><div class="v">47</div>
+          <div class="d"><span class="pill up">+12</span> önceki koşuya göre</div></div>
+        <div class="tile"><div class="k">Yön dağılımı</div>
+          <div class="v"><span style="color:var(--up)">31</span><span class="dim"> / </span><span style="color:var(--down)">16</span></div>
+          <div class="d">alış / satış</div></div>
+        <div class="tile"><div class="k">En üretken paket</div>
+          <div class="v" style="font-size:19px;letter-spacing:-.3px">Yapı</div>
+          <div class="d">47 sinyalin 28'i</div></div>
+        <div class="tile"><div class="k">Tarama süresi</div><div class="v">6<span class="dim" style="font-size:15px">dk</span> 22<span class="dim" style="font-size:15px">sn</span></div>
+          <div class="d">648 sembol · 4S + 1G</div></div>
+      </div>
+
+      <div class="filters">
+        <span class="lab">Tazelik</span>
+        <span class="cg">
+          <button class="chip" aria-pressed="false">Son 1 mum</button>
+          <button class="chip" aria-pressed="true">Son 3 mum</button>
+          <button class="chip" aria-pressed="false">Son 10 mum</button>
+          <button class="chip" aria-pressed="false">Tümü</button>
+        </span>
+        <span class="sep"></span>
+        <span class="lab">Zaman dilimi</span>
+        <span class="cg">
+          <button class="chip" aria-pressed="true">1G</button>
+          <button class="chip" aria-pressed="false">4S</button>
+        </span>
+        <span class="sep"></span>
+        <button class="chip">Yön: Tümü</button>
+        <button class="chip">Durum: Onaylandı</button>
+        <span style="margin-left:auto"></span>
+        <button class="btn ghost">Taramayı kaydet</button>
+        <button class="btn">Bugünü tara</button>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Sembol</th><th>Paket</th><th>Strateji</th><th>Yön</th><th>Durum</th>
+              <th class="r">Yaş</th><th class="r">Fiyat</th><th class="r">Seviye</th>
+              <th>20 bar</th><th>Tarihsel isabet</th>
+            </tr>
+          </thead>
+          <tbody id="scanrows"></tbody>
+        </table>
+      </div>
+      <p class="dim" style="font-size:12px;margin:10px 0 0">
+        Örnek veri — gerçek tarama çıktısı değil. <b class="mut">Tarihsel isabet</b> kolonu
+        K4 (istatistik) kapısının çıktısını taşır; ölçülmemiş bir strateji burada
+        “kanıtlanmadı” görünür, gizlenmez.
+      </p>
+    </section>
+
+    <!-- ══════════════ GRAFİK ══════════════ -->
+    <section class="board" id="grafik">
+      <header>
+        <span class="eyebrow">Yüzey · Grafik</span>
+        <h2>Sinyalin nasıl doğduğunun görsel kanıtı</h2>
+        <p>Referans <code class="num" style="font-size:12px">HRhIeAdbcAAL2_B</code>'nin yeniden üretimi:
+           dolgulu X-A-B-C-D gövdesi, sağ kenarda oran-renkli fibo merdiveni, kutulu durum rozeti.
+           <b>İmleci grafiğin üstünde gezdir</b> — crosshair ve HUD canlı.</p>
+      </header>
+
+      <div class="chartframe">
+        <div class="chartbar">
+          <span class="sym">THYAO</span>
+          <span class="dim" style="font-size:12px">Türk Hava Yolları · BIST</span>
+          <div class="tfgroup" role="group" aria-label="Zaman dilimi">
+            <button aria-pressed="false">4S</button>
+            <button aria-pressed="true">1G</button>
+          </div>
+          <span class="sep" style="width:1px;height:18px;background:var(--line)"></span>
+          <span class="pill acc">yapı · altın bölge</span>
+          <span class="pill down">SAT</span>
+          <span class="pill">TAMAMLANDI</span>
+          <span style="margin-left:auto"></span>
+          <span class="eyebrow" style="letter-spacing:1.4px">örnek veri</span>
+        </div>
+
+        <div class="chartbody">
+          <svg id="chart" viewBox="0 0 1180 560" role="img"
+               aria-label="THYAO günlük grafik, altın bölge / fibonacci düzeltme stratejisi, X-A-B-C-D geometrisi ve D hedefinde tamamlanmış satış sinyali"></svg>
+
+          <div class="hud">
+            <div class="l1">THYAO <span class="dim">·</span> BIST <span class="dim">·</span> 1G
+              &nbsp; <span id="hud-o"></span></div>
+            <div class="l2">Altın Bölge <span class="dim">·</span> baskın salınım X→A
+              <span class="dim">·</span> D hedefi <b style="color:var(--down)">159.49</b></div>
+          </div>
+
+          <div class="statbox">
+            <div class="h"><span>ALTIN BÖLGE</span><span>DURUM</span></div>
+            <div class="r"><span>Baskın salınım</span><span>X→A · 39.00</span></div>
+            <div class="r"><span>Bölge (0.618–0.786)</span><span>185.00 / 178.45</span></div>
+            <div class="r"><span>Temas</span><span style="color:var(--accent)">3 · tutmadı</span></div>
+            <div class="r"><span>Yön</span><span style="color:var(--down)">Satış ▼</span></div>
+            <div class="r"><span>Doğduğu bar</span><span>18 bar önce</span></div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <div class="note"><h5>Nereye bak</h5>
+            <p>Sağ kenardaki merdiven. <b>0.618–0.786 arası</b> altın bölgedir; fiyat oraya
+               dönüp <b>tutamazsa</b> X seviyesinin altı hedef olur.</p></div>
+          <div class="note"><h5>Ne ölçer</h5>
+            <p>Baskın X→A salınımının düzeltme derinliğini. Baskın salınım seçimi
+               <b>150 sembolde backtest edildi</b>: en baskın %86.7, en yeni yalnızca %59.3.</p></div>
+          <div class="note"><h5>Sinyal ne zaman doğar</h5>
+            <p>C oluşup fiyat 0.786'yı <b>kapanışta</b> aşağı kırdığında. Sinyal
+               pivotun barını değil, <b>onaylandığı barı</b> taşır — sonradan değişmez.</p></div>
+          <div class="note"><h5>Değerler ne demek</h5>
+            <p><b>1.272 = D hedefi</b> (159.49), <b>1.618 = azami risk</b> (146.00).
+               İkisi arası kapanış, formasyonun tamamlandığı bölgedir.</p></div>
+        </div>
+
+        <div class="verdict">
+          <span class="pill acc">K4 · İSTATİSTİK</span>
+          <p><b>Kenar kanıtlanmadı.</b> 586 sembol, sembol-kümelenmiş, IS/OOS ayrımlı,
+             permütasyon + BH-FDR ölçümünde bu strateji q=0.05 eşiğini geçemedi
+             (n=553 sembol, fark +%0.42, p=0.13). Sinyal gösterilir, iddia edilmez —
+             <b>ölçülmemiş bir stratejiyi “çalışıyor” diye sunmuyoruz.</b></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ KÜTÜPHANE ══════════════ -->
+    <section class="board" id="kutuphane">
+      <header>
+        <span class="eyebrow">Yüzey · Strateji Kütüphanesi</span>
+        <h2>Her strateji, kaynağıyla ve ölçümüyle birlikte</h2>
+        <p>Kartın yüzü gerçek bir grafik. Altında kaynağı (hangi kitap, hangi sayfa),
+           7 kapılık pasaportunun nerede olduğu ve istatistik verdikti.</p>
+      </header>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <!-- ══════════════ BİLEŞENLER ══════════════ -->
+    <section class="board" id="bilesenler" style="border-bottom:0">
+      <header>
+        <span class="eyebrow">Tasarım Sistemi</span>
+        <h2>Token'lar ve bileşenler</h2>
+        <p>Dört referans sitenin ölçülmüş ortak dili. Gölge yok; yüzeyler bir tık açık zemin +
+           saç teli inceliğinde kenarlıkla ayrılıyor. Ağırlık 400 varsayılan, 500 yalnızca vurgu.</p>
+      </header>
+
+      <div class="specgrid">
+        <div class="spec"><h5>Düğme</h5>
+          <div class="row"><button class="btn">Bugünü tara</button>
+            <button class="btn ghost">Dışa aktar</button></div>
+          <p class="dim" style="font-size:12px;margin:10px 0 0">Kontroller <b class="mut">tam hap</b>,
+             paneller <b class="mut">2px</b>. Ara yarıçap yok.</p></div>
+
+        <div class="spec"><h5>Filtre çipi</h5>
+          <div class="row"><button class="chip" aria-pressed="true">Son 3 mum</button>
+            <button class="chip">Son 10 mum</button><button class="chip">Tümü</button></div>
+          <p class="dim" style="font-size:12px;margin:10px 0 0">13px · dolgu 6/14 · kenarlık .8px</p></div>
+
+        <div class="spec"><h5>Rozet</h5>
+          <div class="row"><span class="pill up">AL</span><span class="pill down">SAT</span>
+            <span class="pill acc">yapı</span><span class="pill">ONAYLANDI</span>
+            <span class="pill">3 mum önce</span></div>
+          <p class="dim" style="font-size:12px;margin:10px 0 0">
+            Yeşil/kırmızı <b class="mut">yön</b> demek; aksan <b class="mut">karara değer</b> demek.
+            Ayrı token aileleri.</p></div>
+
+        <div class="spec"><h5>Metin kademesi</h5>
+          <div class="stack" style="gap:4px">
+            <span>Birincil — sinyalin kendisi</span>
+            <span class="mut">İkincil — bağlam ve açıklama</span>
+            <span class="dim">Üçüncül — etiket, birim, zaman damgası</span>
+          </div>
+          <p class="dim" style="font-size:12px;margin:10px 0 0">
+            %100 / %62 / %34. Hiyerarşi boyutla değil <b class="mut">opaklıkla</b>.
+            Üçüncül kademe <b class="mut">sayıya uygulanmaz</b>.</p></div>
+
+        <div class="spec"><h5>Sayı dizgisi</h5>
+          <ul class="scale num" style="font-variant-numeric:tabular-nums">
+            <li><span>THYAO</span><span>209.10</span></li>
+            <li><span>ASELS</span><span>78.45</span></li>
+            <li><span>EREGL</span><span>1 204.75</span></li>
+            <li><span>KCHOL</span><span>9.08</span></li>
+          </ul>
+          <p class="dim" style="font-size:12px;margin:10px 0 0">
+            Mono + <code>tabular-nums</code> — ondalıklar hizalanır.</p></div>
+
+        <div class="spec"><h5>Tipografi ölçeği</h5>
+          <ul class="scale">
+            <li><span style="font-family:var(--f-display);font-size:19px;letter-spacing:-.5px">Levha başlığı</span><code>19 / -0.5</code></li>
+            <li><span style="font-size:14px">Gövde</span><code>14 / 400</code></li>
+            <li><span style="font-size:13px">Tablo satırı</span><code>13 / 400</code></li>
+            <li><span class="eyebrow">Eyebrow</span><code>11 / +2.2</code></li>
+          </ul></div>
+
+        <div class="spec"><h5>Yükleniyor</h5>
+          <div class="stack">
+            <div class="skel" style="width:58%"></div>
+            <div class="skel" style="width:86%"></div>
+            <div class="skel" style="width:72%"></div>
+          </div></div>
+
+        <div class="spec"><h5>Boş durum</h5>
+          <div class="empty"><b>Son 3 mumda bu filtreye uyan sinyal yok.</b>
+            Tazeliği “son 10 mum”a gevşetmeyi deneyebilirsin.</div>
+          <p class="dim" style="font-size:12px;margin:6px 0 0">Sahte veri yok, “yakında” yok.</p></div>
+      </div>
+
+      <div class="accentnote">
+        <b>Aksan kararı sana ait — üstteki üç daireyle canlı deneyebilirsin.</b>
+        Dikkat edilmesi gereken gerçek bir sorun var: <b>turkuaz logodan geliyor ama grafikte
+        yükseliş yeşiline yakın duruyor.</b> Bir tarama aracında bu, marka rengiyle yön
+        anlamının karışması demek. Kehribar ve elektrik mavisi bu riski taşımıyor;
+        turkuazı seçersek yükseliş yeşilini belirgin şekilde sarıya kaydırmamız gerekir.
+        <span class="swatchrow">
+          <button class="swatch" data-acc="teal" aria-pressed="true"><i style="background:#2ED3C0"></i>Turkuaz <span class="hex">#2ED3C0</span></button>
+          <button class="swatch" data-acc="amber" aria-pressed="false"><i style="background:#E9A93A"></i>Kehribar <span class="hex">#E9A93A</span></button>
+          <button class="swatch" data-acc="blue" aria-pressed="false"><i style="background:#5B8CFF"></i>Elektrik mavi <span class="hex">#5B8CFF</span></button>
+        </span>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ═══════════ tema + aksan ═══════════ */
+const root = document.documentElement;
+function setAccent(a){
+  root.setAttribute('data-accent', a);
+  document.querySelectorAll('[data-acc]').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.acc === a)));
+  drawChart(); drawThumbs();
+}
+document.querySelectorAll('[data-acc]').forEach(b =>
+  b.addEventListener('click', () => setAccent(b.dataset.acc)));
+
+const themeBtn = document.getElementById('themebtn');
+function currentlyLight(){
+  const s = root.getAttribute('data-theme');
+  if (s) return s === 'light';
+  return window.matchMedia('(prefers-color-scheme: light)').matches;
+}
+function syncThemeBtn(){ themeBtn.textContent = currentlyLight() ? 'Koyu tema' : 'Açık tema'; }
+themeBtn.addEventListener('click', () => {
+  root.setAttribute('data-theme', currentlyLight() ? 'dark' : 'light');
+  syncThemeBtn(); drawChart(); drawThumbs();
+});
+syncThemeBtn();
+
+/* aria-pressed taşıyan çipler tıklanabilir olsun (grup içinde tek seçim) */
+document.querySelectorAll('.filters, .tfgroup').forEach(group => {
+  group.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn || !btn.hasAttribute('aria-pressed')) return;
+    const sibs = [...group.querySelectorAll('button[aria-pressed]')]
+      .filter(b => b.parentElement === btn.parentElement);
+    sibs.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  });
+});
+
+const T = n => getComputedStyle(root).getPropertyValue(n).trim();
+
+/* ═══════════ deterministik örnek seri ═══════════ */
+function rng(seed){ return () => (seed = seed*1664525 + 1013904223 & 0x7fffffff) / 0x7fffffff; }
+
+/* X-A-B-C-D dönüm noktaları — fibo matematiği referansla birebir:
+   A=209.10 (0.0), X=170.10 (1.0), aralık 39.00 */
+const A_PX = 209.10, X_PX = 170.10, RANGE = A_PX - X_PX;
+const fib = r => +(A_PX - r*RANGE).toFixed(2);
+const PIV = [
+  {i:0,   p:181.4, t:null},
+  {i:18,  p:X_PX,  t:'X'},
+  {i:48,  p:A_PX,  t:'A'},
+  {i:72,  p:fib(.786), t:'B'},
+  {i:100, p:fib(.236), t:'C'},
+  {i:132, p:fib(1.272), t:'D'},
+  {i:139, p:161.8, t:null}
+];
+const N = 140;
+
+const bars = (() => {
+  const r = rng(20260912), out = [];
+  for (let i = 0; i < N; i++){
+    let s = PIV[0], e = PIV[1];
+    for (let k = 0; k < PIV.length-1; k++)
+      if (i >= PIV[k].i && i <= PIV[k+1].i){ s = PIV[k]; e = PIV[k+1]; break; }
+    const f = (i - s.i) / Math.max(1, e.i - s.i);
+    const mid = s.p + (e.p - s.p) * (f*f*(3-2*f));
+    const amp = RANGE * 0.055;
+    const wob = (r()-.5)*amp + Math.sin(i*0.9)*amp*0.35;
+    const o = mid + wob, c = mid + (r()-.5)*amp*1.15 + (e.p>s.p ? amp*.2 : -amp*.2);
+    const hi = Math.max(o,c) + r()*amp*.75, lo = Math.min(o,c) - r()*amp*.75;
+    out.push({i, o, h:hi, l:lo, c, v: 0.35 + r()*0.65 + (Math.abs(c-o)/amp)*0.3});
+  }
+  /* dönüm barlarını tam pivot fiyatına oturt */
+  PIV.filter(p => p.t).forEach(p => {
+    const b = out[p.i], up = p.t==='A' || p.t==='C';
+    if (up){ b.h = p.p; b.c = p.p - RANGE*.012; b.o = p.p - RANGE*.03; b.l = b.o - RANGE*.02; }
+    else   { b.l = p.p; b.c = p.p + RANGE*.012; b.o = p.p + RANGE*.03; b.h = b.o + RANGE*.02; }
+  });
+  return out;
+})();
+
+const FIBS = [
+  {r:0,     lab:'0.0 (A)',        v:'fib-0'},
+  {r:.236,  lab:'0.236',          v:'fib-236'},
+  {r:.382,  lab:'0.382',          v:'fib-382'},
+  {r:.5,    lab:'0.500',          v:'fib-500'},
+  {r:.618,  lab:'0.618',          v:'fib-618'},
+  {r:.786,  lab:'0.786',          v:'fib-786'},
+  {r:1,     lab:'1.0 (X)',        v:'fib-1'},
+  {r:1.272, lab:'1.272 (D hedefi)', v:'fib-ext'},
+  {r:1.618, lab:'1.618 (azami risk)', v:'fib-ext'}
+];
+
+/* ═══════════ grafik ═══════════ */
+const VB = {w:1180, h:560};
+const PAD = {l:14, r:186, t:58, b:26};
+const PRICE_H = 372, VOL_H = 74, VOL_GAP = 16;
+
+const xOf = i => PAD.l + (i + .5) * ((VB.w - PAD.l - PAD.r) / N);
+const PMIN = 142, PMAX = 215;
+const yOf = p => PAD.t + (PMAX - p) / (PMAX - PMIN) * PRICE_H;
+
+function el(tag, attrs, text){
+  const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function drawChart(){
+  const svg = document.getElementById('chart');
+  svg.innerHTML = '';
+  const MONO = T('--f-mono') || 'monospace';
+  const cAcc = T('--accent'), cUp = T('--up'), cDown = T('--down');
+  const cTxt = T('--text'), cTxt2 = T('--text-2'), cTxt3 = T('--text-3'), cGrid = T('--grid');
+  const bw = (VB.w - PAD.l - PAD.r) / N;
+  const right = VB.w - PAD.r;
+
+  /* --- yatay kılavuz + sağ fiyat ekseni --- */
+  for (let p = 150; p <= 210; p += 10){
+    svg.appendChild(el('line',{x1:PAD.l,x2:right,y1:yOf(p),y2:yOf(p),stroke:cGrid,'stroke-width':1}));
+    svg.appendChild(el('text',{x:right+128,y:yOf(p)+3.4,fill:cTxt3,'font-family':MONO,
+      'font-size':10,'text-anchor':'start'}, p.toFixed(2)));
+  }
+
+  /* --- altın bölge bandı (0.618–0.786) --- */
+  const gz1 = yOf(fib(.618)), gz2 = yOf(fib(.786));
+  svg.appendChild(el('rect',{x:xOf(48),y:gz1,width:right-xOf(48),height:gz2-gz1,
+    fill:cAcc,opacity:.085}));
+  svg.appendChild(el('text',{x:xOf(50),y:gz1+13,fill:cAcc,'font-family':MONO,'font-size':10,
+    'letter-spacing':'1.4'}, 'ALTIN BÖLGE'));
+
+  /* --- fibo merdiveni: çizgi + sağ kenar etiketi --- */
+  FIBS.forEach(f => {
+    const y = yOf(fib(f.r)), col = T('--' + f.v);
+    const inZone = f.r === .618 || f.r === .786;
+    svg.appendChild(el('line',{x1:xOf(46),x2:right+4,y1:y,y2:y,stroke:col,
+      'stroke-width':inZone?1.4:1,'stroke-dasharray':f.r>1?'2 3':'6 4',opacity:inZone?.95:.72}));
+    svg.appendChild(el('text',{x:right+16,y:y+3.4,fill:col,'font-family':MONO,
+      'font-size':10.5,'text-anchor':'start'}, f.lab + ': ' + fib(f.r).toFixed(2)));
+  });
+
+  /* --- formasyon gövdesi: X→A→B ve B→C→D üçgenleri --- */
+  const P = Object.fromEntries(PIV.filter(p=>p.t).map(p => [p.t,{x:xOf(p.i),y:yOf(p.p),p}]));
+  svg.appendChild(el('polygon',{points:`${P.X.x},${P.X.y} ${P.A.x},${P.A.y} ${P.B.x},${P.B.y}`,
+    fill:cAcc,opacity:.10,stroke:cAcc,'stroke-width':1.3,'stroke-opacity':.55}));
+  svg.appendChild(el('polygon',{points:`${P.B.x},${P.B.y} ${P.C.x},${P.C.y} ${P.D.x},${P.D.y}`,
+    fill:cAcc,opacity:.10,stroke:cAcc,'stroke-width':1.3,'stroke-opacity':.55}));
+  /* C→D izdüşümü (kesikli) */
+  svg.appendChild(el('line',{x1:P.C.x,y1:P.C.y,x2:P.D.x,y2:P.D.y,stroke:cDown,
+    'stroke-width':1.2,'stroke-dasharray':'3 3',opacity:.85}));
+
+  /* --- mumlar --- */
+  bars.forEach(b => {
+    const x = xOf(b.i), up = b.c >= b.o, col = up ? cUp : cDown;
+    svg.appendChild(el('line',{x1:x,x2:x,y1:yOf(b.h),y2:yOf(b.l),stroke:col,'stroke-width':1}));
+    const y1 = yOf(Math.max(b.o,b.c)), y2 = yOf(Math.min(b.o,b.c));
+    svg.appendChild(el('rect',{x:x-bw*.32,y:y1,width:bw*.64,height:Math.max(1,y2-y1),
+      fill:col,opacity:up?.9:1}));
+  });
+
+  /* --- hacim şeridi --- */
+  const vTop = PAD.t + PRICE_H + VOL_GAP;
+  const vMax = Math.max(...bars.map(b=>b.v));
+  bars.forEach(b => {
+    const h = (b.v/vMax) * VOL_H, x = xOf(b.i), up = b.c >= b.o;
+    svg.appendChild(el('rect',{x:x-bw*.32,y:vTop+VOL_H-h,width:bw*.64,height:h,
+      fill:up?cUp:cDown,opacity:.34}));
+  });
+  svg.appendChild(el('text',{x:PAD.l+2,y:vTop-4,fill:cTxt3,'font-family':MONO,
+    'font-size':10,'letter-spacing':'1.4'},'HACİM'));
+
+  /* --- swing etiketleri --- */
+  [['X','HL',1],['A','LH',-1],['B','HL',1],['C','LH',-1]].forEach(([t,lab,dir]) => {
+    const q = P[t];
+    svg.appendChild(el('text',{x:q.x,y:q.y + dir*30,fill:cTxt3,'font-family':MONO,
+      'font-size':9.5,'text-anchor':'middle'}, lab));
+  });
+
+  /* --- köşe rozetleri (hap formu, referanstaki gibi) --- */
+  Object.entries(P).forEach(([t,q]) => {
+    const above = (t==='A'||t==='C'), by = q.y + (above ? -15 : 15);
+    svg.appendChild(el('circle',{cx:q.x,cy:q.y,r:3.4,fill:cAcc,stroke:T('--surface'),'stroke-width':1.4}));
+    svg.appendChild(el('rect',{x:q.x-9,y:by-9,width:18,height:18,rx:9,
+      fill:cAcc,opacity:.16,stroke:cAcc,'stroke-width':1,'stroke-opacity':.6}));
+    svg.appendChild(el('text',{x:q.x,y:by+4,fill:cAcc,'font-family':MONO,'font-size':11,
+      'font-weight':500,'text-anchor':'middle'}, t));
+  });
+
+  /* --- D tamamlanma etiketi: önder çizgi + kutulu rozet --- */
+  const dx = P.D.x, dy = P.D.y;
+  const bx = dx - 152, by = dy + 46;
+  svg.appendChild(el('line',{x1:dx,y1:dy+6,x2:bx+142,y2:by-7,stroke:cDown,
+    'stroke-width':1,opacity:.6}));
+  svg.appendChild(el('rect',{x:bx,y:by-16,width:150,height:22,rx:2,
+    fill:T('--surface'),stroke:cDown,'stroke-width':1,'stroke-opacity':.7}));
+  svg.appendChild(el('text',{x:bx+9,y:by,fill:cDown,'font-family':MONO,'font-size':11},
+    'D: 159.49  [TAMAMLANDI]'));
+
+  /* --- crosshair katmanı --- */
+  const cross = el('g',{id:'cross',visibility:'hidden'});
+  cross.appendChild(el('line',{id:'cx',y1:PAD.t,y2:vTop+VOL_H,stroke:cTxt3,
+    'stroke-width':1,'stroke-dasharray':'3 3'}));
+  cross.appendChild(el('line',{id:'cy',x1:PAD.l,x2:right,stroke:cTxt3,
+    'stroke-width':1,'stroke-dasharray':'3 3'}));
+  cross.appendChild(el('rect',{id:'cbg',x:right+4,width:120,height:17,rx:2,fill:cTxt,opacity:.92}));
+  cross.appendChild(el('text',{id:'cpx',fill:T('--surface'),'font-family':MONO,'font-size':10.5,
+    'text-anchor':'start'}));
+  svg.appendChild(cross);
+
+  /* --- son fiyat rozeti --- */
+  const last = bars[N-1];
+  svg.appendChild(el('line',{x1:PAD.l,x2:right+4,y1:yOf(last.c),y2:yOf(last.c),
+    stroke:cDown,'stroke-width':1,'stroke-dasharray':'1 3',opacity:.8}));
+  svg.appendChild(el('rect',{x:right+4,y:yOf(last.c)-8.5,width:120,height:17,rx:2,fill:cDown}));
+  svg.appendChild(el('text',{x:right+11,y:yOf(last.c)+3.6,fill:'#fff',
+    'font-family':MONO,'font-size':10.5}, last.c.toFixed(2)));
+
+  /* --- zaman ekseni --- */
+  [[10,'Mar 2026'],[52,'May 2026'],[95,'Tem 2026'],[130,'Eyl 2026']].forEach(([i,lab]) => {
+    svg.appendChild(el('text',{x:xOf(i),y:VB.h-8,fill:cTxt3,'font-family':MONO,
+      'font-size':10,'text-anchor':'middle'}, lab));
+  });
+
+  hookCross(svg, vTop + VOL_H);
+  setHud(N-1);
+}
+
+function setHud(i){
+  const b = bars[i], up = b.c >= b.o;
+  const f = n => n.toFixed(2);
+  document.getElementById('hud-o').innerHTML =
+    `<span class="dim">A</span> ${f(b.o)} <span class="dim">Y</span> ${f(b.h)} ` +
+    `<span class="dim">D</span> ${f(b.l)} <span class="dim">K</span> ` +
+    `<b style="color:var(--${up?'up':'down'})">${f(b.c)} ${up?'▲':'▼'}</b>`;
+}
+
+function hookCross(svg, bottom){
+  const g = svg.querySelector('#cross');
+  const move = e => {
+    const r = svg.getBoundingClientRect();
+    const sx = (e.clientX - r.left) / r.width * VB.w;
+    const sy = (e.clientY - r.top) / r.height * VB.h;
+    const bw = (VB.w - PAD.l - PAD.r) / N;
+    let i = Math.round((sx - PAD.l) / bw - .5);
+    i = Math.max(0, Math.min(N-1, i));
+    const x = xOf(i), y = Math.max(PAD.t, Math.min(bottom, sy));
+    g.setAttribute('visibility','visible');
+    g.querySelector('#cx').setAttribute('x1', x); g.querySelector('#cx').setAttribute('x2', x);
+    g.querySelector('#cy').setAttribute('y1', y); g.querySelector('#cy').setAttribute('y2', y);
+    g.querySelector('#cbg').setAttribute('y', y - 8.5);
+    const t = g.querySelector('#cpx');
+    t.setAttribute('x', VB.w - PAD.r + 11); t.setAttribute('y', y + 3.6);
+    t.textContent = (PMAX - (y - PAD.t) / PRICE_H * (PMAX - PMIN)).toFixed(2);
+    setHud(i);
+  };
+  svg.addEventListener('pointermove', move);
+  svg.addEventListener('pointerleave', () => {
+    g.setAttribute('visibility','hidden'); setHud(N-1);
+  });
+}
+
+/* ═══════════ tarama tablosu ═══════════ */
+const ROWS = [
+  ['THYAO','Türk Hava Yolları','Yapı','Altın Bölge','down','Tamamlandı',0,209.10,178.45,'kanıtlanmadı'],
+  ['ASELS','Aselsan','Yapı','Arz–Talep Bölgesi','up','Onaylandı',1,78.45,74.20,'ölçülmedi'],
+  ['EREGL','Ereğli Demir Çelik','Formasyon','Çift Dip','up','Onaylandı',1,1204.75,1180.00,'kanıtlanmadı'],
+  ['TUPRS','Tüpraş','Trend & Momentum','EWMAC','up','Onaylandı',2,142.30,139.80,'izlenen aday'],
+  ['KCHOL','Koç Holding','Yapı','Piyasa Yapısı · BOS','up','Onaylandı',2,9.08,8.94,'ölçülmedi'],
+  ['SISE','Şişecam','Formasyon','Yükselen Üçgen','up','Kırılım',2,41.66,40.90,'kanıtlanmadı'],
+  ['BIMAS','BİM','Yapı','Yatay Aralık','down','Temas',3,512.00,524.50,'ölçülmedi'],
+  ['FROTO','Ford Otosan','Formasyon','Bayrak','up','Onaylandı',3,1088.25,1061.00,'kanıtlanmadı'],
+  ['AKBNK','Akbank','Trend & Momentum','MA Sistemi','down','Onaylandı',3,68.90,70.15,'izlenen aday'],
+  ['ENKAI','Enka İnşaat','Yapı','Altın Bölge','up','Bölgede',3,58.44,56.80,'kanıtlanmadı']
+];
+const AGE = n => n === 0 ? 'son mum' : n + ' mum önce';
+const VERDICT = {
+  'izlenen aday':  ['acc',  'en az çürütülmüş üçlüden biri'],
+  'kanıtlanmadı':  ['',     'FDR eşiğini geçemedi'],
+  'ölçülmedi':     ['',     'K4 kapısı henüz açılmadı']
+};
+
+function sparkline(seed, up){
+  const r = rng(seed); let v = 50;
+  const pts = Array.from({length:22}, (_,k) => {
+    v += (r()-.46)*9 + (up ? .9 : -.9);
+    return [k/21*60+1, 16 - Math.max(1, Math.min(15, v/100*15 + 1))];
+  });
+  return `<svg class="spark" viewBox="0 0 62 18" aria-hidden="true"><polyline fill="none"
+    stroke="var(--${up?'up':'down'})" stroke-width="1.2" stroke-linejoin="round"
+    points="${pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}"/></svg>`;
+}
+
+document.getElementById('scanrows').innerHTML = ROWS.map((r,k) => {
+  const [sym,name,pkg,strat,dir,state,age,px,lvl,verd] = r;
+  const [cls,title] = VERDICT[verd];
+  return `<tr>
+    <td class="sym">${sym}<span class="sub">${name}</span></td>
+    <td class="mut">${pkg}</td>
+    <td>${strat}</td>
+    <td><span class="pill ${dir}">${dir === 'up' ? 'AL' : 'SAT'}</span></td>
+    <td class="mut">${state}</td>
+    <td class="r num dim">${AGE(age)}</td>
+    <td class="r num">${px.toFixed(2)}</td>
+    <td class="r num mut">${lvl.toFixed(2)}</td>
+    <td>${sparkline(k*7919+13, dir === 'up')}</td>
+    <td><span class="pill ${cls}" title="${title}">${verd}</span></td>
+  </tr>`;
+}).join('');
+
+/* ═══════════ kütüphane kartları ═══════════ */
+const CARDS = [
+  {ad:'Altın Bölge', kaynak:'PESAVENTO · S.41-58', tarih:'PASAPORT K5', tip:'fib',
+   ozet:'Baskın salınımın 0.618–0.786 düzeltme bandı. Fiyat bölgeye dönüp tutamazsa X seviyesinin altı hedeflenir. Baskın salınım seçimi 150 sembolde backtest edildi.',
+   paket:'Yapı', verdict:'kanıtlanmadı'},
+  {ad:'Piyasa Yapısı', kaynak:'SMC / ICT LİTERATÜRÜ', tarih:'PASAPORT K2', tip:'ms',
+   ozet:'HH / HL / LH / LL zinciri ve bunların kırıldığı noktalar: BOS (yapı kırılımı) ve CHoCH (karakter değişimi). Diğer yapı stratejilerinin altyapısı.',
+   paket:'Yapı', verdict:'ölçülmedi'},
+  {ad:'Arz–Talep Bölgesi', kaynak:'ORNEK2 REFERANSI', tarih:'PASAPORT K1', tip:'zone',
+   ozet:'Pivot çıpalı bölge tespiti, birleştirme ve tazelik takibi. Hacim profili ve POC katmanı ikinci turda eklenecek.',
+   paket:'Yapı', verdict:'ölçülmedi'},
+  {ad:'Adil Değer Boşluğu', kaynak:'YENİ STRATEJİ REFERANSI', tarih:'PASAPORT K0', tip:'fvg',
+   ozet:'Üç barlık ardışık boşluk ve sonrasındaki konsolidasyondan kırılım. 4S ölçekleme hatası önceki sistemde 648/648 sembolde sıfır aday veriyordu — bu kez kalibrasyon K3 kapısında ölçülecek.',
+   paket:'Yapı', verdict:'ölçülmedi'}
+];
+
+function thumbFor(tip, w, h){
+  const r = rng(tip.length*977 + 31);
+  let s = `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true">`;
+  const n = 34, bw = w/n;
+  let v = h*0.55;
+  const pts = [];
+  for (let i = 0; i < n; i++){
+    v += (r()-.5)*h*0.12 + (tip==='fib' ? h*0.006 : -h*0.004);
+    v = Math.max(h*0.2, Math.min(h*0.82, v));
+    pts.push(v);
+  }
+  if (tip === 'fib'){
+    [0.28,0.38,0.48,0.58].forEach((f,k) => {
+      s += `<line x1="${w*.35}" x2="${w}" y1="${h*f}" y2="${h*f}"
+             stroke="var(--fib-${[236,382,500,618][k]})" stroke-width="1"
+             stroke-dasharray="4 3" opacity=".75"/>`;
+    });
+    s += `<rect x="${w*.35}" y="${h*.48}" width="${w*.65}" height="${h*.10}"
+           fill="var(--accent)" opacity=".12"/>`;
+  }
+  if (tip === 'ms'){
+    s += `<polyline fill="none" stroke="var(--accent)" stroke-width="1.4" opacity=".8"
+           points="${w*.08},${h*.72} ${w*.28},${h*.34} ${w*.46},${h*.54} ${w*.66},${h*.24} ${w*.86},${h*.46}"/>`;
+    ['HL','HH','HL','HH'].forEach((t,k) => {
+      s += `<text x="${w*(.08+k*.195)}" y="${h*[.8,.28,.62,.18][k]}" fill="var(--text-3)"
+             font-family="monospace" font-size="7" text-anchor="middle">${t}</text>`;
+    });
+  }
+  if (tip === 'zone'){
+    s += `<rect x="0" y="${h*.30}" width="${w}" height="${h*.11}" fill="var(--down)" opacity=".16"/>`;
+    s += `<rect x="0" y="${h*.62}" width="${w}" height="${h*.11}" fill="var(--up)" opacity=".16"/>`;
+  }
+  if (tip === 'fvg'){
+    s += `<rect x="${w*.42}" y="${h*.40}" width="${w*.52}" height="${h*.09}"
+           fill="var(--accent)" opacity=".22"/>`;
+    s += `<rect x="${w*.20}" y="${h*.58}" width="${w*.30}" height="${h*.07}"
+           fill="var(--accent)" opacity=".12"/>`;
+  }
+  for (let i = 0; i < n; i++){
+    const x = i*bw + bw/2, c = pts[i], o = i ? pts[i-1] : c, up = c <= o;
+    const top = Math.min(c,o), bot = Math.max(c,o);
+    const col = up ? 'var(--up)' : 'var(--down)';
+    s += `<line x1="${x}" x2="${x}" y1="${top-h*.05}" y2="${bot+h*.05}" stroke="${col}" stroke-width=".8" opacity=".9"/>`;
+    s += `<rect x="${x-bw*.27}" y="${top}" width="${bw*.54}" height="${Math.max(1,bot-top)}" fill="${col}" opacity=".9"/>`;
+  }
+  return s + '</svg>';
+}
+
+function drawThumbs(){
+  document.getElementById('cards').innerHTML = CARDS.map(c => {
+    const [cls] = VERDICT[c.verdict];
+    return `<article class="card">
+      <div class="thumb">${thumbFor(c.tip, 300, 118)}</div>
+      <div class="meta">${c.kaynak} &nbsp;·&nbsp; ${c.tarih}</div>
+      <h3>${c.ad}</h3>
+      <p>${c.ozet}</p>
+      <div class="foot">
+        <span class="pill acc">${c.paket}</span>
+        <span class="pill ${cls}">${c.verdict}</span>
+        <a href="#grafik">Grafiği aç →</a>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+drawChart();
+drawThumbs();
+</script>
