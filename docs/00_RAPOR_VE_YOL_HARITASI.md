@@ -4,7 +4,9 @@
 **Kapsam:** Mevcut üç kod tabanının (teknik / temel / Quaxis mobil), kitap
 kaynaklarının ve tüm proje belgelerinin incelenmesi; yeni klasörde sıfırdan
 ayağa kaldırma planı.
-**Durum:** Karar bekliyor — Bölüm 11'deki 4 soru cevaplanmadan kod yazılmayacak.
+**Durum:** Kararlar alındı ve uygulanıyor. Bkz. `karar/ADR-001` ve
+`karar/ADR-002`. Bölüm 3, 7 ve 9 ADR-002 ile güncellendi; okurken ADR'ler
+esas alınmalıdır.
 
 ---
 
@@ -121,6 +123,12 @@ kanıtlanmadı" rozeti olacak. Bu, rakiplerin yapmadığı ve senin
 ---
 
 ## 3. Asıl karar: "sıfırdan klasör" evet, "sıfırdan kod" hayır
+
+> **ADR-002 ile kısmen değiştirildi (2026-09-12).** Aşağıdaki muhakeme
+> **altyapı katmanları** (`core`, `testing`, `data`, `scanner`) için geçerliliğini
+> koruyor. Ancak kullanıcı kararıyla **`indicators` ve `features` taşınmıyor** —
+> her strateji kitaptan yeniden türetilerek sıfırdan yazılacak. Gerekçe:
+> `karar/ADR-002-strateji-kodlari-sifirdan.md`.
 
 Senin isteğin haklı ve ben de **yeni klasörü destekliyorum** — ama sebebi
 "kod berbat" değil, ve bu ayrım planın tamamını belirliyor.
@@ -282,32 +290,29 @@ tek başına ~1.5 saat makine zamanı).
 
 ---
 
-## 7. Strateji sırası
+## 7. Strateji sırası ve kapsamı
 
-27 göstergenin tamamı gelmeyecek — **9'u ile başlayıp** kalanları ölçüm
-sonuçlarına göre alacağız. Sıra üç ölçüte göre: (a) net bir referans görseli
-var mı, (b) istatistiksel olarak henüz çürütülmemiş mi, (c) ürünün temel
-hikâyesini taşıyor mu.
+> **Güncelleme (ADR-002):** "9 strateji ile başla" kısıtı kaldırıldı. Hedef tüm
+> stratejiler ya da büyük çoğunluğu; sayı sınırı yok. Ayrıca her stratejinin
+> kodu **sıfırdan**, kitaptan türetilerek yazılır — eski koda referans olarak
+> değil yalnızca karşılaştırma için bakılır.
 
-| # | Strateji | Referans | İstatistik durumu | Neden bu sırada |
-|---|---|---|---|---|
-| 1 | `structure.golden_zone` + fib retracement | `HRhIeAdbcAAL2_B` | en az çürütülmüş 3'ten biri | En net referans görsel; baskın-swing kararı **zaten backtest edilmiş** (%86.7 vs %59.3). Pilot için ideal. |
-| 2 | `structure.market_structure` (HH/HL/LH/LL + BOS/CHoCH) | `ornek1.png` | ölçülmedi | Diğer her şeyin altyapısı; görsel dili basit. |
-| 3 | `structure.range_box` (yatay aralık) | `HRjNKRZWAAAhfSy` | ölçülmedi | Komposeri **zaten bitti** (4 tur görsel doğrulama geçti). |
-| 4 | `trend.channel` (paralel kanal, CMT kuralı) | `HRiOTwUbQAA9WKw` | ölçülmedi | Fon tarafıyla kesişimin ana aracı. |
-| 5 | `trend.ewmac` | — | **en güçlü aday** (n=559, p=0.034) | Görsel olarak sade ama sayısal olarak en umut verici; K4'ü ilk geçme ihtimali en yüksek. |
-| 6 | `patterns.head_shoulders` / `double_top_bottom` | `TOBO.png` | ölçülmedi | Kullanıcıların en çok tanıdığı formasyonlar; hologram + boyun çizgisi işi zaten yapıldı. |
-| 7 | `harmonic.*` (Carney + Pesavento ile başla) | `HRhIeAdbcAAL2_B`, `HRhMNlYbwAACrVs` | `carney` −%3.66 (n=68) — **dikkat** | En zor görsel; 8 ekolün hepsi değil, önce 2'si. |
-| 8 | `structure.supply_demand` | kullanıcı koyu tema kutusu | ölçülmedi | Basit, popüler. |
-| 9 | `pair.relative_momentum` + Pair Health | `HRcUk75bgAApv6n` | 17 çiftte çalışıyor | Ayrı bir ürün paketi; en son. |
+Değişmeyen tek kural: **bir strateji 7 kapının tamamından geçmeden sıradakine
+geçilmez.** Sıra, Bölüm B bittikten sonra birlikte belirlenecek; ilk adayların
+seçim ölçütü şu üçü:
 
-Kalan 18'i (broadening, wedge, triangle, flag_pennant, breakout_fvg,
-five_zero, nenstar, navarro200, gilmore, cypher, three_drives, weekly_channel,
-ma_systems, breakouts, price_structure, swing_fib_abcd, alpha_rank,
-momentum_rank, vol_harvest) **arşive** alıyoruz — kodları duruyor, siteye
-çıkmıyorlar. Sırası gelince aynı 7 kapıdan geçerler.
+1. **Net bir referans görseli var mı** — K5 kapısı için hedef lazım.
+2. **Kitap kaynağı ne kadar somut** — K0 kapısı eşikleri alıntıyla ister.
+3. **İstatistiksel olarak henüz çürütülmemiş mi** — önceki ölçümde
+   `trend.ewmac`, `structure.golden_zone`, `trend.ma_systems` en az çürütülmüş
+   üçlüydü; `harmonic.carney` (−%3.66, n=68) ve `patterns.broadening`
+   (−%1.86, n=102) ise negatif taraftaydı.
 
----
+Referans görseli bulunan aday havuzu (`önemli/` + `images/` klasörlerinden):
+fibo merdiveni / altın bölge, piyasa yapısı (HH-HL-LH-LL, BOS/CHoCH), yatay
+aralık, paralel kanal, üçgen/kama, bayrak-flama, XABCD harmonikleri, üç itiş,
+A-B-C-D salınımı, arz-talep bölgeleri, çift sağlığı, likidite (Corwin-Schultz),
+istatistik tablosu.
 
 ## 8. İhtiyacımız olan agent'lar, skill'ler ve araçlar
 
@@ -362,80 +367,81 @@ genişletilecek.
 
 ## 9. Faz planı — adım adım
 
-Her faz **ayrı bir oturumda** başlatılmalı (`/clear` ile) — bu senin kendi
-çalışma kuralın ve token açısından da doğru.
+> **Güncelleme (ADR-002):** sıra değişti — **önce site**, sonra altyapı, sonra
+> stratejiler. Temel analiz ve mobil bu plandan çıkarıldı.
 
-### Faz 0 — Kuruluş *(1 oturum)*
-- `Desktop\QuaxisLabs\` altında **yeni, temiz git deposu** (`git init`),
-  ev dizinindeki 4 GB'lık depodan tamamen bağımsız.
-- Monorepo iskeleti (Bölüm 4), `pyproject.toml`, `package.json`, `Makefile`,
-  `.gitignore` (veri/önbellek/PDF **kesinlikle** hariç), pre-commit.
-- GitHub'da yeni depo mu, `QuaxisLabs`'ı sıfırlamak mı — **senin kararın**
-  (Bölüm 11, Soru 3).
-- `docs/karar/ADR-001-yeniden-insa.md` — bu raporun özeti, kalıcı kayıt.
-- **Bitti kriteri:** `git log` tek commit, `.git` < 5 MB.
+Her faz **ayrı bir oturumda** başlatılmalı (`/clear` ile).
 
-### Faz 1 — Sözleşmeler *(1 oturum)*
-- `packages/ortak/` — `Signal`, `IndicatorResult`, `ChartSpec` v1 şeması
-  (JSON Schema + Python dataclass + TS tipi, tek kaynaktan üretilir).
-- `docs/strateji/_SABLON.md` — pasaport şablonu, 7 kapı.
-- `.claude/skills/quaxis-mimari` + `strateji-pasaportu` yazılır.
-- **Bitti kriteri:** ChartSpec'in TS ve Python tarafı aynı örnek dosyayı
-  doğruluyor.
+### BÖLÜM A — SİTE
+*Bitiş kriteri: senin "bu site artık istediğim gibi görünüyor" onayın. Bu onay
+alınmadan Bölüm B'ye geçilmez.*
 
-### Faz 2 — Tasarım sistemi ve kabuk *(2 oturum)*
-- Mobbin referansları toplanır → `references/`.
-- **Önce Artifact olarak maket**, senin onayın, sonra kod.
-- `apps/web`: 3 tema token seti, `next/font` ile yerel fontlar (Türkçe glif
-  testi zorunlu), 13 bileşen (`Card`, `DataTable` sanallaştırılmış, `StatTile`,
-  `Pill`, `Tab`, `Skeleton`, `EmptyState`…), `/tasarim` iç vitrin sayfası.
-- Kabuk: sol ray (4 ürün paketi), üst şerit, **⌘K komut paleti**, yükleme/boş/
-  hata durumları.
-- **Bitti kriteri:** 3 tema × 2 genişlik ekran görüntüleri alınmış, **gözle
-  incelenmiş**, en az 3 iterasyon; `npm run build` temiz.
+**Faz 0 — Kuruluş** ✅ *(bitti)*
+Yeni ve temiz git deposu (`.git` 108 KB), monorepo iskeleti, `.gitignore`,
+ADR-001 ve ADR-002.
 
-### Faz 3 — Motor göçü *(2 oturum)*
-- `tlab/{core,data,features,indicators,scanner,testing}` → `packages/teknik/`,
-  ad `quaxis.teknik`. `tlab/viz` **gelmez**.
-- 1008 test yeni depoda yeşil olmadan faz bitmez.
-- Veri önbelleği (121 MB) depo dışında, `data/` git-ignore.
-- FastAPI iskeleti: `/api/tarama`, `/api/grafik`, `/api/katalog`.
-- **Bitti kriteri:** `pytest -q` yeşil, `tlab eod --market bist` yeni depoda
-  koşuyor.
+**Faz 1 — Tasarım referansları ve tasarım dili** *(1 oturum)*
+- Kullanıcının verdiği 4 referans sitesi gezilir: dovetail.com, slash.com,
+  v7labs.com, luxalgo.com.
+- Her siteden: ekran görüntüleri + **hesaplanmış tasarım token'ları**
+  (font aileleri, renk paleti, yarıçap ölçeği, boşluk ritmi, gölge katmanları).
+- Çıktı: `docs/design/TASARIM_DILI.md` — dört sitenin **ortak** dili ve
+  QuaxisLabs'a ne alınacağı; `references/` altında kanıt dosyaları.
+- Kritik ilke: dördü **birlikte** incelenir, tek tek yamalanmaz.
 
-### Faz 4 — İlk strateji uçtan uca *(2 oturum)* ⭐
-**Pilot: `structure.golden_zone`.** 7 kapının tamamı. Bu faz bittiğinde
-elinde çalışan bir ürün var: tarama sayfasında sinyal listesi → tıkla →
-grafik açılıyor → sinyalin nasıl oluştuğu referans görsel kalitesinde
-çizilmiş → yanında "nasıl okunur" ve dürüst bir istatistik rozeti.
+**Faz 2 — Tasarım sistemi ve bileşen kütüphanesi** *(2 oturum)*
+- Önce **Artifact olarak maket**, senin onayın, sonra kod.
+- `apps/web`: tema token setleri, `next/font` ile yerel fontlar (Türkçe glif
+  testi zorunlu: İ ı Ğ ğ Ş ş Ç ç Ö ö Ü ü).
+- Bileşenler: `Card`, `Panel`, `SectionLabel`, `Pill`, `Badge`, `Tab`,
+  `StatTile`, `DataTable` (sanallaştırılmış, 500+ satırda 60 fps),
+  `Sparkline`, `EmptyState`, `Skeleton`.
+- `/tasarim` iç vitrin sayfası — gelecekteki her tasarım işinin referansı.
 
-Bu fazı **kesinlikle acele etmiyoruz** — süreç burada kanıtlanıyor. Sonraki
-8 strateji bu kalıbın tekrarı olacak.
+**Faz 3 — Uygulama kabuğu ve sayfa iskeletleri** *(1-2 oturum)*
+- Sol ray (ürün paketleri), üst şerit, **⌘K komut paleti**, tema seçici.
+- Sayfa iskeletleri: Tarama, Grafik, Strateji Kütüphanesi.
+- Yükleme / boş / hata durumlarının üçü de tasarlanmış olmalı.
+- Doğrulama: 3 tema × 2 genişlik (1440/768) ekran görüntüsü, **gözle
+  incelenmiş**, en az 3 iterasyon.
 
-### Faz 5–8 — Strateji strateji *(strateji başına 1–2 oturum)*
-Bölüm 7'deki sırayla, 2'den 9'a.
+**Faz 4 — `ChartSpec` v1 ve grafik motoru** *(2 oturum)*
+- `ChartSpec` şeması: JSON Schema + Python dataclass + TypeScript tipi, tek
+  kaynaktan üretilir.
+- Web renderer: Lightweight Charts v5 (mum/hacim/crosshair/zoom) + kendi SVG
+  overlay katmanımız (fibo merdiveni, dolgulu poligon, hap rozet, numaralı
+  temas, önder çizgi, sağ kenar etiketi).
+- **Kabul kriteri:** referans görsellerden en az üçü, elle yazılmış bir
+  `ChartSpec` ile **birebir** yeniden üretilir. Gerçek gösterge kodu henüz yok —
+  bu fazda çizim katmanı tek başına kanıtlanır.
 
-### Faz 9 — Tarama, alarm, evren yüzeyleri *(2 oturum)*
-- Tazelik filtresi (son 1/3/10 mum), satır-üzeri grafik önizlemesi,
-  kaydedilmiş taramalar, karşılaştırma.
-- Alarm motoru (`packages/teknik/alerts/`) + Telegram kanalı (bot zaten var)
-  + "bu kural son 30 günde N kez tetiklenirdi" canlı önizlemesi.
-- Evren yüzeyi: sektör rotasyonu, piyasa genişliği, momentum ısı haritası.
+### BÖLÜM B — ALTYAPI
 
-### Faz 10 — Temel analiz entegrasyonu *(3–4 oturum)*
-- `bilanco-radar` motoru `packages/temel/`e taşınır.
-- Kalan 3 kitap (Fisher, Lynch, Schilit) çıkarımı.
-- **10+ yıllık seri veri açığı kapatılır** (KAP XBRL / İş Yatırım kalem kodları).
-- 4 mercek + bileşik skor → ortak tarama yüzeyinde teknik sinyalle **aynı
-  tabloda**: "temel skoru yüksek + teknik sinyal taze" kesişim taraması.
-  **Projenin asıl fikri bu kesişim.**
+**Faz 5 — Altyapı göçü** *(2 oturum)*
+- `core`, `testing`, `data`, `scanner` → `packages/teknik/` (ad `quaxis.teknik`).
+- **Gösterge taşınmaz.** `features` de taşınmaz; strateji strateji gelecek.
+- Bu katmanların testleri yeni depoda yeşil olmadan faz bitmez.
+- FastAPI: `/api/tarama`, `/api/grafik`, `/api/katalog`.
+- Veri sağlayıcı kararı burada uygulanır (bkz. Bölüm 11, açık konu).
 
-### Faz 11 — Mobil *(ayrı bir iş)*
-`Desktop\Quaxis\mobile` Flutter iskeleti temel alınır.
+**Faz 6 — Strateji Pasaportu süreci** *(1 oturum)*
+- `docs/strateji/_SABLON.md` — 7 kapı, doldurulacak alanlar, kanıt yerleri.
+- `.claude/agents/`: `kaynak-okuyucu`, `strateji-kodlayici`, `olcum-uzmani`,
+  `grafik-tasarimcisi`, `arayuz-tasarimcisi`.
+- `.claude/skills/`: `quaxis-mimari`, `strateji-pasaportu`,
+  `grafik-tasarim-sistemi`, `web-tasarim-sistemi`.
+- `tools/`: görsel kabul döngüsü (render → ekran görüntüsü → referansla
+  karşılaştır), kalibrasyon ve istatistik koşucuları.
 
-**Toplam kaba tahmin:** Faz 0–9 arası **18–24 oturum**. Faz 10 ayrı **3–4**.
+### BÖLÜM C — STRATEJİLER *(birer birer, sayı sınırı yok)*
 
----
+Her strateji kendi fazı: **Faz 7.1, 7.2, 7.3, …**
+Her biri K0 → K6. Bir strateji bitmeden sıradakine geçilmez. Strateji başına
+tahmini 1–2 oturum (K4'ün tam evren ölçümü tek başına ~1.5 saat makine zamanı).
+
+### Kapsam dışı (bu depoda planlanmıyor)
+Temel analiz entegrasyonu ve mobil uygulama. `packages/temel` yer tutucu olarak
+kalır; sırası gelirse ayrı bir ADR ile planlanır.
 
 ## 10. Riskler ve dürüst uyarılar
 

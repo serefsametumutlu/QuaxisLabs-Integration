@@ -56,17 +56,35 @@ tools/          Görsel kabul döngüsü, snapshot ve karşılaştırma araçlar
 
 ## Durum
 
+Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
+(bkz. [ADR-002](docs/karar/ADR-002-strateji-kodlari-sifirdan.md)).
+
+### Bölüm A — Site (senin onayın alınmadan B'ye geçilmez)
+
 | Faz | İş | Durum |
 |---|---|---|
-| 0 | Kuruluş — depo, iskelet, ADR | **devam ediyor** |
-| 1 | Sözleşmeler — ChartSpec, pasaport şablonu, skill'ler | bekliyor |
-| 2 | Tasarım sistemi ve uygulama kabuğu | bekliyor |
-| 3 | Motor göçü (`packages/teknik`) | bekliyor |
-| 4 | İlk strateji uçtan uca — `structure.golden_zone` | bekliyor |
-| 5–8 | Strateji strateji (2→9) | bekliyor |
-| 9 | Tarama / alarm / evren yüzeyleri | bekliyor |
-| 10 | Temel analiz entegrasyonu | bekliyor |
-| 11 | Mobil | bekliyor |
+| 0 | Kuruluş — depo, iskelet, ADR'ler | ✅ bitti |
+| 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | **devam ediyor** |
+| 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | bekliyor |
+| 3 | Uygulama kabuğu ve sayfa iskeletleri | bekliyor |
+| 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | bekliyor |
+
+### Bölüm B — Altyapı
+
+| Faz | İş | Durum |
+|---|---|---|
+| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | bekliyor |
+| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | bekliyor |
+
+### Bölüm C — Stratejiler (birer birer, **sayı sınırı yok**)
+
+Her strateji kendi fazıdır ve **7 kapının tamamından geçmeden sıradakine
+geçilmez**. Kodu kitaptan yeniden türetilir; eski koda referans olarak değil,
+yalnızca karşılaştırma için bakılır.
+
+| Faz | Strateji | Durum |
+|---|---|---|
+| 7.1 | *(sıra Bölüm B bitince belirlenecek)* | bekliyor |
 
 Tam plan: [`docs/00_RAPOR_VE_YOL_HARITASI.md`](docs/00_RAPOR_VE_YOL_HARITASI.md)
 

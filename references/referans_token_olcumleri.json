@@ -1,0 +1,78 @@
+{
+  "_aciklama": "Dort referans sitenin gercek getComputedStyle olcumleri (ilk ~4000 DOM ogesi, 1440x900 masaustu). Tahmin degil olcum. Sentez: docs/design/TASARIM_DILI.md",
+  "_tarih": "2026-09-12",
+  "_kaynak": "kullanicinin verdigi 4 referans site",
+
+  "luxalgo.com": {
+    "fonts": ["Aeonik (2667)", "ui-monospace (46)", "ui-sans-serif (26)", "system-ui (9)"],
+    "sizes": ["16px (1754)", "14px (617)", "13px (118)", "12px (84)", "52px (45)", "15px (26)", "11px (22)", "56px (18)", "10px (17)", "20px (9)", "76px (8)"],
+    "weights": ["400 (2562)", "500 (185)", "700 (1)"],
+    "colors": ["rgb(237,237,237) (1539)", "rgb(125,125,125) (376)", "rgb(160,160,160) (326)", "white 25% (150)", "rgb(128,137,159) (104)", "rgb(255,255,255) (38)"],
+    "bgs": ["rgb(10,10,10) (45)", "black 40% (26)", "rgb(0,0,0) (22)", "rgb(255,255,255) (9)", "rgb(20,20,20) (7)", "white 7% (6)", "rgb(11,13,16) (4)", "rgb(5,5,5) (2)", "rgb(26,26,28) (2)"],
+    "radii": ["0px (2538)", "pill/2.68e7px (78)", "8px (77)", "12px (40)", "6px (7)", "16px (3)"],
+    "letterSpacing": ["-1.3px (45)", "-0.375px (24)", "-1.4px (18)", "+2.2px (17)", "-1.9px (8)"],
+    "shadows": ["yok/transparent (11)", "0 1px 6px rgba(0,0,0,.06) (1)"],
+    "cssVarsOrnek": {
+      "--color-purple-500": "#9200ff",
+      "--color-purple-300": "#bc61ff",
+      "--color-cyan-400": "#2ff3ff",
+      "--color-pink-500": "#ff00d6",
+      "--color-green-500": "#35cd78",
+      "--color-sky-500": "#0d8ed6",
+      "--color-cobalt-400": "#5663d6",
+      "--card": "oklch(20.04% .0062 271.1)",
+      "--muted": "oklch(23.09% .006 271.15)",
+      "--border": "oklch(26.9% 0 0)",
+      "--tracking-wider": ".05em",
+      "--text-7xl": "4.5rem",
+      "--pine-error": "#f23645"
+    },
+    "not": "Dorttten tek 'trading urunu' olan site. Yogunluk dili alinir, kimlik alinmaz."
+  },
+
+  "dovetail.com": {
+    "fonts": ["Inter (3782)", "JetBrains Mono (74)", "PP Mondwest (22)"],
+    "sizes": ["20px (3148)", "16px (172)", "14px (83)", "12px (48)", "112px (26)", "24px (13)", "64px (10)", "18px (7)", "130px (6)", "65px (6)"],
+    "weights": ["400 (3268)", "600 (385)", "500 (228)"],
+    "colors": ["rgb(255,255,255) (3080)", "rgb(33,33,33) (348)", "rgb(250,250,250) (342)", "white 64% (68)", "rgb(167,167,167) (23)", "rgb(10,10,10) (11)", "white 48% (5)", "rgb(0,68,255) (4)"],
+    "bgs": ["rgb(33,33,33) (294)", "rgb(20,20,20) (18)", "white 8% (17)", "rgb(10,10,10) (16)", "rgb(255,255,255) (11)", "white 24% (4)", "rgb(29,29,29) (3)", "rgb(0,41,166) (2)"],
+    "radii": ["0px (3769)", "8px (89)", "4px (16)", "50% (6)"],
+    "letterSpacing": ["-2px (391)", "+1px (74)", "-0.25px (32)", "-0.5px (13)"],
+    "shadows": ["HIC YOK (0)"],
+    "not": "En sert negatif tracking (-2px). Golge sifir. Kaydirma animasyonu agir -- bolumler bos render ediliyor, BIZDE YAPILMAYACAK."
+  },
+
+  "slash.com": {
+    "fonts": ["Inter (1377)", "ivyPresto -- serif display (32)"],
+    "sizes": ["16px (779)", "14px (420)", "20px (46)", "18px (39)", "15px (37)", "13px (21)", "12px (15)", "64px (12)", "44px (11)", "52px (7)"],
+    "weights": ["400 (1244)", "500 (114)", "600 (34)", "300 (16)"],
+    "colors": ["rgb(255,255,255) (1128)", "rgb(145,148,161) (67)", "rgb(172,175,185) (41)", "rgb(119,122,136) (38)", "rgb(94,97,110) (21)", "rgb(199,201,209) (14)", "rgb(204,145,102) ACCENT (8)"],
+    "bgs": ["rgb(24,24,27) (8)", "rgb(28,29,34) (4)", "rgb(18,19,23) (4)", "rgb(11,12,14) (3)", "rgb(4,4,6) (3)", "rgb(255,255,255) (9)"],
+    "radii": ["0px (1179)", "2px (121)", "pill/9999px (47)", "10px (45)", "8px (8)", "12px (7)"],
+    "letterSpacing": ["-0.32px (68)", "-0.36px (40)", "-0.8px (38)", "-0.3px (37)"],
+    "not": "Serif display (ivyPresto) + Inter govde. Panel yaricapi 2px (cok keskin), dugme tam hap. Aksan bakir #cc9166. Gri ailesi SOGUK (zinc/slate)."
+  },
+
+  "v7labs.com": {
+    "fonts": ["STK Bureau Sans Book (84)", "Martina Plantijn Light -- serif italik (37)", "STK Bureau (23)"],
+    "sizes": ["12px (778)", "14px (56)", "13px (21)", "16px (20)", "48px (17)", "18px (7)", "40px (7)", "24px (6)", "20px (5)"],
+    "weights": ["400 (862)", "300 (37)", "430 (23)"],
+    "colors": ["rgb(255,255,255) (102)", "white 71% (12)", "white 60% (12)", "rgb(41,41,41) (9)", "white 65% (5)", "white 30% (4)", "rgb(0,0,238) ACCENT (263)"],
+    "bgs": ["rgb(41,41,41) (43)", "rgb(28,28,28) (12)", "white 5% (12)", "white 11% (5)", "white 10% (5)", "rgb(255,255,255) (13)"],
+    "radii": ["0px (882)", "6px (12)", "pill/160px (10)", "100% (8)", "pill/100px (4)", "pill/120px (3)"],
+    "letterSpacing": ["-0.56px (56)", "-1.44px (17)", "-0.64px (16)", "-0.72px (13)"],
+    "not": "En yogun boy olcegi (12px baskin) -- bize EN YAKIN olan. Serif italik vurgu ('Shaping the *future* of investment intelligence'). Aksan saf mavi."
+  },
+
+  "_ortak_bulgular": [
+    "Zemin #0a0a0a civari, notr siyah-gri; renkli koyu tema (lacivert/mor) YOK",
+    "Yuzey ayrimi golge ile DEGIL beyaz alfa %5-11 dolgu + %8-16 kenarlik ile",
+    "Agirlik kitligi: neredeyse her sey 400; 500/600 yalnizca vurgu; 700 yok",
+    "Uc basamakli metin hiyerarsisi: %100 / ~%64 / ~%30 -- hiyerarsi BOYUTLA degil OPAKLIKLA",
+    "Basligda negatif tracking (-0.8...-2px), kucuk etikette pozitif (+1...+2.2px)",
+    "Yaricap ikili: panel keskin (0-2px), kontrol tam hap; ara deger yalnizca medya kutusunda",
+    "Tek aksan rengi, sayfanin %1'inden azinda",
+    "Notr govde yuzu + KARAKTERLI ikinci yuz (mono ya da serif italik)",
+    "Dar boy olcegi (12-16px) + genis bosluk; ara boy yok, dogrudan 44-76px display"
+  ]
+}
