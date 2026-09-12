@@ -64,8 +64,8 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 | Faz | İş | Durum |
 |---|---|---|
 | 0 | Kuruluş — depo, iskelet, ADR'ler | ✅ bitti |
-| 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | **devam ediyor** |
-| 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | bekliyor |
+| 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | ✅ bitti |
+| 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | maket ✅ onaylandı · kod **sırada** |
 | 3 | Uygulama kabuğu ve sayfa iskeletleri | bekliyor |
 | 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | bekliyor |
 
@@ -87,6 +87,8 @@ yalnızca karşılaştırma için bakılır.
 | 7.1 | *(sıra Bölüm B bitince belirlenecek)* | bekliyor |
 
 Tam plan: [`docs/00_RAPOR_VE_YOL_HARITASI.md`](docs/00_RAPOR_VE_YOL_HARITASI.md)
+Sonraki oturumun promptu: [`docs/SONRAKI_OTURUM_PROMPTU.md`](docs/SONRAKI_OTURUM_PROMPTU.md)
+Onaylanmış maket: [`docs/design/maket_v1.html`](docs/design/maket_v1.html)
 
 ---
 

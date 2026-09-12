@@ -450,6 +450,77 @@ td .sub{color:var(--text-3); font-size:11.5px; margin-left:7px}
 .card .foot a{margin-left:auto; color:var(--accent); font-size:12.5px; text-decoration:none}
 .card .foot a:hover{text-decoration:underline}
 
+/* ---------- strateji sayfası ---------- */
+.stratHead{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:16px}
+.stratHead h2{margin:6px 0 0}
+.stratHead .rt{margin-left:auto; display:flex; gap:8px; align-items:center}
+.seg{display:flex; gap:2px; padding:2px; border-radius:var(--r-pill);
+  background:var(--surface-2); border:.8px solid var(--line); width:max-content}
+.seg button{height:26px; padding:0 14px; border:0; background:transparent; cursor:pointer;
+  border-radius:var(--r-pill); font-family:var(--f-ui); font-size:12.5px; color:var(--text-3)}
+.seg button[aria-pressed="true"]{background:var(--surface-3); color:var(--text)}
+
+.sect{border:1px solid var(--line); border-top:0; background:var(--surface); padding:18px 20px 20px}
+.sect:first-of-type{border-top:1px solid var(--line)}
+.sect > h3{
+  margin:0 0 4px; font-family:var(--f-display); font-size:15px; font-weight:500;
+  letter-spacing:-.3px; display:flex; align-items:center; gap:10px;
+}
+.sect > h3 .gate{
+  font-family:var(--f-mono); font-size:9.5px; letter-spacing:1.6px;
+  padding:2.5px 8px; border-radius:var(--r-pill);
+  background:var(--accent-soft); color:var(--accent);
+}
+.sect > .lede{margin:0 0 14px; font-size:12.5px; color:var(--text-2); max-width:76ch}
+
+.params{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:20px}
+.params h4{margin:0 0 8px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:1.8px;
+  text-transform:uppercase; color:var(--text-3); font-weight:400}
+.params dl{margin:0; font-size:12.5px}
+.params dt{font-family:var(--f-mono); font-size:12px; color:var(--text); margin-top:9px}
+.params dt:first-child{margin-top:0}
+.params dt .def{color:var(--accent); margin-left:7px}
+.params dd{margin:2px 0 0; color:var(--text-2); line-height:1.5}
+
+.src{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.srcbox{border:1px solid var(--line); border-left:2px solid var(--accent);
+  background:var(--surface-2); padding:11px 14px 13px}
+.srcbox .k{font-family:var(--f-mono); font-size:10px; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--text-3)}
+.srcbox p{margin:7px 0 0; font-size:12.5px; color:var(--text-2); line-height:1.55}
+.srcbox p b{color:var(--text); font-weight:500}
+.srcbox code{font-family:var(--f-mono); font-size:11.5px; color:var(--accent)}
+
+.gap{border:1px dashed var(--line-strong); background:transparent; border-left-width:1px}
+.gap .k{color:var(--text-3)}
+
+.measure{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:22px}
+@media (max-width:760px){ .measure{grid-template-columns:1fr} }
+.mtable{width:100%; min-width:0; border-collapse:collapse; font-size:12.5px}
+.mtable th{text-align:left; font-family:var(--f-mono); font-size:10px; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--text-3); font-weight:400; padding:0 0 7px}
+.mtable td{padding:6px 0; border-top:1px solid var(--line); color:var(--text-2)}
+.mtable td:last-child{text-align:right; color:var(--text); font-family:var(--f-mono);
+  font-variant-numeric:tabular-nums}
+
+pre.code{
+  margin:0; padding:13px 15px; overflow-x:auto;
+  background:var(--surface-2); border:1px solid var(--line);
+  font-family:var(--f-mono); font-size:11.5px; line-height:1.65; color:var(--text-2);
+}
+pre.code .kw{color:var(--fib-786)}
+pre.code .st{color:var(--up)}
+pre.code .cm{color:var(--text-3)}
+pre.code .fn{color:var(--accent)}
+
+details.faq{border-top:1px solid var(--line); padding:11px 0}
+details.faq:first-of-type{border-top:0}
+details.faq summary{cursor:pointer; font-size:13px; list-style:none; color:var(--text)}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::before{content:'—'; color:var(--accent); margin-right:9px; font-family:var(--f-mono)}
+details.faq:not([open]) summary::before{content:'+'}
+details.faq p{margin:8px 0 0 22px; font-size:12.5px; color:var(--text-2); max-width:78ch; line-height:1.55}
+
 /* ---------- bileşen vitrini ---------- */
 .specgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:1px;
   background:var(--line); border:1px solid var(--line); border-radius:var(--r-panel); overflow:hidden}
@@ -508,7 +579,7 @@ td .sub{color:var(--text-3); font-size:11.5px; margin-left:7px}
     <a href="#tarama">Tarama</a>
     <a href="#kutuphane">Stratejiler</a>
     <a href="#grafik">Grafik</a>
-    <a href="#bilesenler">Yöntem</a>
+    <a href="#strateji">Yöntem</a>
   </nav>
   <span class="spacer" style="flex:1"></span>
   <div class="themeseg" role="group" aria-label="Tema"></div>
@@ -602,6 +673,7 @@ td .sub{color:var(--text-3); font-size:11.5px; margin-left:7px}
       <a href="#tarama" aria-current="page"><span class="dot"></span>Tarama<span class="cnt">47</span></a>
       <a href="#grafik"><span class="dot"></span>Grafik</a>
       <a href="#kutuphane"><span class="dot"></span>Strateji Kütüphanesi<span class="cnt">9</span></a>
+      <a href="#strateji"><span class="dot"></span>Strateji sayfası</a>
       <a href="#bilesenler"><span class="dot"></span>Tasarım Sistemi</a>
     </nav>
 
@@ -767,6 +839,191 @@ td .sub{color:var(--text-3); font-size:11.5px; margin-left:7px}
       <div class="cards" id="cards"></div>
     </section>
 
+    <!-- ══════════════ STRATEJİ SAYFASI ══════════════ -->
+    <section class="board" id="strateji">
+      <header>
+        <span class="eyebrow">Yüzey · Strateji sayfası</span>
+        <h2>Bir stratejinin tam künyesi</h2>
+        <p>Kütüphanedeki karta tıklayınca buraya gelinir. İskeleti LuxAlgo'nun gösterge
+           sayfasından alındı; <b>Kaynak</b> ve <b>Ölçüm</b> bölümleri bizim eklememiz —
+           onlar 874 gösterge yayınlıyor ve hiçbirinin ileriye dönük getirisini göstermiyor.</p>
+      </header>
+
+      <div class="stratHead">
+        <div>
+          <span class="eyebrow">Yapı paketi</span>
+          <h2 style="font-size:23px">Altın Bölge</h2>
+          <p class="mut" style="margin:6px 0 0;font-size:13px;max-width:64ch">
+            Baskın salınımın 0.618–0.786 düzeltme bandı. Fiyat bölgeye döner ve
+            <b class="dim">tutamazsa</b>, salınımın başlangıç seviyesinin altı hedeflenir.</p>
+        </div>
+        <div class="rt">
+          <span class="pill">4S · 1G</span>
+          <span class="pill">648 sembol</span>
+          <span class="pill">kanıtlanmadı</span>
+        </div>
+      </div>
+
+      <div class="seg" style="margin-bottom:12px" role="group" aria-label="Görünüm">
+        <button aria-pressed="true">Grafik</button>
+        <button aria-pressed="false">Python kaynağı</button>
+      </div>
+
+      <div class="chartframe" style="margin-bottom:0">
+        <div class="chartbar">
+          <span class="sym">THYAO</span><span class="dim" style="font-size:12px">1G</span>
+          <span class="pill acc">altın bölge</span><span class="pill down">SAT</span>
+          <span style="margin-left:auto"></span>
+          <span class="eyebrow" style="letter-spacing:1.4px">örnek veri</span>
+        </div>
+        <svg id="stratchart" viewBox="0 0 1060 210" role="img"
+             aria-label="Altın Bölge stratejisinin THYAO günlük grafiğindeki örneği"></svg>
+      </div>
+
+      <!-- ── PARAMETRELER ── -->
+      <div class="sect">
+        <h3>Parametreler <span class="gate">K1 · SÖZLEŞME</span></h3>
+        <p class="lede">Hepsi <code class="num" style="font-size:12px">frozen dataclass</code>
+           alanı; sonuç kaydı bir <code class="num" style="font-size:12px">params_hash</code>
+           taşır. Aynı veri + aynı parametre = bit bit aynı sonuç.</p>
+        <div class="params">
+          <div>
+            <h4>Salınım tespiti</h4>
+            <dl>
+              <dt>pivot_sol <span class="def">5</span></dt>
+              <dd>Bir tepenin pivot sayılması için solunda kaç barın daha alçak kapanması gerektiği.</dd>
+              <dt>pivot_sag <span class="def">5</span></dt>
+              <dd>Aynısı sağ taraf için. Pivot ancak bu kadar bar geçince <b>onaylanır</b> — sinyal o barın tarihini taşır, pivotun kendi barını değil.</dd>
+              <dt>min_salinim_atr <span class="def">2.0</span></dt>
+              <dd>Bir salınımın dikkate alınması için kaç ATR uzunluğunda olması gerektiği. Gürültüyü eler.</dd>
+            </dl>
+          </div>
+          <div>
+            <h4>Bölge</h4>
+            <dl>
+              <dt>bolge_alt <span class="def">0.618</span></dt>
+              <dd>Altın bölgenin sığ ucu. Fibonacci düzeltme oranı.</dd>
+              <dt>bolge_ust <span class="def">0.786</span></dt>
+              <dd>Derin ucu. Buranın altına kapanış, düzeltmenin başarısız sayıldığı eşiktir.</dd>
+              <dt>baskinlik <span class="def">"en_buyuk"</span></dt>
+              <dd>Hangi salınımın bölgeyi tanımladığı. <b>En yeni değil en baskın</b> — 150 sembolde ölçüldü, aradaki fark 27 puan.</dd>
+            </dl>
+          </div>
+          <div>
+            <h4>Onay</h4>
+            <dl>
+              <dt>sadece_kapanis <span class="def">true</span></dt>
+              <dd>Fitil değmesi sinyal saymaz; seviyenin <b>kapanışta</b> kırılması gerekir. Açık bar asla sinyal üretmez.</dd>
+              <dt>max_bar <span class="def">180</span></dt>
+              <dd>Bir salınımın geçerli kalacağı azami süre. Sınırsız bırakılırsa yıllarca süren sahte formasyonlar doğuyor — bu ölçülmüş bir hatadır.</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KAYNAK ── -->
+      <div class="sect">
+        <h3>Kaynak <span class="gate">K0 · KAYNAK</span></h3>
+        <p class="lede">Her eşiğin nereden geldiği burada yazar. <b>Ezberden sayı yazmak yasak</b> —
+           kitapta yoksa, ölçümle türetildiği belirtilir.</p>
+        <div class="src">
+          <div class="srcbox">
+            <div class="k">Birincil kaynak</div>
+            <p><b>Larry Pesavento</b> — bilgi bankası çıkarımı:
+               <code>bilgi-bankasi/teknik/10_pesavento_twys.md</code><br>
+               <span class="dim">0.618 ve 0.786 oranlarının alıntısı ve madde kodları K0 kapısında
+               bu dosyadan girilecek.</span></p>
+          </div>
+          <div class="srcbox">
+            <div class="k">Ölçümle türetilen</div>
+            <p><b>baskinlik = "en_buyuk"</b> — kitaptan değil, <b>backtest'ten</b> geldi.
+               150 BIST sembolü, 4159 salınım: en baskın salınım <b>%86.7</b> başarı,
+               en yeni salınım <b>%59.3</b>. Salınım büyüklüğü ile başarı arasında
+               Spearman ρ=0.24, p&lt;0.0001, monoton.</p>
+          </div>
+          <div class="srcbox gap">
+            <div class="k">Açık — kapatılacak</div>
+            <p><code>min_salinim_atr = 2.0</code> değerinin kaynağı henüz yok.
+               K0 kapısı kapanmadan bu alan boş bırakılamaz: ya kitaptan alıntılanacak
+               ya da K3'te tam evren kalibrasyonuyla türetilecek.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ÖLÇÜM ── -->
+      <div class="sect">
+        <h3>Ölçüm <span class="gate">K3 · K4</span></h3>
+        <p class="lede">Bu bölüm rakiplerde yok. Stratejinin işe yarayıp yaramadığı burada
+           yazar — <b>ne çıkarsa o.</b></p>
+        <div class="measure">
+          <div>
+            <table class="mtable">
+              <thead><tr><th colspan="2">K4 · Sembol-kümelenmiş OOS testi</th></tr></thead>
+              <tbody>
+                <tr><td>Evren</td><td>586 sembol</td></tr>
+                <tr><td>Bağımsız gözlem (sembol)</td><td>553</td></tr>
+                <tr><td>Pencere</td><td>ilk %70 IS / son %30 OOS</td></tr>
+                <tr><td>Ufuk</td><td>20 bar</td></tr>
+                <tr><td>Adil baza karşı fark</td><td>+%0.42</td></tr>
+                <tr><td>Permütasyon p değeri</td><td>0.13</td></tr>
+                <tr><td>BH-FDR (q=0.05)</td><td style="color:var(--down)">geçemedi</td></tr>
+                <tr><td>K3 · tam evrende aday</td><td>623 / 648 sembol</td></tr>
+              </tbody>
+            </table>
+            <p class="dim" style="font-size:12px;margin:12px 0 0">
+              Bu rakamlar eski depodaki tam evren koşusundan. <b class="mut">Yeni kodla
+              K4 kapısında baştan ölçülecek</b> — strateji sıfırdan yazıldığı için eski
+              ölçüm otomatik devretmez.
+            </p>
+          </div>
+          <div>
+            <span class="eyebrow">20 bar ileri getiri · ortalama</span>
+            <svg viewBox="0 0 340 132" role="img" style="width:100%;height:auto;margin-top:10px"
+                 aria-label="Gösterge sinyalleri ortalama yüzde 1.18, yön-ağırlıklı adil baz yüzde 0.76, aradaki fark yüzde 0.42 ve istatistiksel olarak anlamlı değil">
+              <line x1="8" y1="104" x2="332" y2="104" stroke="var(--line-strong)" stroke-width="1"/>
+              <rect x="42" y="34" width="76" height="70" fill="var(--accent)" opacity=".8"/>
+              <text x="80" y="26" fill="var(--accent)" font-family="var(--f-mono)" font-size="13"
+                    text-anchor="middle">+%1.18</text>
+              <text x="80" y="120" fill="var(--text-2)" font-family="var(--f-mono)" font-size="10"
+                    text-anchor="middle">sinyaller</text>
+              <rect x="164" y="59" width="76" height="45" fill="var(--text-3)" opacity=".6"/>
+              <text x="202" y="51" fill="var(--text-2)" font-family="var(--f-mono)" font-size="13"
+                    text-anchor="middle">+%0.76</text>
+              <text x="202" y="120" fill="var(--text-2)" font-family="var(--f-mono)" font-size="10"
+                    text-anchor="middle">adil baz</text>
+              <line x1="266" y1="34" x2="266" y2="59" stroke="var(--text-3)" stroke-width="1"/>
+              <line x1="262" y1="34" x2="270" y2="34" stroke="var(--text-3)" stroke-width="1"/>
+              <line x1="262" y1="59" x2="270" y2="59" stroke="var(--text-3)" stroke-width="1"/>
+              <text x="278" y="44" fill="var(--text-2)" font-family="var(--f-mono)" font-size="11">+%0.42</text>
+              <text x="278" y="58" fill="var(--text-3)" font-family="var(--f-mono)" font-size="9.5">p = 0.13</text>
+            </svg>
+            <p class="dim" style="font-size:12px;margin:10px 0 0">
+              Adil baz, aynı sembollerde rastgele barların sinyallerin kendi al/sat oranıyla
+              ağırlıklandırılmış hâli — düz "piyasa yükseldi" etkisi ayıklanmış olur.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SSS ── -->
+      <div class="sect">
+        <h3>Sık sorulanlar</h3>
+        <details class="faq" open><summary>Sinyal sonradan kaybolur mu?</summary>
+          <p>Hayır. Sinyal, pivotun oluştuğu barın değil <b>onaylandığı barın</b> tarihini taşır
+             ve geçmişe dönük hiçbir zaman değişmez. Her gösterge, tam seriyle farklı
+             noktalardan kesilmiş serilerin aynı sonucu ürettiği walk-forward testinden
+             geçmeden yayına alınamaz.</p></details>
+        <details class="faq" open><summary>"Kanıtlanmadı" rozeti ne demek?</summary>
+          <p>Stratejinin ileriye dönük getirisi ölçüldü ve çoklu-test düzeltmesinden sonra
+             sıfırdan ayırt edilebilir bir kenar <b>bulunamadı</b>. "Zarar ettiriyor" demek değil;
+             "işe yaradığına dair elimizde kanıt yok" demek. Gizlemek yerine yazıyoruz.</p></details>
+        <details class="faq" open><summary>Neden en yeni salınım değil en baskın salınım?</summary>
+          <p>Ölçtük. 150 sembolde 4159 salınımın nihai sonucu karşılaştırıldı: en baskın
+             salınımın başarı oranı %86.7, en yeninin %59.3. 27 puanlık bu fark tesadüfle
+             açıklanamaz. Bu bir tercih değil, bir bulgu.</p></details>
+      </div>
+    </section>
+
     <!-- ══════════════ BİLEŞENLER ══════════════ -->
     <section class="board" id="bilesenler" style="border-bottom:0">
       <header>
@@ -901,7 +1158,7 @@ function setAccent(a){
 }
 document.querySelectorAll('[data-acc]').forEach(b =>
   b.addEventListener('click', () => setAccent(b.dataset.acc)));
-function redraw(){ drawHero(); drawChart(); drawThumbs(); }
+function redraw(){ drawCompact('herochart'); drawCompact('stratchart'); drawChart(); drawThumbs(); }
 
 /* ── tema anahtarı: sistem / açık / koyu ──
    Ürünün varsayılanı KOYU (kullanıcı kararı) — sistem yine de seçilebilir. */
@@ -948,7 +1205,7 @@ function tickCountdown(){
 tickCountdown(); setInterval(tickCountdown, 1000);
 
 /* aria-pressed taşıyan çipler tıklanabilir olsun (grup içinde tek seçim) */
-document.querySelectorAll('.filters, .tfgroup').forEach(group => {
+document.querySelectorAll('.filters, .tfgroup, .seg').forEach(group => {
   group.addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn || !btn.hasAttribute('aria-pressed')) return;
@@ -1305,18 +1562,19 @@ function drawThumbs(){
       <div class="foot">
         <span class="pill acc">${c.paket}</span>
         <span class="pill ${cls}">${c.verdict}</span>
-        <a href="#grafik">Grafiği aç →</a>
+        <a href="#strateji">Stratejiyi aç →</a>
       </div>
     </article>`;
   }).join('');
 }
 
 /* ═══════════ giriş ekranı önizleme grafiği ═══════════ */
-function drawHero(){
-  const svg = document.getElementById('herochart');
+function drawCompact(id){
+  const svg = document.getElementById(id);
   if (!svg) return;
   svg.innerHTML = '';
-  const W = 1060, H = 230, P = {l:10, r:150, t:16, b:22};
+  const [,,W,H] = svg.getAttribute('viewBox').split(/\s+/).map(Number);
+  const P = {l:10, r:150, t:16, b:22};
   const PH = H - P.t - P.b, right = W - P.r;
   const bw = (W - P.l - P.r) / N;
   const x = i => P.l + (i + .5) * bw;
