@@ -5,8 +5,8 @@ Motor (packages/teknik) tipli sonuç üretir, komposer onu ChartSpec'e çevirir,
 çiziciler (web / PNG) ChartSpec'i okur. Katmanlar tek yöne akar.
 """
 
-from .spec import SURUM, ChartSpec
 from .roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, SeviyeRol, Yon
+from .spec import SURUM, ChartSpec
 
 __all__ = [
     "SURUM",

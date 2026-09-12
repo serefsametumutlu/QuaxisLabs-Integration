@@ -19,9 +19,9 @@ import sys
 KOK = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from quaxis_chart.komposer.altin_bolge import bestele  # noqa: E402
-from quaxis_chart.ornek.thyao_altin_bolge import sonuc  # noqa: E402
-from quaxis_chart.sema import sema  # noqa: E402
+from quaxis.chart.komposer.altin_bolge import bestele  # noqa: E402
+from quaxis.chart.ornek.thyao_altin_bolge import sonuc  # noqa: E402
+from quaxis.chart.sema import sema  # noqa: E402
 
 
 def main() -> int:

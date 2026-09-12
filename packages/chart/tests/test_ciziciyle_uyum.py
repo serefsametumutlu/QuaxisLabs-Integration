@@ -15,8 +15,7 @@ import pathlib
 import re
 
 import pytest
-
-from quaxis_chart.roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, SeviyeRol, Yon
+from quaxis.chart.roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, SeviyeRol, Yon
 
 WEB = pathlib.Path(__file__).resolve().parents[3] / "apps" / "web"
 TIPLER = WEB / "lib" / "chartspec.ts"
@@ -82,7 +81,7 @@ def test_yon_degerleri_ayni(tipler):
 
 
 def test_surum_ayni(tipler):
-    from quaxis_chart.spec import SURUM
+    from quaxis.chart.spec import SURUM
 
     m = re.search(r'CHARTSPEC_SURUM = "([\d.]+)"', tipler)
     assert m and m.group(1) == SURUM

@@ -8,9 +8,8 @@ geçmezse sözleşme delinmiş demektir.
 from __future__ import annotations
 
 import pytest
-
-from quaxis_chart.roller import AlanRol, IsaretRol, SeviyeRol, Yon, fib_rol
-from quaxis_chart.spec import (
+from quaxis.chart.roller import AlanRol, IsaretRol, SeviyeRol, Yon, fib_rol
+from quaxis.chart.spec import (
     Alan,
     ChartSpec,
     Cizgi,

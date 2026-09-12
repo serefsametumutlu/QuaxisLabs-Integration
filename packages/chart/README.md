@@ -49,7 +49,7 @@ Sözleşme ancak dil sınırını geçince sözleşmedir.
 ## Dizin
 
 ```
-quaxis_chart/
+quaxis.chart/
   roller.py          kapalı rol kümesi (SeviyeRol, AlanRol, CizgiRol, …)
   spec.py            ChartSpec v1 dataclass'ları + doğrulama + JSON
   sema.py            JSON şeması, enum'lardan türetilir

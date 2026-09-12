@@ -6,10 +6,9 @@ import copy
 
 import jsonschema
 import pytest
-
-from quaxis_chart.komposer.altin_bolge import bestele
-from quaxis_chart.ornek.thyao_altin_bolge import sonuc
-from quaxis_chart.sema import sema
+from quaxis.chart.komposer.altin_bolge import bestele
+from quaxis.chart.ornek.thyao_altin_bolge import sonuc
+from quaxis.chart.sema import sema
 
 
 @pytest.fixture(scope="module")

@@ -15,7 +15,7 @@ Renk yok, piksel yok: yalnızca ROL ve DEĞER. Nasıl görüneceği çizicinin i
 
 from __future__ import annotations
 
-from ..roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, SeviyeRol, Yon, fib_rol
+from ..roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, Yon, fib_rol
 from ..spec import (
     Alan,
     Bant,
@@ -161,7 +161,10 @@ def bestele(sonuc: FibDuzeltmeSonucu, *, ornek_mi: bool = False) -> ChartSpec:
         MumSerisi(
             id="mum",
             panel="fiyat",
-            veri=[Mum(t=b.t, acilis=b.acilis, yuksek=b.yuksek, dusuk=b.dusuk, kapanis=b.kapanis) for b in barlar],
+            veri=[
+                Mum(t=b.t, acilis=b.acilis, yuksek=b.yuksek, dusuk=b.dusuk, kapanis=b.kapanis)
+                for b in barlar
+            ],
         ),
         HacimSerisi(
             id="hacim",

@@ -21,7 +21,7 @@ apps/
 services/
   api/          FastAPI — teknik + temel için TEK kapı
 packages/
-  teknik/       Tarama motoru: core, data, features, indicators, scanner, testing
+  teknik/       Tarama motoru: core, data, scanner, testing (gösterge YOK — Bölüm C)
   temel/        (Faz 10) Bilanço / mercek motoru
   chart/        ChartSpec v1 sözleşmesi + strateji başına komposer (Python)
   ortak/        Paylaşılan tipler, semboller, takvim, Türkçe etiketler
@@ -73,8 +73,8 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 
 | Faz | İş | Durum |
 |---|---|---|
-| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | **sırada** |
-| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | bekliyor |
+| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | ✅ bitti |
+| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | **sırada** |
 
 ### Bölüm C — Stratejiler (birer birer, **sayı sınırı yok**)
 
@@ -144,6 +144,27 @@ Next.js 16 + React 19 + TypeScript + Tailwind 4. Token sistemi
 [`/tasarim`](apps/web/app/(uygulama)/tasarim/page.tsx) vitrininde üç temada yan yana
 gösterilir. Görsel kabul kaydı:
 [`docs/design/ui/README.md`](docs/design/ui/README.md).
+
+## Python tarafı
+
+```bash
+# depo kökünden — kurulum gerekmez
+python -m pytest              # 140 test (ağ testleri hariç)
+python -m pytest -m network   # yalnız ağa çıkanlar
+python -m ruff check packages/
+```
+
+`packages/*/quaxis/<ad>` altındaki modüller **PEP 420 isim alanı paketi**
+olarak birleşir; kökteki `conftest.py` paketleri `sys.path`'e koyar.
+
+| Paket | Ne | Belge |
+|---|---|---|
+| `quaxis.teknik` | Tarama motoru altyapısı (core · data · scanner · testing) | [`packages/teknik/README.md`](packages/teknik/README.md) |
+| `quaxis.chart` | ChartSpec v1 sözleşmesi + strateji komposerleri | [`packages/chart/README.md`](packages/chart/README.md) |
+
+**Gösterge katmanı henüz yok.** ADR-002 gereği sıfırdan yazılacak; motor
+bunu bir katalog ARAYÜZÜ üzerinden bekliyor ve tek bir gösterge olmadan da
+uçtan uca test ediliyor.
 
 Tam plan: [`docs/00_RAPOR_VE_YOL_HARITASI.md`](docs/00_RAPOR_VE_YOL_HARITASI.md)
 Sonraki oturumun promptu: [`docs/SONRAKI_OTURUM_PROMPTU.md`](docs/SONRAKI_OTURUM_PROMPTU.md)

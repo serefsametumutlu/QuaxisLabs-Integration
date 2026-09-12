@@ -25,8 +25,9 @@ from __future__ import annotations
 
 import dataclasses
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Literal, Sequence
+from typing import Any, Literal
 
 from .roller import AlanRol, CizgiRol, EtiketRol, IsaretRol, RozetRol, SeviyeRol, Yon
 
@@ -52,7 +53,9 @@ class Mum:
     kapanis: float
 
     def dogrula(self) -> None:
-        if not (self.dusuk <= min(self.acilis, self.kapanis) and self.yuksek >= max(self.acilis, self.kapanis)):
+        govde_alt = min(self.acilis, self.kapanis)
+        govde_ust = max(self.acilis, self.kapanis)
+        if not (self.dusuk <= govde_alt and self.yuksek >= govde_ust):
             raise ValueError(
                 f"Tutarsız mum (t={self.t}): yüksek {self.yuksek} / düşük {self.dusuk} "
                 f"açılış {self.acilis} / kapanış {self.kapanis} aralığını kapsamıyor."
@@ -223,7 +226,9 @@ class ChartSpec:
         """Sözleşmeyi zorlar. Hatalıysa `ValueError`. Kendini döner ki
         `spec = ChartSpec(...).dogrula()` yazılabilsin."""
         if self.surum != SURUM:
-            raise ValueError(f"Desteklenmeyen ChartSpec sürümü: {self.surum!r} (beklenen {SURUM!r}).")
+            raise ValueError(
+                f"Desteklenmeyen ChartSpec sürümü: {self.surum!r} (beklenen {SURUM!r})."
+            )
 
         if not self.paneller:
             raise ValueError("En az bir panel gerekli.")
@@ -325,11 +330,15 @@ def _panel_dogrula(p: Panel, seriler: Sequence[Seri]) -> None:
 
 
 def _seri_alt(s: Seri) -> float:
-    return min(m.dusuk for m in s.veri) if isinstance(s, MumSerisi) else min(b.hacim for b in s.veri)
+    if isinstance(s, MumSerisi):
+        return min(m.dusuk for m in s.veri)
+    return min(b.hacim for b in s.veri)
 
 
 def _seri_ust(s: Seri) -> float:
-    return max(m.yuksek for m in s.veri) if isinstance(s, MumSerisi) else max(b.hacim for b in s.veri)
+    if isinstance(s, MumSerisi):
+        return max(m.yuksek for m in s.veri)
+    return max(b.hacim for b in s.veri)
 
 
 _ROL_TIPLERI = (SeviyeRol, AlanRol, CizgiRol, IsaretRol, EtiketRol, RozetRol, Yon)

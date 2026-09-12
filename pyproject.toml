@@ -1,0 +1,33 @@
+# QuaxisLabs — Python tarafı için ortak araç yapılandırması.
+#
+# Depoda tek bir dağıtılabilir paket yok: `packages/*/quaxis/<ad>` altındaki
+# modüller PEP 420 isim alanı paketi olarak birleşir (bkz. kökteki
+# `conftest.py`). Kurulum gerekmez; testler depo kökünden koşar.
+
+[tool.pytest.ini_options]
+testpaths = ["packages/chart/tests", "packages/teknik/tests"]
+# Ağa çıkan testler varsayılan koşuda ATLANIR; açıkça istenirse koşar:
+#   python -m pytest -m network
+addopts = "-q -m 'not network'"
+markers = [
+    "network: ağ erişimi ister; varsayılan koşuda atlanır",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:pkg_resources",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["apps/web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# UP042: taşınan motor kodu `class X(str, Enum)` deyimini tutarlı kullanıyor.
+# `StrEnum`'a çevirmek davranış değiştiren (── `str()` çıktısı ──) ayrı bir
+# iştir; göç fazında yapılmaz, kendi testleriyle ayrıca yapılır.
+ignore = ["UP042"]
+
+[tool.ruff.lint.per-file-ignores]
+# Testlerde uzun açıklayıcı assert mesajları ve fikstür tekrarları normaldir.
+"**/tests/**" = ["E501"]

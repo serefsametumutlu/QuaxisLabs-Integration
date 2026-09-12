@@ -5,10 +5,9 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
-
-from quaxis_chart.komposer.altin_bolge import bestele
-from quaxis_chart.ornek.thyao_altin_bolge import fib, sonuc
-from quaxis_chart.roller import AlanRol, RozetRol, SeviyeRol
+from quaxis.chart.komposer.altin_bolge import bestele
+from quaxis.chart.ornek.thyao_altin_bolge import fib, sonuc
+from quaxis.chart.roller import AlanRol, RozetRol, SeviyeRol
 
 
 @pytest.fixture(scope="module")

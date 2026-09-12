@@ -1,0 +1,505 @@
+"""SQLite sonuç deposu (`outputs/results.db`) + tam IndicatorResult JSON
+klasörü (`outputs/results/{run_id}/`).
+
+ŞEMA DONUK — Bilanço Radar (kardeş proje) ile `symbol` üzerinden join
+edilecek; alan adlarını DEĞİŞTİRME (yeni alan eklemek serbest, mevcut
+alanı yeniden adlandırmak/kaldırmak DEĞİL).
+
+`signals` tablosunun `pattern_id` alanı: her indikatör kendi payload'ında
+farklı bir "hangi aday/olay" anahtarı taşır (harmonikler `pattern_id`,
+SwingFibABCD `triple_id`, diğerleri yalnızca `event`) — bkz. `_pattern_key()`
+bunları TEK bir alana normalize eder. Bu, PK'nin (run_id, symbol, timeframe,
+indicator, pattern_id, state, bar_time) parçası olduğu için ÖNEMLİ: aynı
+anahtar ikinci kez yazılırsa (aynı çalıştırmada teorik bir çakışma)
+INSERT OR REPLACE ile üzerine yazılır — sessizce kaybolma YOK, ama gerçek
+bir çakışma olursa en son yazan kazanır (nadir, dokümante edilmiş sınırlama).
+"""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+from quaxis.teknik.core.types import IndicatorResult, Signal
+
+DEFAULT_DB_PATH = Path("outputs") / "results.db"
+DEFAULT_JSON_ROOT = Path("outputs") / "results"
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    market TEXT NOT NULL,
+    timeframes TEXT NOT NULL,
+    universe_size INTEGER NOT NULL,
+    indicators_json TEXT NOT NULL,
+    git_sha TEXT,
+    status TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS signals (
+    run_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    market TEXT NOT NULL,
+    timeframe TEXT NOT NULL,
+    indicator TEXT NOT NULL,
+    params_hash TEXT NOT NULL,
+    bar_time TEXT NOT NULL,
+    detected_at TEXT NOT NULL,
+    direction TEXT NOT NULL,
+    state TEXT NOT NULL,
+    score REAL NOT NULL,
+    pattern_id TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    bars_ago INTEGER,
+    PRIMARY KEY (run_id, symbol, timeframe, indicator, pattern_id, state, bar_time)
+);
+
+CREATE TABLE IF NOT EXISTS states (
+    run_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    timeframe TEXT NOT NULL,
+    indicator TEXT NOT NULL,
+    last_state_json TEXT NOT NULL,
+    PRIMARY KEY (run_id, symbol, timeframe, indicator)
+);
+
+CREATE TABLE IF NOT EXISTS data_quality (
+    run_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    timeframe TEXT NOT NULL,
+    status TEXT NOT NULL,
+    report_json TEXT NOT NULL,
+    PRIMARY KEY (run_id, symbol, timeframe)
+);
+"""
+
+
+@dataclass(frozen=True)
+class RunRecord:
+    run_id: str
+    started_at: str
+    finished_at: str | None
+    market: str
+    timeframes: list[str]
+    universe_size: int
+    indicator_names: list[str]
+    git_sha: str | None
+    status: str
+
+
+@dataclass(frozen=True)
+class SymbolIndicatorRun:
+    """engine.run()'dan persist()'e verilen tek bir (symbol veya y/x çifti,
+    timeframe, indikatör) sonucu — bkz. scanner/engine.py::IndicatorRunResult
+    (bu, o dataclass'ın SQLite'a yazılabilir izdüşümüdür)."""
+
+    symbol: str
+    market: str
+    timeframe: str
+    indicator: str
+    params_hash: str
+    result: IndicatorResult | None
+    error: str | None
+
+
+@dataclass(frozen=True)
+class DataQualityRecord:
+    symbol: str
+    timeframe: str
+    status: str
+    report: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class DiffReport:
+    new_signals: list[dict] = field(default_factory=list)
+    transitions: list[dict] = field(default_factory=list)
+    missing_signals: list[dict] = field(default_factory=list)
+    # chain_key (symbol, tf, indicator, pattern_id) bazinda hesaplanir --
+    # `missing_signals` (state'i de kimligin parcasi sayan kaba `key()`
+    # eslesmesi) DEGIL. Meşru bir durum geçişi (forming->confirmed, AYNI
+    # bar_time'da) `missing_signals`'i doldurur ama repaint DEGILDIR; bkz.
+    # `ResultsStore.diff()`.
+    repaint_alarm: bool = False
+
+    @property
+    def has_repaint_alarm(self) -> bool:
+        return self.repaint_alarm
+
+
+def _pattern_key(signal: Signal) -> str:
+    payload = signal.payload
+    return str(
+        payload.get("pattern_id")
+        or payload.get("triple_id")
+        or payload.get("event")
+        or "signal"
+    )
+
+
+class ResultsStore:
+    def __init__(
+        self, db_path: Path = DEFAULT_DB_PATH, json_root: Path = DEFAULT_JSON_ROOT
+    ) -> None:
+        self.db_path = db_path
+        self.json_root = json_root
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._conn = sqlite3.connect(self.db_path)
+        self._conn.execute("PRAGMA foreign_keys = ON")
+        self._conn.executescript(_SCHEMA)
+        self._migrate_bars_ago_column()
+        self._conn.commit()
+
+    def _migrate_bars_ago_column(self) -> None:
+        """`_SCHEMA`'daki `CREATE TABLE IF NOT EXISTS` var olan bir `signals`
+        tablosuna yeni `bars_ago` kolonunu EKLEMEZ (SQLite semantiği) -- Faz
+        0 öncesi oluşturulmuş `outputs/results.db` dosyaları için tek seferlik
+        bir `ALTER TABLE` migrasyonu gerekiyor. Şema DONUK sözleşmesi bu tür
+        bir alan EKLEMEYE izin veriyor (kaldırma/yeniden adlandırma değil)."""
+        cols = {row[1] for row in self._conn.execute("PRAGMA table_info(signals)")}
+        if "bars_ago" not in cols:
+            self._conn.execute("ALTER TABLE signals ADD COLUMN bars_ago INTEGER")
+
+    def close(self) -> None:
+        self._conn.close()
+
+    def __enter__(self) -> ResultsStore:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
+    # -- yazma -----------------------------------------------------------
+
+    def start_run(self, run: RunRecord) -> None:
+        self._conn.execute(
+            "INSERT OR REPLACE INTO runs "
+            "(run_id, started_at, finished_at, market, timeframes, universe_size, "
+            " indicators_json, git_sha, status) VALUES (?,?,?,?,?,?,?,?,?)",
+            (
+                run.run_id, run.started_at, run.finished_at, run.market,
+                json.dumps(run.timeframes), run.universe_size,
+                json.dumps(run.indicator_names), run.git_sha, run.status,
+            ),
+        )
+        self._conn.commit()
+
+    def finish_run(self, run_id: str, finished_at: str, status: str) -> None:
+        self._conn.execute(
+            "UPDATE runs SET finished_at = ?, status = ? WHERE run_id = ?",
+            (finished_at, status, run_id),
+        )
+        self._conn.commit()
+
+    def persist(self, run_id: str, results: list[SymbolIndicatorRun]) -> None:
+        for item in results:
+            if item.error is not None:
+                self._conn.execute(
+                    "INSERT OR REPLACE INTO signals "
+                    "(run_id, symbol, market, timeframe, indicator, params_hash, bar_time, "
+                    " detected_at, direction, state, score, pattern_id, payload_json, bars_ago) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        run_id, item.symbol, item.market, item.timeframe, item.indicator,
+                        item.params_hash, "", "", "neutral", "error", 0.0, "error",
+                        json.dumps({"error": item.error}, ensure_ascii=False), None,
+                    ),
+                )
+                continue
+
+            assert item.result is not None
+            for signal in item.result.signals:
+                bars_ago = signal.payload.get("bars_ago")
+                self._conn.execute(
+                    "INSERT OR REPLACE INTO signals "
+                    "(run_id, symbol, market, timeframe, indicator, params_hash, bar_time, "
+                    " detected_at, direction, state, score, pattern_id, payload_json, bars_ago) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        run_id, item.symbol, item.market, item.timeframe, item.indicator,
+                        item.params_hash, signal.bar_time.isoformat(),
+                        signal.detected_at.isoformat(),
+                        signal.direction, signal.state, signal.score, _pattern_key(signal),
+                        json.dumps(signal.payload, ensure_ascii=False, default=str),
+                        int(bars_ago) if bars_ago is not None else None,
+                    ),
+                )
+            self._conn.execute(
+                "INSERT OR REPLACE INTO states "
+                "(run_id, symbol, timeframe, indicator, last_state_json) VALUES (?,?,?,?,?)",
+                (
+                    run_id, item.symbol, item.timeframe, item.indicator,
+                    json.dumps(item.result.last_state, ensure_ascii=False, default=str),
+                ),
+            )
+            self._write_json(run_id, item)
+        self._conn.commit()
+
+    def persist_data_quality(self, run_id: str, records: list[DataQualityRecord]) -> None:
+        for rec in records:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO data_quality "
+                "(run_id, symbol, timeframe, status, report_json) VALUES (?,?,?,?,?)",
+                (
+                    run_id, rec.symbol, rec.timeframe, rec.status,
+                    json.dumps(rec.report, ensure_ascii=False),
+                ),
+            )
+        self._conn.commit()
+
+    def _write_json(self, run_id: str, item: SymbolIndicatorRun) -> None:
+        assert item.result is not None
+        out_dir = self.json_root / run_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        safe_symbol = item.symbol.replace("/", "-")
+        out_path = out_dir / f"{safe_symbol}_{item.timeframe}_{item.indicator}.json"
+        out_path.write_text(item.result.to_json(), encoding="utf-8")
+
+    # -- okuma -------------------------------------------------------------
+
+    def read_result(
+        self, run_id: str, symbol: str, timeframe: str, indicator: str
+    ) -> IndicatorResult | None:
+        """`_write_json`'ın YAZDIĞI tam `IndicatorResult`'ı geri okur (Faz 8E
+        `confluence.py`'nin ihtiyaç duyduğu Level/Box/Line geometrisi
+        `signals` tablosunda YOK — yalnızca tam JSON dosyasında var). Dosya
+        yoksa (o run'da bu indikatör bu sembolde HATA vermiş veya hiç
+        koşulmamış) `None` döner, istisna fırlatmaz."""
+        safe_symbol = symbol.replace("/", "-")
+        path = self.json_root / run_id / f"{safe_symbol}_{timeframe}_{indicator}.json"
+        if not path.exists():
+            return None
+        return IndicatorResult.from_json(path.read_text(encoding="utf-8"))
+
+    def list_symbol_indicators(
+        self, run_id: str, timeframe: str | None = None
+    ) -> list[tuple[str, str, str]]:
+        """O run'da BAŞARIYLA sonuç üretmiş (hatasız) (symbol, timeframe,
+        indicator) üçlülerini döner — `states` tablosu yalnızca `persist()`'in
+        `item.result is not None` dalında yazılır (bkz. `persist()`), bu
+        yüzden hatalı koşular burada hiç görünmez."""
+        if timeframe is not None:
+            cur = self._conn.execute(
+                "SELECT DISTINCT symbol, timeframe, indicator FROM states "
+                "WHERE run_id = ? AND timeframe = ?",
+                (run_id, timeframe),
+            )
+        else:
+            cur = self._conn.execute(
+                "SELECT DISTINCT symbol, timeframe, indicator FROM states WHERE run_id = ?",
+                (run_id,),
+            )
+        return [(row[0], row[1], row[2]) for row in cur.fetchall()]
+
+    def list_runs(self, market: str, status: str | None = None) -> list[str]:
+        """market için run_id'leri, EN YENİDEN EN ESKİYE sıralı döner
+        (`started_at` bazlı) — `eod.py`'nin "önceki run"u bulması için."""
+        if status is not None:
+            cur = self._conn.execute(
+                "SELECT run_id FROM runs WHERE market = ? AND status = ? "
+                "ORDER BY started_at DESC",
+                (market, status),
+            )
+        else:
+            cur = self._conn.execute(
+                "SELECT run_id FROM runs WHERE market = ? ORDER BY started_at DESC",
+                (market,),
+            )
+        return [row[0] for row in cur.fetchall()]
+
+    def query(
+        self,
+        run_id: str | None = None,
+        symbol: str | None = None,
+        timeframe: str | None = None,
+        indicator: str | None = None,
+        state: str | None = None,
+    ) -> list[dict]:
+        clauses, params = [], []
+        for col, val in (
+            ("run_id", run_id), ("symbol", symbol), ("timeframe", timeframe),
+            ("indicator", indicator), ("state", state),
+        ):
+            if val is not None:
+                clauses.append(f"{col} = ?")
+                params.append(val)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        cur = self._conn.execute(f"SELECT * FROM signals {where} ORDER BY bar_time", params)
+        cols = [d[0] for d in cur.description]
+        return [dict(zip(cols, row, strict=True)) for row in cur.fetchall()]
+
+    def latest_signals(
+        self,
+        run_id: str,
+        *,
+        market: str | None = None,
+        timeframe: str | None = None,
+        indicator: str | None = None,
+        indicators: tuple[str, ...] | None = None,
+        direction: str | None = None,
+        symbol: str | None = None,
+        states: tuple[str, ...] | None = ("confirmed", "completed"),
+        max_bars_ago: int | None = None,
+        limit: int = 200,
+        offset: int = 0,
+    ) -> tuple[list[dict], int]:
+        """`query(run_id=...)`'un ham çıktısı HER durum geçişini ayrı satır
+        tutar (bkz. modül docstring'i) — bir `(symbol, timeframe, indicator,
+        pattern_id)` zincirinin yalnızca EN GÜNCEL (`detected_at` en büyük)
+        satırını döndürür (web/dashboard tüketiciler için "şu an ne
+        gösteriliyor" sorusunun doğru cevabı budur, tam geçmiş DEĞİL).
+        `states=None` tüm durumları döner; varsayılan yalnızca confirmed/
+        completed (dashboard.py'nin ZATEN kullandığı filtre). `(satırlar,
+        toplam_eslesme_sayisi)` döner — `toplam`, `limit/offset`'ten
+        BAĞIMSIZ, sayfalama için.
+
+        `indicators` (2026-09-02, web arayüzünün "Stratejiler"
+        kategorilerine göre ayrı ayrı tarama sonucu görüntüleme isteğine
+        yanıt): `indicator` (tekil eşitlik) yerine/yanında bir KATEGORİdeki
+        TÜM gösterge adlarını (ör. tüm `harmonic.*`) tek seferde filtreler
+        (`indicator IN (...)`). `direction`: `long`/`short` filtresi.
+
+        `max_bars_ago` (Faz 0, TANI_VE_YOL_HARITASI_v2.md — sinyal tazeliği):
+        verilirse yalnızca zincirin GÜNCEL (rn=1) satırının `bars_ago`'su bu
+        değere eşit veya küçük olan sinyalleri döner. `bars_ago`
+        `scanner/engine.py::_add_bars_ago`'nun run anında hesaplayıp
+        `payload`'a yazdığı, sonra `persist()`'in kendi kolonuna kopyaladığı
+        bar-cinsi bir yaş (`None` = bu run'dan ÖNCE yazılmış eski bir satır,
+        migrasyon öncesi — bu satırlar `max_bars_ago` verildiğinde YAŞI
+        BİLİNMEDİĞİ için dışlanır). `None` (varsayılan) = filtre YOK, eski
+        davranış korunur."""
+        clauses: list[str] = ["run_id = ?"]
+        params: list[object] = [run_id]
+        for col, val in (
+            ("market", market), ("timeframe", timeframe),
+            ("indicator", indicator), ("symbol", symbol), ("direction", direction),
+        ):
+            if val is not None:
+                clauses.append(f"{col} = ?")
+                params.append(val)
+        if indicators:
+            placeholders = ", ".join("?" for _ in indicators)
+            clauses.append(f"indicator IN ({placeholders})")
+            params.extend(indicators)
+        where = " AND ".join(clauses)
+        state_clause = ""
+        if states is not None:
+            placeholders = ", ".join("?" for _ in states)
+            state_clause = f"WHERE state IN ({placeholders})"
+            params_states: list[object] = list(states)
+        else:
+            params_states = []
+
+        ranked_sql = f"""
+            SELECT *, ROW_NUMBER() OVER (
+                PARTITION BY symbol, timeframe, indicator, pattern_id
+                ORDER BY detected_at DESC
+            ) AS rn
+            FROM signals
+            WHERE {where}
+        """
+        latest_sql = f"SELECT * FROM ({ranked_sql}) WHERE rn = 1"
+        filtered_sql = f"SELECT * FROM ({latest_sql}) {state_clause}"
+        params_bars_ago: list[object] = []
+        if max_bars_ago is not None:
+            bars_ago_clause = " AND " if state_clause else " WHERE "
+            filtered_sql += f"{bars_ago_clause}bars_ago IS NOT NULL AND bars_ago <= ?"
+            params_bars_ago = [max_bars_ago]
+
+        count_cur = self._conn.execute(
+            f"SELECT COUNT(*) FROM ({filtered_sql})", params + params_states + params_bars_ago
+        )
+        total = count_cur.fetchone()[0]
+
+        cur = self._conn.execute(
+            f"{filtered_sql} ORDER BY detected_at DESC LIMIT ? OFFSET ?",
+            params + params_states + params_bars_ago + [limit, offset],
+        )
+        cols = [d[0] for d in cur.description]
+        rows = [dict(zip(cols, row, strict=True)) for row in cur.fetchall()]
+        return rows, total
+
+    def latest_run(self, market: str) -> str | None:
+        cur = self._conn.execute(
+            "SELECT run_id FROM runs WHERE market = ? AND status = 'completed' "
+            "ORDER BY started_at DESC LIMIT 1",
+            (market,),
+        )
+        row = cur.fetchone()
+        return row[0] if row else None
+
+    def get_run(self, run_id: str) -> RunRecord | None:
+        cur = self._conn.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,))
+        row = cur.fetchone()
+        if row is None:
+            return None
+        cols = [d[0] for d in cur.description]
+        raw = dict(zip(cols, row, strict=True))
+        return RunRecord(
+            run_id=raw["run_id"], started_at=raw["started_at"], finished_at=raw["finished_at"],
+            market=raw["market"], timeframes=json.loads(raw["timeframes"]),
+            universe_size=raw["universe_size"], indicator_names=json.loads(raw["indicators_json"]),
+            git_sha=raw["git_sha"], status=raw["status"],
+        )
+
+    def diff(self, run_a: str, run_b: str) -> DiffReport:
+        """run_a: ÖNCEKİ (baseline), run_b: SONRAKİ (yeni) koşu."""
+        rows_a = self.query(run_id=run_a)
+        rows_b = self.query(run_id=run_b)
+
+        def key(r: dict) -> tuple:
+            return (
+                r["symbol"], r["timeframe"], r["indicator"],
+                r["pattern_id"], r["state"], r["bar_time"],
+            )
+
+        def chain_key(r: dict) -> tuple:
+            return (r["symbol"], r["timeframe"], r["indicator"], r["pattern_id"])
+
+        keys_a = {key(r) for r in rows_a}
+        keys_b = {key(r) for r in rows_b}
+
+        new_signals = [r for r in rows_b if key(r) not in keys_a]
+        missing_signals = [r for r in rows_a if key(r) not in keys_b]
+
+        states_by_chain_a: dict[tuple, set[str]] = {}
+        for r in rows_a:
+            states_by_chain_a.setdefault(chain_key(r), set()).add(r["state"])
+
+        transitions = []
+        for r in rows_b:
+            ck = chain_key(r)
+            prior_states = states_by_chain_a.get(ck, set())
+            if ck in states_by_chain_a and r["state"] not in prior_states:
+                transitions.append({**r, "from_states": sorted(prior_states)})
+
+        # Gercek repaint alarmi: AYNI (chain_key, bar_time) icin run_a'da
+        # gorulen bir yon, run_b'de o bar_time icin ya hic yok ya da
+        # farkli. Devlet gecisi (forming->confirmed) AYNI bar_time'da
+        # kalip yon degismezse alarm SAYILMAZ -- yukaridaki `key()` bazli
+        # `missing_signals` state'i kimligin parcasi saydigi icin her
+        # mesru gecisi de "kayip sinyal" sayiyordu.
+        directions_by_bar_a: dict[tuple, set[str]] = {}
+        for r in rows_a:
+            directions_by_bar_a.setdefault(
+                (chain_key(r), r["bar_time"]), set()
+            ).add(r["direction"])
+        directions_by_bar_b: dict[tuple, set[str]] = {}
+        for r in rows_b:
+            directions_by_bar_b.setdefault(
+                (chain_key(r), r["bar_time"]), set()
+            ).add(r["direction"])
+        repaint_alarm = any(
+            not (directions_by_bar_b.get(bar_key, set()) & dirs_a)
+            for bar_key, dirs_a in directions_by_bar_a.items()
+        )
+
+        return DiffReport(
+            new_signals=new_signals, transitions=transitions, missing_signals=missing_signals,
+            repaint_alarm=repaint_alarm,
+        )
