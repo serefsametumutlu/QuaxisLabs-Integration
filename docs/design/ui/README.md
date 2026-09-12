@@ -172,3 +172,73 @@ Her yüzey için koyu 1440 + açık 1440 + koyu 768 saklandı. Sistem teması Fa
   içinde yatay kayıyor, hiçbir ızgarada yarım satır kalmıyor.
 - Duyuru şeridi geri sayımı sunucuda boş, istemcide dönüyor — hidrasyon
   uyuşmazlığı yok.
+
+---
+
+# Faz 4 — ChartSpec v1 + grafik motoru (`*-f4.png`)
+
+**Tarih:** 2026-09-12
+**Referans:** [`references/HRhIeAdbcAAL2_B.png`](../../../references/HRhIeAdbcAAL2_B.png)
+
+Levha artık örnek çizim değil, gerçek bir motor: mum/hacim/crosshair/zoom-pan
+Lightweight Charts v5'ten, fibo merdiveni ve formasyon çizimleri bizim SVG
+overlay'imizden. İkisini besleyen tek kaynak Python komposerinin ürettiği
+`ChartSpec` JSON'u.
+
+| Yüzey | Dosya |
+|---|---|
+| Grafik yüzeyi (tam merdiven) | `grafik-*-f4.png` |
+| Giriş ekranı önizlemesi (seyrek merdiven) | `giris-*-f4.png` |
+| Strateji sayfası | `strateji-*-f4.png` |
+
+## İterasyonlar — ne görüldü, ne düzeltildi
+
+### f4i1 → f4i2
+1. **Durum kutusu grafiğin üstünde yüzüyordu ve formasyonun C köşesini,
+   sağ oluktaki fibo etiketlerinin yarısını kapatıyordu.** Makette bu bir
+   çizimdi; gerçek grafikte fiyat her yere gidebilir ve yüzen bir kutu er geç
+   bir şeyin üstüne düşer. Kutu levhanın **altına**, yatay şeride taşındı.
+   Yan kazanç: 820px altında gizlenmek zorunda değil, dar ekranda da okunuyor.
+2. **Son fiyat rozeti ile `1.272` etiketi üst üste biniyordu** → sağ oluk için
+   dikey çakışma çözücü yazıldı (`yerlesim.ts`): sabit öğe (son fiyat) yerinde
+   kalır, etiketler ondan kaçar, kayan etiket çizgisine ince bir bağla bağlanır.
+3. **Durum rozeti sağ oluğa taşıyordu** → kutu çizim alanının içine sınırlandı.
+
+### f4i2 → f4i3
+4. **`1.618 (azami risk): 146.00` etiketi sağdan kesiliyordu** → oluk 168 →
+   **186px** (maketin `PAD.r` değeriyle aynı).
+5. **`0.5` / `0.236` biçim tutarsızlığı** → referanstaki gibi `0.500`.
+6. **`TAMAMLANDİ`** → veri `tamamlandı` yapıldı, Türkçe büyütme doğru çalıştı.
+
+### f4i3 → f4i4 — en önemli bulgu
+7. **Grafik tuvali etiket oluğunun ALTINA taşıyordu.** Sarmala `padding-right`
+   vermek yetmiyordu: mutlak konumlu çocuk padding kutusunu değil kenarlık
+   kutusunu doldurur. Son barlar ve `D` köşesi oluğun altında kalıp fibo
+   etiketleriyle çakışıyordu. Tuvalin sağ kenarı doğrudan oluk kadar içeri
+   alındı.
+
+### f4i4 → f4i6
+8. **Giriş ekranı önizlemesinde dokuz basamak okunmaz bir yığına dönüyordu**
+   (250px levhada 10 etiket). Çizici `seviyeler="vurgulu"` kipi aldı: kısa
+   levhalarda yalnız karara değer basamaklar (`0.618`, `0.786`, `1.272`) —
+   maketin giriş ekranında yaptığının aynısı.
+9. **Bant etiketi ince bantta alt çizginin üstüne biniyordu** → bant 24px'ten
+   inceyse etiket bandın üstüne yazılıyor.
+10. **Salınım etiketleri (`LH`/`HL`) yatay fibo çizgilerinin üstüne düşünce
+    okunmaz oluyordu.** Önce `paint-order: stroke` denendi — **yetmedi**:
+    kontur yalnız glif kenarını korur, harflerin *arasından* geçen çizgiyi
+    kapatmaz. Metin ölçülüp arkasına gerçek bir zemin dikdörtgeni kondu.
+
+### Doğrulanıp kusur bulunmayanlar
+- Açık/koyu tema geçişi: token'lar `MutationObserver` ile yeniden okunuyor,
+  mum renkleri ve overlay birlikte dönüyor.
+- Sol rayda yalnız bulunulan yüzey vurgulu (2.6× büyütmeyle bakıldı).
+- Pivot işaretleri **onay barında** duruyor, kendi barında değil — non-repaint
+  sözleşmesinin çizim tarafındaki karşılığı (`test_komposer.py` bunu sabitler).
+
+## Referanstan bilinçli sapma
+
+Referanstaki **kesik-noktalı mavi trend çizgisi** üretilmedi: o çizgi Altın
+Bölge stratejisine değil ayrı bir trendline göstergesine ait. Her komposer
+yalnız kendi stratejisinin çizimini üretir; aksi hâlde jenerik çiziciye geri
+dönülmüş olurdu. `CizgiRol.TREND` rolü sözleşmede hazır bekliyor.

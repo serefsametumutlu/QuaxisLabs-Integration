@@ -280,19 +280,25 @@
 .hud .l2 { color: var(--text-2); }
 .hud b { font-weight: 500; }
 
+/* Durum şeridi — ARTIK levhanın üstünde yüzmüyor.
+   Faz 4'te gerçek ChartSpec çizilince yüzen kutu, formasyonun C köşesini ve
+   sağ oluktaki fibo etiketlerini kapattı (f4i1 bulgusu). Makette bu bir
+   çizimdi; gerçek grafikte fiyat her yere gidebilir ve yüzen bir kutu er geç
+   bir şeyin üstüne düşer. Bilgi aynı, yeri değişti: levhanın ALTINDA yatay
+   şerit. Yan kazanç — 820px altında gizlenmek zorunda değil, dar ekranda da
+   okunuyor. */
 .statbox {
-  /* Sag kenardaki fiyat olugu viewBox'in ~%8'i; kutu %10'dan solda durur ki
-     son fiyat rozetinin ustune binmesin (f3i1 bulgusu). */
-  position: absolute; right: 9%; top: 10px; pointer-events: none;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  border: 1px solid var(--line); border-radius: var(--r-panel);
-  font-family: var(--f-mono); font-size: 10.5px; min-width: 194px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  background: var(--surface); border: 1px solid var(--line); border-top: 0;
+  font-family: var(--f-mono); font-size: 10.5px;
 }
-.statbox .h { display: flex; justify-content: space-between; padding: 5px 9px;
-  border-bottom: 1px solid var(--line); color: var(--text-3); letter-spacing: 1.2px; }
-.statbox .r { display: flex; justify-content: space-between; gap: 14px; padding: 3.5px 9px; color: var(--text-2); }
-.statbox .r span:last-child { color: var(--text); }
-@media (max-width: 820px) { .statbox { display: none; } }
+.statbox .r {
+  display: flex; flex-direction: column; gap: 5px; padding: 9px 13px 11px;
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  margin: -1px 0 0 -1px; color: var(--text-3);
+}
+.statbox .r span:first-child { letter-spacing: 1.2px; text-transform: uppercase; font-size: 9.5px; }
+.statbox .r span:last-child { color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; }
 
 /* Levhanın içi henüz motor değil — işaret çubukta durur, grafiğin üstünde
    değil: bindirme mumları ve hacmi kapatıyordu (f3i1 bulgusu). */

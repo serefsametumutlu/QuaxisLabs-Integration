@@ -3,6 +3,7 @@
 @import "./bilesenler.css";
 @import "./kabuk.css";
 @import "./strateji.css";
+@import "./grafik.css";
 
 /* Token'ları Tailwind'in kendi sözlüğüne de bağla — böylece sınıf yazarken
    hardcoded renk kullanma ihtimali kalmaz (bg-surface, text-text-2, …).

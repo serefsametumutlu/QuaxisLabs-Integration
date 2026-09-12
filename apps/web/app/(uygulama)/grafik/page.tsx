@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Eyebrow, Pill, Seg } from "@/components/ui";
-import { Faz4Isareti, GrafikYeri } from "@/components/kabuk/GrafikYeri";
+import { Grafik } from "@/components/grafik/Grafik";
+import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
 import { STRATEJILER } from "@/lib/ornek-strateji";
 
 const TF = [
@@ -11,14 +12,29 @@ const TF = [
 ] as const;
 
 const STRATEJI = STRATEJILER[0];
+const SPEC = THYAO_ALTIN_BOLGE;
+
+/** Seviye fiyatı SPEC'ten okunur — aynı sayı iki yerde yazılmaz. */
+function seviye(rol: string): number | null {
+  const k = (SPEC.katmanlar ?? []).find((x) => x.tur === "seviye" && x.rol === rol);
+  return k && k.tur === "seviye" ? k.fiyat : null;
+}
+
+const f = (n: number | null) => (n === null ? "—" : n.toFixed(2));
 
 /**
  * Grafik yüzeyi — sinyalin nasıl doğduğunun görsel kanıtı.
- * Levhanın çevresi (çubuk, HUD, durum kutusu, dört not, K4 verdikti) burada
- * kurulur; levhanın İÇİ Faz 4'te ChartSpec ile doldurulacak.
+ *
+ * Levha artık bir ChartSpec okuyor: mum, hacim, crosshair ve zoom/pan
+ * Lightweight Charts'tan; fibo merdiveni, dolgulu X-A-B-C-D gövdeleri, köşe
+ * rozetleri ve durum rozeti bizim SVG katmanımızdan. Sayfadaki bütün sayılar
+ * spec'ten türetilir.
  */
 export default function GrafikSayfasi() {
   const [tf, setTf] = useState<string>("1g");
+
+  const a = seviye("fib_0");
+  const x = seviye("fib_1");
 
   return (
     <section className="board">
@@ -26,78 +42,73 @@ export default function GrafikSayfasi() {
         <Eyebrow>Yüzey · Grafik</Eyebrow>
         <h2>Sinyalin nasıl doğduğunun görsel kanıtı</h2>
         <p>
-          Levhanın çerçevesi, HUD&apos;u, durum kutusu ve altındaki dört not bu fazda kuruldu.
-          Levhanın içi — dolgulu X-A-B-C-D gövdesi, oran-renkli fibo merdiveni, numaralı temas
-          daireleri, crosshair — <b>Faz 4</b>&apos;te <code className="num" style={{ fontSize: 12 }}>ChartSpec</code>{" "}
-          ile bağlanacak.
+          Levha bir <code className="num" style={{ fontSize: 12 }}>ChartSpec</code> okuyor. Mum,
+          hacim, crosshair ve zoom/pan Lightweight Charts&apos;tan; fibo merdiveni, dolgulu
+          X-A-B-C-D gövdeleri, köşe rozetleri ve durum rozeti bizim SVG katmanımızdan geliyor.
+          Spec&apos;i Python komposeri üretti — <b>çizici hiçbir seviyeyi kendisi hesaplamaz.</b>
         </p>
       </header>
 
       <div className="chartframe">
         <div className="chartbar">
-          <span className="sym">THYAO</span>
+          <span className="sym">{SPEC.kunye.sembol}</span>
           <span className="dim" style={{ fontSize: 12 }}>
-            Türk Hava Yolları · BIST
+            {SPEC.kunye.ad} · BIST
           </span>
           <Seg label="Zaman dilimi" options={TF} value={tf} onChange={setTf} mono />
           <span className="sep" style={{ width: 1, height: 18, background: "var(--line)" }} />
-          <Pill tone="acc">yapı · altın bölge</Pill>
-          <Pill tone="down">SAT</Pill>
-          <Pill>TAMAMLANDI</Pill>
+          <Pill tone="acc">yapı · {SPEC.kunye.strateji_adi?.toLocaleLowerCase("tr")}</Pill>
+          <Pill tone={SPEC.kunye.yon === "al" ? "up" : "down"}>
+            {SPEC.kunye.yon === "al" ? "AL" : "SAT"}
+          </Pill>
+          <Pill>{SPEC.kunye.durum?.toLocaleUpperCase("tr")}</Pill>
           <span style={{ marginLeft: "auto" }} />
-          <Faz4Isareti />
-          <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
+          {SPEC.kunye.ornek_mi ? (
+            <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
+          ) : null}
         </div>
 
         <div className="chartbody">
-          <GrafikYeri
-            w={1180}
-            h={470}
-            bar={140}
-            /* HUD ve durum kutusu üstte duruyor: seri onların ALTINDAN
-               başlar, sağdaki pay yalnız fiyat oluğu kadar. Böylece ne son
-               barlar ne de fiyat rozeti bir katmanın arkasında kalır. */
-            padUst={124}
-            padSag={96}
-            son={{ fiyat: 159.49, yon: "down" }}
-            label="THYAO günlük grafik — örnek seri; strateji çizimleri Faz 4'te eklenecek"
+          <Grafik
+            spec={SPEC}
+            yukseklik={470}
+            hudEk={
+              <>
+                {SPEC.kunye.strateji_adi} <span className="dim">·</span> baskın salınım X→A{" "}
+                <span className="dim">·</span> D hedefi{" "}
+                <b style={{ color: "var(--down)" }}>{f(seviye("fib_1272"))}</b>
+              </>
+            }
           />
 
-          <div className="hud">
-            <div className="l1">
-              THYAO <span className="dim">·</span> BIST <span className="dim">·</span>{" "}
-              {tf === "1g" ? "1G" : "4S"}
-            </div>
-            <div className="l2">
-              Altın Bölge <span className="dim">·</span> baskın salınım X→A{" "}
-              <span className="dim">·</span> D hedefi{" "}
-              <b style={{ color: "var(--down)" }}>159.49</b>
-            </div>
-          </div>
+        </div>
 
-          <div className="statbox">
-            <div className="h">
-              <span>ALTIN BÖLGE</span>
-              <span>DURUM</span>
-            </div>
-            {[
-              ["Baskın salınım", "X→A · 39.00"],
-              ["Bölge (0.618–0.786)", "185.00 / 178.45"],
-              ["Doğduğu bar", "18 bar önce"],
-            ].map(([k, v]) => (
-              <div className="r" key={k}>
-                <span>{k}</span>
-                <span>{v}</span>
-              </div>
-            ))}
-            <div className="r">
-              <span>Temas</span>
-              <span style={{ color: "var(--accent)" }}>3 · tutmadı</span>
-            </div>
-            <div className="r">
-              <span>Yön</span>
-              <span style={{ color: "var(--down)" }}>Satış ▼</span>
-            </div>
+        <div className="statbox">
+          <div className="r">
+            <span>Baskın salınım</span>
+            <span>X→A · {a !== null && x !== null ? (a - x).toFixed(2) : "—"}</span>
+          </div>
+          <div className="r">
+            <span>Bölge (0.618–0.786)</span>
+            <span>
+              {f(seviye("fib_618"))} / {f(seviye("fib_786"))}
+            </span>
+          </div>
+          <div className="r">
+            <span>D hedefi (1.272)</span>
+            <span style={{ color: "var(--down)" }}>{f(seviye("fib_1272"))}</span>
+          </div>
+          <div className="r">
+            <span>Azami risk (1.618)</span>
+            <span>{f(seviye("fib_1618"))}</span>
+          </div>
+          <div className="r">
+            <span>Temas</span>
+            <span style={{ color: "var(--accent)" }}>3 · tutmadı</span>
+          </div>
+          <div className="r">
+            <span>Yön</span>
+            <span style={{ color: "var(--down)" }}>Satış ▼</span>
           </div>
         </div>
 

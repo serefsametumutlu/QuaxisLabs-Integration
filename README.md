@@ -23,7 +23,7 @@ services/
 packages/
   teknik/       Tarama motoru: core, data, features, indicators, scanner, testing
   temel/        (Faz 10) Bilanço / mercek motoru
-  chart/        ChartSpec üreticileri (strateji başına komposer)
+  chart/        ChartSpec v1 sözleşmesi + strateji başına komposer (Python)
   ortak/        Paylaşılan tipler, semboller, takvim, Türkçe etiketler
 docs/
   karar/        ADR — mimari karar kayıtları
@@ -67,13 +67,13 @@ Kapsam: **site + teknik analiz.** Temel analiz ve mobil bu yol haritasında yok
 | 1 | Tasarım referansları ve ortak tasarım dilinin çıkarılması | ✅ bitti |
 | 2 | Tasarım sistemi + bileşen kütüphanesi + `/tasarim` vitrini | ✅ bitti |
 | 3 | Uygulama kabuğu ve sayfa iskeletleri | ✅ bitti |
-| 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | **sırada** |
+| 4 | `ChartSpec` v1 + grafik motoru; referans grafiklerin birebir üretimi | ✅ bitti |
 
 ### Bölüm B — Altyapı
 
 | Faz | İş | Durum |
 |---|---|---|
-| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | bekliyor |
+| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` (gösterge YOK) | **sırada** |
 | 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | bekliyor |
 
 ### Bölüm C — Stratejiler (birer birer, **sayı sınırı yok**)
@@ -107,7 +107,7 @@ python ../../tools/tablo_olcum.py             # DataTable 500 satır ölçümü
 |---|---|---|
 | `/` | Giriş ekranı — hero, olgu şeridi, 7 kapı, rozet açıklaması | iskelet ✅ |
 | `/tarama` | Tarama tablosu + sağdan açılan grafik çekmecesi | iskelet ✅ |
-| `/grafik` | Grafik levhası: çubuk, HUD, durum kutusu, 4 not, K4 verdikti | iskelet ✅ · **levhanın içi Faz 4** |
+| `/grafik` | Grafik levhası — `ChartSpec` okuyan gerçek motor | ✅ |
 | `/stratejiler` | Strateji kütüphanesi (kart ızgarası) | iskelet ✅ |
 | `/stratejiler/<ad>` | Strateji künyesi: parametreler, **Kaynak** (K0), **Ölçüm** (K4), SSS | iskelet ✅ |
 | `/tasarim` | Bileşen vitrini — 15 bileşen, üç tema yan yana | ✅ |
@@ -116,12 +116,32 @@ Kabuk her yüzeyde ortak: yapışkan üst şerit, `Ctrl+K` hızlı geçiş, sol 
 tema (sistem/açık/koyu) ve aksan anahtarı. **Veri hâlâ örnektir** ve arayüzde
 her yerde öyle etiketlenir.
 
+### Grafik motoru
+
+```
+gösterge → TİPLİ SONUÇ → KOMPOSER → ChartSpec (JSON) → web çizici
+ (Bölüm C)              (packages/chart, Python)        (apps/web)
+```
+
+Mum, hacim, crosshair ve zoom/pan **Lightweight Charts v5**'ten; fibo
+merdiveni, dolgulu X-A-B-C-D gövdeleri, köşe rozetleri ve önder çizgili durum
+rozeti **bizim SVG overlay**'imizden gelir. Çizici hiçbir seviyeyi kendisi
+hesaplamaz ve ChartSpec renk taşımaz — rol → token eşlemesi çizici tarafında.
+
+Sözleşme ve üç yapısal güvencesi: [`packages/chart/README.md`](packages/chart/README.md).
+
+```bash
+cd packages/chart
+python -m pytest tests -q   # 47 test
+python uret.py              # şema + örnek ChartSpec üretir
+```
+
 Next.js 16 + React 19 + TypeScript + Tailwind 4. Token sistemi
 [`apps/web/app/tokens.css`](apps/web/app/tokens.css)'te ve onaylanmış maketten
 **birebir** taşınmıştır. Fontlar (Archivo · Inter · JetBrains Mono)
 `next/font/local` ile yereldir; CDN bağımlılığı yoktur. Bileşenler
 [`apps/web/components/ui/`](apps/web/components/ui) altında; hepsi
-[`/tasarim`](apps/web/app/tasarim/page.tsx) vitrininde üç temada yan yana
+[`/tasarim`](apps/web/app/(uygulama)/tasarim/page.tsx) vitrininde üç temada yan yana
 gösterilir. Görsel kabul kaydı:
 [`docs/design/ui/README.md`](docs/design/ui/README.md).
 

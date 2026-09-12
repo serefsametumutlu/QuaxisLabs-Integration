@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Eyebrow, Pill } from "@/components/ui";
-import { Faz4Isareti, GrafikYeri } from "@/components/kabuk/GrafikYeri";
+import { Grafik } from "@/components/grafik/Grafik";
+import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
 import { HeroForm } from "@/components/kabuk/HeroForm";
 import { OLGULAR } from "@/lib/ornek-veri";
 
@@ -63,16 +64,9 @@ export default function GirisEkrani() {
               SAT
             </Pill>
             <span style={{ marginLeft: "auto" }} />
-            <Faz4Isareti />
             <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
           </div>
-          <GrafikYeri
-            w={1060}
-            h={230}
-            bar={120}
-            son={{ fiyat: 159.49, yon: "down" }}
-            label="THYAO günlük grafik önizlemesi — örnek seri"
-          />
+          <Grafik spec={THYAO_ALTIN_BOLGE} yukseklik={250} dar seviyeler="vurgulu" />
         </div>
       </section>
 

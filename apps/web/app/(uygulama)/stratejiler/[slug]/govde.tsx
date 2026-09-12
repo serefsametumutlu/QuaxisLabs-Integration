@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Eyebrow, Pill, Tabs } from "@/components/ui";
 import { Faz4Isareti, GrafikYeri } from "@/components/kabuk/GrafikYeri";
+import { Grafik } from "@/components/grafik/Grafik";
+import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
 import type { Strateji } from "@/lib/ornek-strateji";
 
 const GORUNUM = [
@@ -14,6 +16,7 @@ const GORUNUM = [
 export function StratejiGovde({ strateji }: { strateji: Strateji }) {
   const [gorunum, setGorunum] = useState<string>("grafik");
   const tohum = strateji.slug.split("").reduce((a, c) => a + c.charCodeAt(0), 0) * 131;
+  const spec = strateji.slug === "altin-bolge" ? THYAO_ALTIN_BOLGE : null;
 
   return (
     <div style={{ marginBottom: 12 }}>
@@ -32,18 +35,25 @@ export function StratejiGovde({ strateji }: { strateji: Strateji }) {
                 SAT
               </Pill>
               <span style={{ marginLeft: "auto" }} />
-              <Faz4Isareti />
+              {spec ? null : <Faz4Isareti />}
               <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
             </div>
             <div className="chartbody">
-              <GrafikYeri
-                seed={tohum}
-                w={1060}
-                h={260}
-                bar={120}
-                son={{ fiyat: 159.49, yon: "down" }}
-                label={`${strateji.ad} stratejisinin THYAO günlük grafiğindeki örneği`}
-              />
+              {/* ChartSpec'i olan strateji gerçek levhayı alır; olmayan hâlâ
+                  örnek çizimi gösterir ve bunu rozetle söyler. Her stratejinin
+                  komposeri kendi fazında yazılacak (Bölüm C). */}
+              {spec ? (
+                <Grafik spec={spec} yukseklik={280} dar />
+              ) : (
+                <GrafikYeri
+                  seed={tohum}
+                  w={1060}
+                  h={260}
+                  bar={120}
+                  son={{ fiyat: 159.49, yon: "down" }}
+                  label={`${strateji.ad} stratejisinin THYAO günlük grafiğindeki örneği`}
+                />
+              )}
             </div>
           </div>
         ) : (

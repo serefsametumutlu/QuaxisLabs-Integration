@@ -1,0 +1,553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quaxislabs.dev/sema/chartspec-1.0.schema.json",
+  "title": "QuaxisLabs ChartSpec",
+  "description": "Çizim kütüphanesinden bağımsız, versiyonlu çizim sözleşmesi. Roller kapalı bir kümedir: listede olmayan bir rol geçersizdir, sessizce varsayılana düşmez.",
+  "type": "object",
+  "required": [
+    "surum",
+    "kunye",
+    "paneller",
+    "seriler"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "surum": {
+      "const": "1.0"
+    },
+    "kunye": {
+      "type": "object",
+      "required": [
+        "sembol",
+        "zaman_dilimi",
+        "strateji"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sembol": {
+          "type": "string"
+        },
+        "ad": {
+          "type": "string"
+        },
+        "zaman_dilimi": {
+          "type": "string"
+        },
+        "strateji": {
+          "type": "string"
+        },
+        "strateji_adi": {
+          "type": "string"
+        },
+        "yon": {
+          "enum": [
+            "al",
+            "sat"
+          ]
+        },
+        "durum": {
+          "type": "string"
+        },
+        "ornek_mi": {
+          "type": "boolean",
+          "description": "Örnek veri mi? Arayüz bunu kullanıcıya AYNEN gösterir."
+        }
+      }
+    },
+    "paneller": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "tur",
+          "oran"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tur": {
+            "enum": [
+              "fiyat",
+              "hacim"
+            ]
+          },
+          "oran": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1
+          },
+          "y": {
+            "type": "object",
+            "required": [
+              "alt",
+              "ust"
+            ],
+            "additionalProperties": false,
+            "description": "Komposerin BİLİNÇLİ yazdığı aralık. Yoksa çizici aralığı YALNIZCA o panelin serilerinden hesaplar; katmanlar aralığı kendiliğinden genişletemez.",
+            "properties": {
+              "alt": {
+                "type": "number"
+              },
+              "ust": {
+                "type": "number"
+              },
+              "gerekce": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "seriler": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "tur",
+              "panel",
+              "veri"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "tur": {
+                "const": "mum"
+              },
+              "panel": {
+                "type": "string"
+              },
+              "veri": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "t",
+                    "acilis",
+                    "yuksek",
+                    "dusuk",
+                    "kapanis"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "t": {
+                      "type": "integer"
+                    },
+                    "acilis": {
+                      "type": "number"
+                    },
+                    "yuksek": {
+                      "type": "number"
+                    },
+                    "dusuk": {
+                      "type": "number"
+                    },
+                    "kapanis": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "tur",
+              "panel",
+              "veri"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "tur": {
+                "const": "hacim"
+              },
+              "panel": {
+                "type": "string"
+              },
+              "veri": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "t",
+                    "hacim",
+                    "yon"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "t": {
+                      "type": "integer"
+                    },
+                    "hacim": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "yon": {
+                      "enum": [
+                        "al",
+                        "sat"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "katmanlar": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "fiyat",
+              "etiket"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "seviye"
+              },
+              "rol": {
+                "enum": [
+                  "fib_0",
+                  "fib_1",
+                  "fib_1272",
+                  "fib_1618",
+                  "fib_236",
+                  "fib_382",
+                  "fib_500",
+                  "fib_618",
+                  "fib_786",
+                  "seviye",
+                  "son_fiyat"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "fiyat": {
+                "type": "number"
+              },
+              "etiket": {
+                "type": "string"
+              },
+              "baslangic": {
+                "type": "integer"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "noktalar"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "alan"
+              },
+              "rol": {
+                "enum": [
+                  "bolge_altin",
+                  "bolge_arz",
+                  "bolge_talep",
+                  "formasyon"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "noktalar": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "t",
+                    "fiyat"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "t": {
+                      "type": "integer",
+                      "description": "UTC epoch saniye"
+                    },
+                    "fiyat": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "etiket": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "alt",
+              "ust"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "bant"
+              },
+              "rol": {
+                "enum": [
+                  "bolge_altin",
+                  "bolge_arz",
+                  "bolge_talep",
+                  "formasyon"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "number"
+              },
+              "ust": {
+                "type": "number"
+              },
+              "etiket": {
+                "type": "string"
+              },
+              "baslangic": {
+                "type": "integer"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "noktalar"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "cizgi"
+              },
+              "rol": {
+                "enum": [
+                  "baglanti",
+                  "projeksiyon",
+                  "trend"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "noktalar": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "t",
+                    "fiyat"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "t": {
+                      "type": "integer",
+                      "description": "UTC epoch saniye"
+                    },
+                    "fiyat": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "nokta"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "isaret"
+              },
+              "rol": {
+                "enum": [
+                  "kose",
+                  "temas"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "nokta": {
+                "type": "object",
+                "required": [
+                  "t",
+                  "fiyat"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "t": {
+                    "type": "integer",
+                    "description": "UTC epoch saniye"
+                  },
+                  "fiyat": {
+                    "type": "number"
+                  }
+                }
+              },
+              "metin": {
+                "type": "string"
+              },
+              "yerlesim": {
+                "enum": [
+                  "ust",
+                  "alt"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "nokta",
+              "metin"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "etiket"
+              },
+              "rol": {
+                "enum": [
+                  "not",
+                  "swing_hh",
+                  "swing_hl",
+                  "swing_lh",
+                  "swing_ll"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "nokta": {
+                "type": "object",
+                "required": [
+                  "t",
+                  "fiyat"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "t": {
+                    "type": "integer",
+                    "description": "UTC epoch saniye"
+                  },
+                  "fiyat": {
+                    "type": "number"
+                  }
+                }
+              },
+              "metin": {
+                "type": "string"
+              },
+              "yerlesim": {
+                "enum": [
+                  "ust",
+                  "alt"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "tur",
+              "rol",
+              "nokta",
+              "metin",
+              "yon"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tur": {
+                "const": "rozet"
+              },
+              "rol": {
+                "enum": [
+                  "durum_gecersiz",
+                  "durum_izleniyor",
+                  "durum_onaylandi",
+                  "durum_tamamlandi"
+                ]
+              },
+              "panel": {
+                "type": "string"
+              },
+              "nokta": {
+                "type": "object",
+                "required": [
+                  "t",
+                  "fiyat"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "t": {
+                    "type": "integer",
+                    "description": "UTC epoch saniye"
+                  },
+                  "fiyat": {
+                    "type": "number"
+                  }
+                }
+              },
+              "metin": {
+                "type": "string"
+              },
+              "yon": {
+                "enum": [
+                  "al",
+                  "sat"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

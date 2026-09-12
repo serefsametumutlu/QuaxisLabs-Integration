@@ -1,0 +1,45 @@
+/* ============================================================
+   Grafik motoru — Lightweight Charts tuvali + SVG overlay (Faz 4)
+   Tuval altta, strateji çizimleri üstte, ikisi de aynı kutuda.
+   ============================================================ */
+
+.qgrafik {
+  position: relative;
+  width: 100%;
+  background: var(--surface);
+  /* Sağ oluk satır içi stille verilir (dar/geniş levha) — fibo etiketleri
+     ve son fiyat rozeti orada durur. */
+}
+/* Tuval oluğun ALTINA taşmaz. Sarmala padding vermek yetmiyordu: mutlak
+   konumlu çocuk padding kutusunu değil kenarlık kutusunu doldurur, bu yüzden
+   son barlar etiket oluğunun altında kalıp fibo etiketleriyle çakışıyordu
+   (f4i3 bulgusu). Sağ kenar doğrudan oluk kadar içeri alınır. */
+.qgrafik-tuval { position: absolute; top: 0; bottom: 0; left: 0; right: var(--oluk, 0px); }
+.qgrafik-tuval > div { width: 100%; height: 100%; }
+
+/* Overlay tıklamayı yutmaz: zoom/pan ve crosshair tuvalin işi. */
+.qgrafik-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  display: block; overflow: visible;
+}
+.qgrafik-overlay text { user-select: none; }
+
+.qgrafik-hud {
+  position: absolute; left: 12px; top: 10px; pointer-events: none;
+  font-size: 11.5px; line-height: 1.75; color: var(--text);
+}
+.qgrafik-hud .l1 { color: var(--text); }
+.qgrafik-hud .l2 { color: var(--text-2); font-family: var(--f-mono); }
+.qgrafik-hud b { font-weight: 500; }
+
+.qgrafik-hata {
+  padding: 22px 20px; border: 1px dashed var(--down); background: var(--down-soft);
+  color: var(--text); font-size: 13px;
+}
+.qgrafik-hata b { display: block; font-weight: 500; margin-bottom: 6px; }
+.qgrafik-hata p { margin: 4px 0 0; color: var(--text-2); font-size: 12.5px; line-height: 1.55; }
+.qgrafik-hata p.dim { color: var(--text-3); }
+
+/* Lightweight Charts kendi bağlantı rozetini kapatıyoruz; yine de gelirse
+   görünmesin — levhada bizim olmayan hiçbir işaret durmaz. */
+.qgrafik #tv-attr-logo { display: none !important; }
