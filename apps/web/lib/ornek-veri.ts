@@ -66,7 +66,7 @@ function seri(seed: number, yukari: boolean, n = 22) {
 
 /** Maketteki tarama tablosunun on satırı — birebir. */
 const CEKIRDEK: Omit<TaramaSatiri, "id" | "seri">[] = [
-  { sembol: "THYAO", ad: "Türk Hava Yolları", paket: "Yapı", strateji: "Altın Bölge", yon: "down", durum: "Tamamlandı", yas: 0, fiyat: 209.1, seviye: 178.45, verdikt: "kanıtlanmadı" },
+  { sembol: "THYAO", ad: "Türk Hava Yolları", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "down", durum: "Tamamlandı", yas: 0, fiyat: 209.1, seviye: 178.45, verdikt: "kanıtlanmadı" },
   { sembol: "ASELS", ad: "Aselsan", paket: "Yapı", strateji: "Arz–Talep Bölgesi", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 78.45, seviye: 74.2, verdikt: "ölçülmedi" },
   { sembol: "EREGL", ad: "Ereğli Demir Çelik", paket: "Formasyon", strateji: "Çift Dip", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 1204.75, seviye: 1180.0, verdikt: "kanıtlanmadı" },
   { sembol: "TUPRS", ad: "Tüpraş", paket: "Trend & Momentum", strateji: "EWMAC", yon: "up", durum: "Onaylandı", yas: 2, fiyat: 142.3, seviye: 139.8, verdikt: "izlenen aday" },
@@ -75,7 +75,7 @@ const CEKIRDEK: Omit<TaramaSatiri, "id" | "seri">[] = [
   { sembol: "BIMAS", ad: "BİM", paket: "Yapı", strateji: "Yatay Aralık", yon: "down", durum: "Temas", yas: 3, fiyat: 512.0, seviye: 524.5, verdikt: "ölçülmedi" },
   { sembol: "FROTO", ad: "Ford Otosan", paket: "Formasyon", strateji: "Bayrak", yon: "up", durum: "Onaylandı", yas: 3, fiyat: 1088.25, seviye: 1061.0, verdikt: "kanıtlanmadı" },
   { sembol: "AKBNK", ad: "Akbank", paket: "Trend & Momentum", strateji: "MA Sistemi", yon: "down", durum: "Onaylandı", yas: 3, fiyat: 68.9, seviye: 70.15, verdikt: "izlenen aday" },
-  { sembol: "ENKAI", ad: "Enka İnşaat", paket: "Yapı", strateji: "Altın Bölge", yon: "up", durum: "Bölgede", yas: 3, fiyat: 58.44, seviye: 56.8, verdikt: "kanıtlanmadı" },
+  { sembol: "ENKAI", ad: "Enka İnşaat", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "up", durum: "Bölgede", yas: 3, fiyat: 58.44, seviye: 56.8, verdikt: "kanıtlanmadı" },
 ];
 
 export const ORNEK_TARAMA: TaramaSatiri[] = CEKIRDEK.map((r, k) => ({
@@ -137,7 +137,7 @@ export type StratejiKarti = {
 
 export const ORNEK_KARTLAR: StratejiKarti[] = [
   {
-    ad: "Altın Bölge",
+    ad: "Salınım Fibo ABCD",
     kaynak: "PESAVENTO · S.41-58",
     kapi: "PASAPORT K5",
     tip: "fib",

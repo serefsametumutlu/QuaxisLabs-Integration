@@ -42,8 +42,8 @@ export type Strateji = {
 
 export const STRATEJILER: Strateji[] = [
   {
-    slug: "altin-bolge",
-    ad: "Altın Bölge",
+    slug: "swing-fib-abcd",
+    ad: "Salınım Fibo ABCD",
     paket: "Yapı",
     ozet:
       "Baskın salınımın 0.618–0.786 düzeltme bandı. Fiyat bölgeye döner ve tutamazsa, salınımın başlangıç seviyesinin altı hedeflenir.",

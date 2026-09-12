@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Eyebrow, Pill, Seg } from "@/components/ui";
 import { Grafik } from "@/components/grafik/Grafik";
-import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
+import { THYAO_SWING_FIB_ABCD } from "@/lib/ornek-chartspec";
 import { STRATEJILER } from "@/lib/ornek-strateji";
 
 const TF = [
@@ -12,7 +12,7 @@ const TF = [
 ] as const;
 
 const STRATEJI = STRATEJILER[0];
-const SPEC = THYAO_ALTIN_BOLGE;
+const SPEC = THYAO_SWING_FIB_ABCD;
 
 /** Seviye fiyatı SPEC'ten okunur — aynı sayı iki yerde yazılmaz. */
 function seviye(rol: string): number | null {

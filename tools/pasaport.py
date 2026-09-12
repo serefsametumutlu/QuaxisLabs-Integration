@@ -1,9 +1,9 @@
 """Strateji Pasaportu doğrulayıcı — kapıların gerçekten kapı olmasını sağlar.
 
     python tools/pasaport.py dogrula          # tüm pasaportları denetle
-    python tools/pasaport.py dogrula altin-bolge
+    python tools/pasaport.py dogrula swing-fib-abcd
     python tools/pasaport.py durum            # kim nerede, tek tabloda
-    python tools/pasaport.py yeni altin-bolge --ad "Altın Bölge" --paket yapi
+    python tools/pasaport.py yeni swing-fib-abcd --ad "Salınım Fibo ABCD" --paket yapi
 
 **Neden var.** Önceki projede süreç bir kontrol listesiydi ve listeye uyulmadı:
 K5 (görsel kabul) hiç yapılmadı, K4 (istatistik) en sona bırakıldı ve 27

@@ -6,8 +6,8 @@ import copy
 
 import jsonschema
 import pytest
-from quaxis.chart.komposer.altin_bolge import bestele
-from quaxis.chart.ornek.thyao_altin_bolge import sonuc
+from quaxis.chart.komposer.swing_fib_abcd import bestele
+from quaxis.chart.ornek.thyao_swing_fib_abcd import sonuc
 from quaxis.chart.sema import sema
 
 

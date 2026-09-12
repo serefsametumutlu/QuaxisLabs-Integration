@@ -124,7 +124,7 @@ export function Omni() {
                   setSecili(0);
                 }}
                 onKeyDown={listeTusu}
-                placeholder="THYAO, Altın Bölge, Tarama…"
+                placeholder="THYAO, Salınım Fibo ABCD, Tarama…"
                 aria-label="Ara"
               />
               <kbd>Esc</kbd>

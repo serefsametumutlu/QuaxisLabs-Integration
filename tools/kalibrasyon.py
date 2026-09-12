@@ -1,7 +1,7 @@
 """K3 koşucusu — tam evrende aday sayısını ölçer ve raporu yazar.
 
-    python tools/kalibrasyon.py --katalog "modul:KATALOG" --gosterge altin.bolge \\
-        --slug altin-bolge --zaman-dilimi 1D
+    python tools/kalibrasyon.py --katalog "modul:KATALOG" --gosterge swing.fib.abcd \\
+        --slug swing-fib-abcd --zaman-dilimi 1D
 
     # gösterge yokken boru hattını sınamak için:
     python tools/kalibrasyon.py --sentetik

@@ -41,7 +41,7 @@ python uret.py                 # şema + örnek ChartSpec üretir
 | Dosya | Ne |
 |---|---|
 | `sema/chartspec-1.0.schema.json` | Dilden bağımsız sözleşme (JSON Schema 2020-12). `sema.py` tarafından **enum'lardan türetilir** — elle yazılmaz, bu yüzden rol listeleriyle ayrı düşemez. |
-| `../../apps/web/ornek/thyao-altin-bolge.chartspec.json` | Web çizicisinin okuduğu örnek spec |
+| `../../apps/web/ornek/thyao-swing-fib-abcd.chartspec.json` | Web çizicisinin okuduğu örnek spec |
 
 Web çizicisi bu JSON'u okur — TypeScript'te elle kurulmuş bir nesneyi değil.
 Sözleşme ancak dil sınırını geçince sözleşmedir.
@@ -55,9 +55,9 @@ quaxis.chart/
   sema.py            JSON şeması, enum'lardan türetilir
   tipler.py          komposer GİRDİLERİ (göstergelerin tipli sonuçları)
   komposer/
-    altin_bolge.py   FibDuzeltmeSonucu → ChartSpec
+    swing_fib_abcd.py   FibDuzeltmeSonucu → ChartSpec
   ornek/
-    thyao_altin_bolge.py   referans görselin sayılarıyla fikstür
+    thyao_swing_fib_abcd.py   referans görselin sayılarıyla fikstür
 tests/
   test_spec.py            sözleşmenin üç güvencesi
   test_komposer.py        referans sayıları ve non-repaint çizim kuralı
@@ -73,16 +73,16 @@ varsayılana düşürür ve ADR-001'in yasakladığı sessiz griye dönüş geri
 ## Göstergeler nerede?
 
 Henüz yok. ADR-002 gereği gösterge katmanı **sıfırdan** yazılacak ve her
-strateji kendi fazında 7 kapıdan geçecek. Bu yüzden `altin_bolge` komposerinin
+strateji kendi fazında 7 kapıdan geçecek. Bu yüzden `swing_fib_abcd` komposerinin
 girdisi şimdilik elle kurulan bir fikstür
-(`ornek/thyao_altin_bolge.py`) — sayıları `references/HRhIeAdbcAAL2_B.png`
+(`ornek/thyao_swing_fib_abcd.py`) — sayıları `references/HRhIeAdbcAAL2_B.png`
 referans görselinden okundu. Komposerin kendisi gerçek koddur ve gösterge
 geldiğinde girdisi değişir, kendisi değişmez.
 
 ## Referanstaki mavi trend çizgisi neden yok?
 
 `HRhIeAdbcAAL2_B.png`'de X'ten yukarı uzanan kesik-noktalı mavi bir çizgi var.
-O çizgi **Altın Bölge stratejisine ait değil**, ayrı bir trendline
+O çizgi **Salınım Fibo ABCD stratejisine ait değil**, ayrı bir trendline
 göstergesinin çıktısı. Komposerin onu üretmesi katman ayrımını bozardı: her
 komposer yalnız kendi stratejisinin çizimini üretir. `CizgiRol.TREND` rolü
 sözleşmede hazır duruyor; trendline stratejisi yazıldığında kendi komposeri

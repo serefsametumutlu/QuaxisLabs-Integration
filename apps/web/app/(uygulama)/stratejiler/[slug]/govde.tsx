@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Eyebrow, Pill, Tabs } from "@/components/ui";
 import { Faz4Isareti, GrafikYeri } from "@/components/kabuk/GrafikYeri";
 import { Grafik } from "@/components/grafik/Grafik";
-import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
+import { THYAO_SWING_FIB_ABCD } from "@/lib/ornek-chartspec";
 import type { Strateji } from "@/lib/ornek-strateji";
 
 const GORUNUM = [
@@ -16,7 +16,7 @@ const GORUNUM = [
 export function StratejiGovde({ strateji }: { strateji: Strateji }) {
   const [gorunum, setGorunum] = useState<string>("grafik");
   const tohum = strateji.slug.split("").reduce((a, c) => a + c.charCodeAt(0), 0) * 131;
-  const spec = strateji.slug === "altin-bolge" ? THYAO_ALTIN_BOLGE : null;
+  const spec = strateji.slug === "swing-fib-abcd" ? THYAO_SWING_FIB_ABCD : null;
 
   return (
     <div style={{ marginBottom: 12 }}>
@@ -78,7 +78,7 @@ export function StratejiGovde({ strateji }: { strateji: Strateji }) {
   );
 }
 
-/** "Altın Bölge" -> "AltinBolge": sınıf adı için Türkçe harfleri sadeleştirir. */
+/** "Salınım Fibo ABCD" -> "SalinimFiboABCD": sınıf adı için Türkçe harfleri sadeleştirir. */
 function ad(s: string) {
   const harita: Record<string, string> = {
     ı: "i", İ: "I", ğ: "g", Ğ: "G", ş: "s", Ş: "S",

@@ -1,4 +1,4 @@
-"""Altın Bölge komposeri — `FibDuzeltmeSonucu` → `ChartSpec`.
+"""Salınım Fibo ABCD komposeri — `FibDuzeltmeSonucu` → `ChartSpec`.
 
 Jenerik bir çizici DEĞİL: bu strateji için bestelenmiş tek bir komposer.
 Referans görsel `references/HRhIeAdbcAAL2_B.png` neyi gösteriyorsa onu üretir:
@@ -11,6 +11,18 @@ Referans görsel `references/HRhIeAdbcAAL2_B.png` neyi gösteriyorsa onu üretir
   · 0.618–0.786 altın bölge bandı
 
 Renk yok, piksel yok: yalnızca ROL ve DEĞER. Nasıl görüneceği çizicinin işi.
+
+**Adlandırma düzeltmesi (Faz 7.1).** Bu komposer Faz 4'te `altin_bolge` adıyla
+yazılmıştı. Yanlıştı: referans görsel bir XABCD **harmonik formasyonu**
+gösteriyor — X,A,B,C,D köşeleri, C→D izdüşümü, tamamlanma rozeti. Golden Zone
+(ICT dilinde OTE) ise bambaşka bir şeydir: yapı kırılımından (BOS) sonra tek bir
+salınımın 0.62–0.79 düzeltme bölgesine dönüşü. Biri formasyon, diğeri bölge.
+Çizdiği şeyin adını taşımayan bir komposer, ölçtüğünü sandığın şeyi ölçmediğin
+bir stratejinin ilk adımıdır; o yüzden ad düzeltildi. Golden Zone kendi
+komposerini kendi fazında alacak.
+
+Buradaki 0.618–0.786 bandı formasyonun İÇİNDEKİ fibo bandıdır — Golden Zone
+stratejisi değil.
 """
 
 from __future__ import annotations
@@ -58,7 +70,7 @@ def bestele(sonuc: FibDuzeltmeSonucu, *, ornek_mi: bool = False) -> ChartSpec:
     """Tipli sonucu ChartSpec'e çevirir ve doğrulanmış hâlde döner."""
     barlar = list(sonuc.barlar)
     if len(barlar) < 2:
-        raise ValueError("Altın Bölge komposeri en az iki bar ister.")
+        raise ValueError("Salınım Fibo ABCD komposeri en az iki bar ister.")
 
     ilk_t, son_t = barlar[0].t, barlar[-1].t
     katmanlar: list[Katman] = []
@@ -180,8 +192,8 @@ def bestele(sonuc: FibDuzeltmeSonucu, *, ornek_mi: bool = False) -> ChartSpec:
         sembol=sonuc.sembol,
         ad=sonuc.ad,
         zaman_dilimi=sonuc.zaman_dilimi,
-        strateji="altin-bolge",
-        strateji_adi="Altın Bölge",
+        strateji="swing-fib-abcd",
+        strateji_adi="Salınım Fibo ABCD",
         yon=sonuc.yon,
         durum=sonuc.durum,
         ornek_mi=ornek_mi,

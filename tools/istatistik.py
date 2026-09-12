@@ -1,7 +1,7 @@
 """K4 koşucusu — sembol-kümelenmiş ileri getiri ölçümü ve raporu.
 
-    python tools/istatistik.py --katalog "modul:KATALOG" --gosterge altin.bolge \\
-        --slug altin-bolge --ufuk 20
+    python tools/istatistik.py --katalog "modul:KATALOG" --gosterge swing.fib.abcd \\
+        --slug swing-fib-abcd --ufuk 20
 
     # ölçüm makinesini gösterge yokken sınamak için:
     python tools/istatistik.py --sentetik

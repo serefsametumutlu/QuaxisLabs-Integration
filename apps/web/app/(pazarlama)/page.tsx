@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Eyebrow, Pill } from "@/components/ui";
 import { Grafik } from "@/components/grafik/Grafik";
-import { THYAO_ALTIN_BOLGE } from "@/lib/ornek-chartspec";
+import { THYAO_SWING_FIB_ABCD } from "@/lib/ornek-chartspec";
 import { HeroForm } from "@/components/kabuk/HeroForm";
 import { OLGULAR } from "@/lib/ornek-veri";
 
@@ -16,8 +16,8 @@ export default function GirisEkrani() {
   return (
     <>
       <section className="hero">
-        <Link className="badge" href="/stratejiler/altin-bolge">
-          <b>YENİ</b> Altın Bölge stratejisi yayında <span className="dim">→</span>
+        <Link className="badge" href="/stratejiler/swing-fib-abcd">
+          <b>YENİ</b> Salınım Fibo ABCD stratejisi yayında <span className="dim">→</span>
         </Link>
 
         <h1>
@@ -58,7 +58,7 @@ export default function GirisEkrani() {
               1G
             </span>
             <Pill tone="acc" small>
-              altın bölge
+              fibo abcd
             </Pill>
             <Pill tone="down" small>
               SAT
@@ -66,7 +66,7 @@ export default function GirisEkrani() {
             <span style={{ marginLeft: "auto" }} />
             <Eyebrow style={{ letterSpacing: "1.4px", fontSize: 10 }}>örnek veri</Eyebrow>
           </div>
-          <Grafik spec={THYAO_ALTIN_BOLGE} yukseklik={250} dar seviyeler="vurgulu" />
+          <Grafik spec={THYAO_SWING_FIB_ABCD} yukseklik={250} dar seviyeler="vurgulu" />
         </div>
       </section>
 

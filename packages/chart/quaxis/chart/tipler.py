@@ -60,7 +60,7 @@ class FibSeviyesi:
 
 @dataclass(frozen=True)
 class FibDuzeltmeSonucu:
-    """Altın Bölge / fibonacci düzeltme göstergesinin tipli sonucu."""
+    """Salınım Fibo ABCD / fibonacci düzeltme göstergesinin tipli sonucu."""
 
     sembol: str
     ad: str

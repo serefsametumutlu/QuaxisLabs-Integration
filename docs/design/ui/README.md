@@ -121,7 +121,7 @@ aralıkları. "2 sn kaydır ve ölç" düğmesiyle vitrinde de tekrarlanabilir.
 | Tarama | `/tarama` | `tarama-*-f3.png` |
 | Grafik | `/grafik` | `grafik-*-f3.png` |
 | Strateji kütüphanesi | `/stratejiler` | `kutuphane-*-f3.png` |
-| Strateji sayfası | `/stratejiler/altin-bolge` | `strateji-*-f3.png` |
+| Strateji sayfası | `/stratejiler/swing-fib-abcd` | `strateji-*-f3.png` |
 
 Her yüzey için koyu 1440 + açık 1440 + koyu 768 saklandı. Sistem teması Faz
 2'de doğrulandı (`tasarim-sistem-*`), tema kapsamlaması değişmedi.

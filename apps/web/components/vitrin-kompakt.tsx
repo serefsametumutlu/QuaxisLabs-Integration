@@ -153,7 +153,7 @@ export function VitrinKompakt() {
           <>
             <span className="sym">THYAO</span>
             <Pill tone="acc" small>
-              altın bölge
+              fibo abcd
             </Pill>
             <Pill tone="down" small>
               SAT

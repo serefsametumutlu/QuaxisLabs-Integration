@@ -3,8 +3,8 @@
     "sembol": "THYAO",
     "ad": "Türk Hava Yolları",
     "zaman_dilimi": "1G",
-    "strateji": "altin-bolge",
-    "strateji_adi": "Altın Bölge",
+    "strateji": "swing-fib-abcd",
+    "strateji_adi": "Salınım Fibo ABCD",
     "yon": "sat",
     "durum": "tamamlandı",
     "ornek_mi": true

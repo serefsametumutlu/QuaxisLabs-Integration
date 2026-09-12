@@ -1,12 +1,12 @@
-"""Altın Bölge komposeri — referansın neyi göstermesi gerektiğini sabitler."""
+"""Salınım Fibo ABCD komposeri — referansın neyi göstermesi gerektiğini sabitler."""
 
 from __future__ import annotations
 
 import dataclasses
 
 import pytest
-from quaxis.chart.komposer.altin_bolge import bestele
-from quaxis.chart.ornek.thyao_altin_bolge import fib, sonuc
+from quaxis.chart.komposer.swing_fib_abcd import bestele
+from quaxis.chart.ornek.thyao_swing_fib_abcd import fib, sonuc
 from quaxis.chart.roller import AlanRol, RozetRol, SeviyeRol
 
 
@@ -52,7 +52,7 @@ def test_referanstaki_fiyatlar_birebir(spec):
     assert bulunan == pytest.approx(beklenen)
 
 
-def test_altin_bolge_bandi_0618_0786_arasi(spec):
+def test_fibo_bandi_0618_0786_arasi(spec):
     (bant,) = _rol(spec, "bant")
     assert bant.rol is AlanRol.BOLGE_ALTIN
     assert bant.alt == pytest.approx(fib(0.786))
