@@ -1,5 +1,12 @@
 # Strateji Envanteri
 
+> ⚠ **2026-09-14 · Veri denetimi yapıldı ve aşağıdaki bütün ölçümleri
+> etkileyen kusurlar bulundu.** Rapor:
+> [`docs/olcum/veri-denetimi-bist-1D.md`](../olcum/veri-denetimi-bist-1D.md).
+> En önemlisi: adil baz **hacimsiz (bayat fiyatlı) barları dışlamıyor** ve
+> o barlardan girilen işlemler 40 barda ortalama %15.31 getiriyor —
+> normal barlarda %6.93. Ölçümler bu düzeltildikten sonra yenilenmeli.
+
 **Güncelleme:** 2026-09-13 (harmonikler eklendi)
 
 Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
