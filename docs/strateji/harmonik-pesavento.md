@@ -28,7 +28,7 @@ kapilar:
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/dedektor.py", "packages/teknik/quaxis/teknik/indicators/harmonik/pivotlar.py", "packages/teknik/tests/test_harmonik.py"] }
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K3-1D.md", "docs/olcum/harmonik-pesavento-K3-karar-kurali.md"] }
   K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K4-1D-long.md", "docs/olcum/harmonik-pesavento-K4-1D-hepsi.md", "docs/olcum/harmonik-pesavento-K4b-teyit-1D-long.md", "docs/olcum/onkayit-harmonik-teyit.md"] }
-  K5: { gecildi: null, kanit: [], onay: null }
+  K5: { gecildi: 2026-09-14, kanit: ["docs/design/ui/harmonik-pesavento-abcd-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-gartley-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-kelebek-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-uc-surus-koyu-1440-son.png", "docs/design/ui/README.md"], onay: 2026-09-14 }
   K6: { gecildi: null, kanit: [] }
 ---
 
@@ -423,21 +423,20 @@ Kitabın Gartley için ~%70 isabet iddiası **doğrulanmadı**: ölçülen %41.4
 | Komposer | [`komposer/harmonik.py`](../../packages/chart/quaxis/chart/komposer/harmonik.py) |
 | Spec üretici | [`tools/harmonik_spec.py`](../../tools/harmonik_spec.py) — gerçek BIST verisi |
 | Örnekler | `rtalb-abcd` · `dogub-gartley` · `srvgy-kelebek` · `burva-uc_surus` |
-| İterasyonlar | **13** (`docs/design/ui/harmonik-*-koyu-1440-son.png`) |
+| İterasyonlar | **13** (`docs/design/ui/harmonik-pesavento-*-koyu-1440-son.png`) |
 | İterasyon kaydı | [`docs/design/ui/README.md`](../design/ui/README.md) |
-| Onay | ❌ **KAPI KAPALI** |
+| Onay | ✅ **2026-09-14 · kullanıcı onayladı** |
 
-### Kapının neden kapalı olduğu
+### Kapı nasıl kapandı
 
-**Tek sebep kaldı: kullanıcı onayı alınmadı.** K5'in bitti kriteri bunu
-şart koşuyor.
+13 iterasyon, dört formasyonun dördü de 1440 ve 768 genişlikte ayrı ayrı
+yakalandı. Kusurların çoğu **gözle değil DOM ve piksel ölçümüyle** bulundu;
+tam kayıt [`docs/design/ui/README.md`](../design/ui/README.md).
 
-i12'de açık bırakılan ölçek hatası **i13'te çözüldü**: fiyat aralığının
-ucundaki köşe mumlarından 43 piksel uzağa düşüyordu; kalibrasyon çizgisi
-enjekte edilip piksel taramasıyla sebep bulundu (`autoscaleInfoProvider`
-mumlar ile `priceToCoordinate` arasında ölçek ayrışması yaratıyordu).
-Sağlayıcı kaldırıldı, fark **2 piksele** indi. Ayrıntı ve geri alınan iki
-deneme: [`docs/design/ui/README.md`](../design/ui/README.md).
+Son engel olan ölçek hatası (fiyat aralığının ucundaki köşe mumlarından 43
+piksel uzağa düşüyordu) i13'te çözüldü — fark **2 piksele** indi.
+
+**Kullanıcı onayı: 2026-09-14.**
 
 ### Örnekler nasıl seçildi
 

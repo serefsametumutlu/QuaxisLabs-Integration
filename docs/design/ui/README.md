@@ -425,7 +425,9 @@ içindeki `_okunaklilik`). Sonuç kendiliğinden karışık çıktı: biri hedef
 ulaştı, ikisi stop oldu, biri süre doldurdu. Kârlı örnek seçmek verdikti
 gizlemenin görsel hâli olurdu.
 
-Ekran görüntüleri: `harmonik-<formasyon>-koyu-1440-son.png` ve `-768-`.
+Ekran görüntüleri: `harmonik-pesavento-<formasyon>-koyu-1440-son.png` ve
+`-768-`. Dosya adı pasaportun slug'ıyla başlıyor — `pasaport.py dogrula`
+K5 kanıtlarını o önekle arıyor ve eşleşmeyen kare sayılmıyor.
 Her formasyon `?f=harmonik-<ad>` bağlantısıyla ayrı ayrı yakalandı.
 
 ### İterasyon kaydı — ne görüldü, ne düzeltildi
