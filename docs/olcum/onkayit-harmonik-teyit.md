@@ -1,7 +1,8 @@
 # Ön kayıt — Harmonik teyitli giriş (KURAL-30, "bir bar bekle")
 
 **Yazıldığı tarih:** 2026-09-13
-**Durum:** ⏳ sonuç GÖRÜLMEDEN yazıldı ve commit edildi.
+**Durum:** ✅ **KOŞULDU** (2026-09-13). Belge sonuç görülmeden yazılıp
+`f989bf6` ile commit edildi; sonuç bölümü sonradan, olduğu gibi eklendi.
 
 > Bu belge, olumsuz bir sonucun ardından yapılan **ikinci** denemedir ve
 > tam da bu yüzden var. İlk ölçüm başarısız olduktan sonra yapılan her
@@ -135,4 +136,100 @@ iddiası tam olarak budur ve ölçülecek olan da budur.
 
 ## 9. Sonuç
 
-*(ölçümden sonra, olduğu gibi eklenecek)*
+Ölçüm dosyası:
+[`harmonik-pesavento-K4b-teyit-1D-long.md`](harmonik-pesavento-K4b-teyit-1D-long.md)
+
+### Tüm dönem (birincil pencere)
+
+| künye | işlem | sembol | isabet | beklenen R | adil baz | **fark** | PF | p |
+|---|---|---|---|---|---|---|---|---|
+| `abcd·kor` | 2413 | 451 | %32.8 | +0.148R | +0.323R | −0.176R | 1.22 | 1.0000 |
+| **`abcd·teyit`** | **803** | **362** | **%45.3** | **+0.707R** | **+0.349R** | **+0.359R** | **2.35** | **0.0685** |
+| `gartley·kor` | 108 | 92 | %35.2 | +0.053R | +0.240R | −0.187R | 1.08 | 0.8941 |
+| `gartley·teyit` | 36 | 36 | %41.7 | −0.108R | +0.171R | −0.278R | 0.82 | 0.8926 |
+| `kelebek·kor` | 138 | 113 | %30.4 | −0.195R | +0.228R | −0.423R | 0.71 | 1.0000 |
+| `kelebek·teyit` | 44 | 43 | %45.5 | +0.174R | +0.183R | −0.009R | 1.39 | 0.4633 |
+| `uc_surus·kor` | 142 | 117 | %24.6 | −0.256R | +0.150R | −0.407R | 0.68 | 0.9990 |
+| `uc_surus·teyit` | 37 | 35 | %51.4 | +0.173R | +0.105R | +0.069R | 1.42 | 0.2499 |
+
+### Karar kuralı (§6) — `abcd·teyit`, en güçlü aday
+
+| Madde | Sonuç |
+|---|---|
+| 1 · Adil baza karşı fark pozitif | ✔ **+0.359R** |
+| 2 · p ≤ 0.05 **ve** BH-FDR | ✘ **p = 0.0685** — düz eşiği bile geçmiyor |
+| 3 · ≥ 30 sembol | ✔ 362 |
+| 4 · Körlemesine varyanttan daha iyi | ✔ **+0.534R** katkı |
+
+**Dördünden üçü sağlandı, ikincisi sağlanmadı. Kural ikisini de istiyordu.**
+
+### Verdikt: HİPOTEZ REDDEDİLDİ
+
+§7 açıktı: "Hiçbir teyitli varyant FDR'yi geçemezse harmonik ailesi
+çürütülmüştür ve bu dosya son denemedir."
+
+Sekiz testin hiçbiri geçemedi. En iyisi p=0.0685 ile **düz 0.05 eşiğini
+bile** geçemedi; sekiz test için BH eşiği ise 0.00625'ti.
+
+### Ama KURAL-30 gerçekten bir şey yapıyor
+
+Bunu saklamak sonucu çarpıtmak olurdu. Teyit tekniği dağılımı **belirgin
+biçimde** değiştirdi:
+
+| formasyon | isabet (körlemesine → teyitli) | stop oranı | teyidin R katkısı |
+|---|---|---|---|
+| `abcd` | %32.8 → **%45.3** | %65 → %47 | **+0.534R** |
+| `kelebek` | %30.4 → **%45.5** | %65 → %41 | **+0.414R** |
+| `uc_surus` | %24.6 → **%51.4** | %75 → %38 | **+0.475R** |
+| `gartley` | %35.2 → %41.7 | %64 → %58 | −0.091R |
+
+Dörtte üçünde isabet ~15 puan arttı ve stop oranı ~20 puan düştü.
+Pesavento'nun "körlemesine girme, bir bar bekle" tavsiyesi **ölçülebilir
+bir etki** taşıyor. Sadece bu etki, adil bazdan ayrılacak kadar büyük ve
+kararlı **değil**.
+
+### Neden "az kalmıştı" demiyorum — asıl bulgu burada
+
+`abcd·teyit`'in p=0.0685'i cazip. Ama pencereler ayrıştırılınca etkinin
+nerede olduğu ortaya çıkıyor:
+
+| pencere | işlem | fark | p |
+|---|---|---|---|
+| IS (ilk %70) | 502 | **+0.582R** | 0.0780 |
+| **OOS (son %30)** | **301** | **−0.005R** | **0.3953** |
+
+**Etkinin tamamı IS penceresinde.** Görülmemiş dönemde fark **sıfır**.
+Tüm dönemin +0.359R'si, IS'in +0.582R'sinin OOS'un sıfırıyla
+ortalamasından ibaret.
+
+Ön kayıt §4 tüm dönemi birincil yapmıştı ve bu doğru bir karardı
+(örneklem için). Ama §4 aynı zamanda şunu yazmıştı: "tutarsızlık çıkarsa
+bu bir BULGU olarak yazılacak — seçim hakkı olarak değil." Çıktı ve
+yazılıyor.
+
+Bir etkinin yalnız geçmişte görünüp görülmemiş dönemde kaybolması, o
+etkinin gerçek olmadığının en bilinen işaretidir. Eşikleri oynatıp
+p'yi 0.05'in altına indirmek burada **kanıt değil, o kayboluşu gizlemek**
+olurdu.
+
+### Bu koşuda düzeltilen hata ne yaptı
+
+`giris_bari_riskli` düzeltmesi (giriş barının kendisi de stop için
+sayılır) körlemesine varyantı beklendiği gibi kötüleştirdi:
+
+| | önce | sonra |
+|---|---|---|
+| `abcd·kor` farkı (OOS) | +0.092R | **+0.059R** |
+| `abcd·kor` farkı (tüm dönem) | — | **−0.176R** |
+
+Düzeltmeden önceki rakamlar, gerçekte giriş barında stop olmuş %17.4'lük
+işlemi canlı sayıyordu.
+
+### Son söz
+
+Bu, ön kayıtta yazıldığı gibi **son denemeydi.** Üçüncü bir varyant
+denenmeyecek. Harmonik ailesi `kanıtlanmadı` etiketiyle kapanır.
+
+`abcd·teyit` için tek meşru yol kaldı ve o da **ileriye dönük**: kural
+bugün donduruldu; bundan sonra gelecek gerçekten yeni veride izlenebilir.
+Geçmişte arama yapmakla gelecekte doğrulamak farklı şeylerdir.

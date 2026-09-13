@@ -4,30 +4,40 @@
 
 ## Aile burada tanımlanır
 
-Beş test: dört formasyon + AB=CD'nin ikinci stop varyantı. Aile
-**önceden** sabitlendi (K3 karar kuralı §5) ve sonuca bakıp
-genişletilmeyecek. BH-FDR bu beşine uygulanır.
+**Sekiz test:** dört formasyon × iki giriş varyantı. Aile
+`docs/olcum/onkayit-harmonik-teyit.md` §5'te **sonuç görülmeden**
+sabitlendi ve genişletilmeyecek. BH-FDR sekizine birden uygulanır.
 
-AB=CD'nin iki stop varyantı olmasının sebebi kitap: AB=CD için stop
-formülü **vermiyor**. Hangi mesafenin doğru olduğu bir getiri sorusu
-olduğu için K3'te kapatılamadı; iki seçenek de ölçülüp aileye dahil
-ediliyor. "İkisini dene, iyi olanı raporla" tuzağına düşmemenin yolu
-ikisini de aynı düzeltmeye sokmaktır.
+| varyant | giriş |
+|---|---|
+| `kor` | fiyat D'ye dokunduğu anda, limit dolum |
+| `teyit` | KURAL-30: bir sonraki bar işlem yönünde kapanırsa o kapanışta |
 
-## Neden hem IS hem OOS yazılıyor
+`kor` varyantında `giris_bari_riskli=True`: limit dolum barın İÇİNDE
+gerçekleşir ve barın kalanı canlıdır. Tanı koşusu sinyallerin %14–28'inin
+giriş barında zaten stop olduğunu ve ölçümün bunu saymadığını buldu. Bu
+hata harmonikleri KAYIRIYORDU; düzeltilmesi sonucu kötüleştirecek.
 
-`measure_r`'ın uyarısı şu: bir koşulu IS'te ARAYIP yine IS'te doğrulamak
-cevabı bildiğin sınava girmektir. Burada **getiride hiçbir arama
-yapılmadı** — eşikler kalibrasyondan (sinyal sayısı, oran dağılımı)
-geldi, R'ye bakılmadı. Bu yüzden IS ayrı bir pencere olarak meşru ve
-tutarlılık kontrolü sağlıyor. Yine de **birincil sayı OOS'unkidir**;
-ikisi ayrışırsa bu bir bulgudur, seçim hakkı değil.
+`teyit` varyantında giriş bar KAPANIŞIDIR, dolayısıyla bayrak gereksiz —
+bar zaten bitmiştir.
+
+## Pencere
+
+Birincil pencere **tüm dönem**. Gerekçe ön kayıt §4: IS/OOS ayrımı
+eşiklerin GETİRİYE bakarak seçilmesine karşı bir korumadır; bizim
+eşiklerimiz K3'te yalnız aday sayısından türetildi ve o koşuda ölçüm
+aracı hiç çağrılmadı. Ayırmanın koruduğu bir şey yok, tek etkisi
+örneklemi %70 küçültmek — ve o küçülme Gartley'i 27 sembole düşürüp
+verdikt yazılamaz hâle getirmişti.
+
+IS ve OOS ayrıca raporlanır; tutarsızlık bir BULGUDUR, seçim hakkı değil.
 """
 
 from __future__ import annotations
 
 import argparse
 import collections
+import dataclasses
 import datetime as dt
 import pathlib
 import sys
@@ -57,14 +67,54 @@ from quaxis.teknik.olcum.bariyer import (  # noqa: E402
 )
 from quaxis.teknik.olcum.ileri_getiri import bh_fdr  # noqa: E402
 
-#: Aile ÖNCEDEN sabit. Sonuca bakıp üye eklenmeyecek.
-AILE: dict[str, tuple[type, object]] = {
-    "abcd_stop1272": (Abcd, AbcdParams(stop_orani=1.272)),
-    "abcd_stop1618": (Abcd, AbcdParams(stop_orani=1.618)),
+#: Formasyonlar. Aile bunların **iki varyantı** — bkz. `AILE`.
+FORMASYON: dict[str, tuple[type, object]] = {
+    "abcd": (Abcd, AbcdParams()),
     "gartley": (Gartley, GartleyParams()),
     "kelebek": (Kelebek, KelebekParams()),
     "uc_surus": (UcSurus, UcSurusParams()),
 }
+
+#: Aile ÖNCEDEN sabit (`docs/olcum/onkayit-harmonik-teyit.md` §5):
+#: 4 formasyon × 2 varyant = **8 test**. Sonuca bakıp üye eklenmeyecek.
+AILE: list[tuple[str, str]] = [
+    (ad, varyant) for ad in FORMASYON for varyant in ("kor", "teyit")
+]
+
+
+def teyitli(
+    df: pd.DataFrame, s: Signal
+) -> tuple[Signal, float, float] | None:
+    """KURAL-30 — bir bar bekleme tekniği. Sıfır serbest parametre.
+
+    D'ye dokunulan bar **sinyaldir ama giriş değildir**. Bir sonraki barın
+    kapanışı beklenir; o bar **işlem yönünde kapanırsa** (boğada
+    `close > open`) o kapanıştan girilir, kapanmazsa işlem **hiç açılmaz**.
+
+    Bedava değil ve bunu ön kayıt §8'de baştan kabul ettik: teyit barı
+    yukarı kapandığı için boğada D'den DAHA YÜKSEK bir fiyattan girilir.
+    Stop aynı yerde kaldığı için risk büyür, ödül/risk düşer. Teyidin
+    isabeti bu kaybı telafi edecek kadar artırması gerekiyor.
+    """
+    i = df.index.get_loc(s.detected_at)
+    if not isinstance(i, int) or i + 1 >= len(df):
+        return None
+    j = i + 1
+    acilis = float(df["open"].iloc[j])
+    kapanis = float(df["close"].iloc[j])
+    uzun = s.direction == "long"
+    if (kapanis <= acilis) if uzun else (kapanis >= acilis):
+        return None  # teyit gelmedi → işlem açılmaz
+    stop, hedef = float(s.payload["stop"]), float(s.payload["hedef"])
+    # Teyit barı stop'un ötesinde kapandıysa işlem zaten ölü doğar.
+    if (kapanis <= stop) if uzun else (kapanis >= stop):
+        return None
+    yeni = dataclasses.replace(
+        s,
+        detected_at=df.index[j],
+        payload={**s.payload, "giris": kapanis, "teyit": True},
+    )
+    return yeni, stop, hedef
 
 
 def _evren(tf: str) -> dict[str, pd.DataFrame]:
@@ -84,7 +134,12 @@ def _evren(tf: str) -> dict[str, pd.DataFrame]:
 
 
 def _islemler(
-    sinif: type, params: object, evren: dict[str, pd.DataFrame], *, yon: str
+    sinif: type,
+    params: object,
+    evren: dict[str, pd.DataFrame],
+    *,
+    yon: str,
+    varyant: str,
 ) -> tuple[dict[str, list[tuple[Signal, float, float]]], int]:
     """Sinyalleri (sinyal, stop, hedef) üçlülerine çevirir.
 
@@ -99,6 +154,13 @@ def _islemler(
         kayit: list[tuple[Signal, float, float]] = []
         for s in ded(df).signals:
             if yon != "hepsi" and s.direction != yon:
+                continue
+            if varyant == "teyit":
+                ucdu = teyitli(df, s)
+                if ucdu is None:
+                    atilan += 1
+                    continue
+                kayit.append(ucdu)
                 continue
             stop, hedef = s.payload["stop"], s.payload["hedef"]
             giris = s.payload["giris"]
@@ -136,14 +198,19 @@ def main() -> int:
     print(f"{len(evren)} sembol", flush=True)
 
     sonuc: dict[str, dict[str, RResult]] = collections.defaultdict(dict)
-    islem_sayisi: dict[str, int] = {}
-    for ad, (sinif, params) in AILE.items():
-        islemler, atilan = _islemler(sinif, params, evren, yon=a.yon)
-        islem_sayisi[ad] = sum(len(v) for v in islemler.values())
-        print(f"  {ad:16s} {islem_sayisi[ad]:6d} işlem "
+    kunye: list[str] = []
+    for formasyon, varyant in AILE:
+        sinif, params = FORMASYON[formasyon]
+        ad = f"{formasyon}·{varyant}"
+        kunye.append(ad)
+        islemler, atilan = _islemler(
+            sinif, params, evren, yon=a.yon, varyant=varyant
+        )
+        n = sum(len(v) for v in islemler.values())
+        print(f"  {ad:18s} {n:6d} işlem "
               f"({len(islemler)} sembol, {atilan} atıldı)", flush=True)
         ufuk = int(getattr(params, "zaman_bariyeri", 40))
-        for pencere in ("oos", "is"):
+        for pencere in ("hepsi", "oos", "is"):
             sonuc[ad][pencere] = measure_r(
                 evren,
                 islemler,
@@ -151,10 +218,13 @@ def main() -> int:
                 pencere=pencere,
                 komisyon=VARSAYILAN_KOMISYON * a.maliyet_kati,
                 kayma=VARSAYILAN_KAYMA * a.maliyet_kati,
+                # Limit dolumda giriş barının kalanı canlı; teyitli girişte
+                # giriş zaten bar KAPANIŞI olduğu için gereksiz.
+                giris_bari_riskli=(varyant == "kor"),
             )
 
-    p_oos = {ad: sonuc[ad]["oos"].p_value for ad in AILE}
-    fdr = bh_fdr(p_oos, q=0.05)
+    p_ana = {ad: sonuc[ad]["hepsi"].p_value for ad in kunye}
+    fdr = bh_fdr(p_ana, q=0.05)
 
     satir: list[str] = []
     y = satir.append
@@ -174,29 +244,49 @@ def main() -> int:
       "BH-FDR (q=0.05) beşine birden uygulandı.")
     y("")
 
-    for pencere, baslik in (("oos", "OOS — birincil"), ("is", "IS — tutarlılık")):
+    for pencere, baslik in (
+        ("hepsi", "Tüm dönem — BİRİNCİL"),
+        ("oos", "OOS — ikincil"),
+        ("is", "IS — ikincil"),
+    ):
         y(f"## {baslik}")
         y("")
-        y("| formasyon | işlem | sembol | isabet | beklenen R | adil baz | fark | PF | p |")
+        y("| künye | işlem | sembol | isabet | beklenen R | adil baz | fark | PF | p |")
         y("|---|---|---|---|---|---|---|---|---|")
-        for ad in AILE:
+        for ad in kunye:
             y(_satir(ad, sonuc[ad][pencere]))
         y("")
 
-    y("## BH-FDR (q = 0.05) — OOS penceresi")
+    y("## BH-FDR (q = 0.05) — tüm dönem, 8 test")
     y("")
-    y("| formasyon | p | FDR eşiğini geçti mi |")
+    y("| künye | p | FDR eşiğini geçti mi |")
     y("|---|---|---|")
-    for ad in sorted(AILE, key=lambda k: p_oos[k]):
-        y(f"| `{ad}` | {p_oos[ad]:.4f} | {'**✔ geçti**' if fdr[ad] else '✘'} |")
+    for ad in sorted(kunye, key=lambda k: p_ana[k]):
+        y(f"| `{ad}` | {p_ana[ad]:.4f} | {'**✔ geçti**' if fdr[ad] else '✘'} |")
+    y("")
+
+    y("## Teyit katkı yaptı mı (ön kayıt §6, madde 4)")
+    y("")
+    y("Teyitli varyantın körlemesineden **daha iyi** olması gerekiyor; "
+      "yoksa teyit 'işe yaradı' denemez.")
+    y("")
+    y("| formasyon | körlemesine fark | teyitli fark | teyidin katkısı |")
+    y("|---|---|---|---|")
+    for formasyon in FORMASYON:
+        k = sonuc[f"{formasyon}·kor"]["hepsi"]
+        t = sonuc[f"{formasyon}·teyit"]["hepsi"]
+        kf = k.mean_r - k.baseline_mean_r
+        tf_ = t.mean_r - t.baseline_mean_r
+        y(f"| `{formasyon}` | {kf:+.3f}R | {tf_:+.3f}R | "
+          f"**{tf_ - kf:+.3f}R** |")
     y("")
 
     y("## Çıkış kırılımı")
     y("")
     y("| formasyon | hedef | stop | zaman | ort. kazanç | ort. kayıp |")
     y("|---|---|---|---|---|---|")
-    for ad in AILE:
-        r = sonuc[ad]["oos"]
+    for ad in kunye:
+        r = sonuc[ad]["hepsi"]
         y(f"| `{ad}` | %{r.target_rate * 100:.0f} | %{r.stop_rate * 100:.0f} | "
           f"%{r.time_rate * 100:.0f} | {r.ortalama_kazanc:+.2f}R | "
           f"{r.ortalama_kayip:+.2f}R |")
@@ -207,14 +297,14 @@ def main() -> int:
     y("Pardo s.295: 30–50 işlem asgari kabul edilir. **Sembol sayısı 30'un "
       "altındaki satırın sayısı yazılır, verdikti yazılmaz.**")
     y("")
-    y("| formasyon | OOS sembol | yeterli mi |")
+    y("| künye | sembol | yeterli mi |")
     y("|---|---|---|")
-    for ad in AILE:
-        n = sonuc[ad]["oos"].n_symbols
+    for ad in kunye:
+        n = sonuc[ad]["hepsi"].n_symbols
         y(f"| `{ad}` | {n} | {'✔' if n >= 30 else '✘ verdikt yazılmaz'} |")
     y("")
 
-    hedef = KOK / "docs" / "olcum" / f"harmonik-pesavento-K4-{tf}-{a.yon}.md"
+    hedef = KOK / "docs" / "olcum" / f"harmonik-pesavento-K4b-teyit-{tf}-{a.yon}.md"
     if a.maliyet_kati != 1.0:
         hedef = hedef.with_name(hedef.stem + f"-maliyet{a.maliyet_kati:g}x.md")
     hedef.write_text("\n".join(satir) + "\n", encoding="utf-8")

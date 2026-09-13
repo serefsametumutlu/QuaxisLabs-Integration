@@ -143,6 +143,7 @@ def barrier_outcome(
     entry: float | None = None,
     komisyon: float = VARSAYILAN_KOMISYON,
     kayma: float = VARSAYILAN_KAYMA,
+    giris_bari_riskli: bool = False,
 ) -> BarrierOutcome | None:
     """Girişten sonraki barları tek tek yürüyüp hangi bariyerin vurulduğunu bulur.
 
@@ -162,6 +163,20 @@ def barrier_outcome(
     bir etki buldu, aynı dönemde %0.3 gidiş-dönüş maliyet 0.068R ediyordu.
     Yani maliyet, bulunan kenarın TAMAMI kadardı. `komisyon=kayma=0` vererek
     kapatılabilir, ama o zaman rapor bunu yazmak zorundadır.
+
+    `giris_bari_riskli` — **limit emirle girilen stratejilerde True olmalı.**
+    Ölçülmüş bir hatanın düzeltmesi: bariyer yürüyüşü normalde giriş barının
+    BİR SONRASINDAN başlar, çünkü bar kapanışından girildiği varsayılır. Ama
+    limit dolum barın İÇİNDE gerçekleşir ve barın kalanı hâlâ canlıdır.
+    Harmonik sinyallerin **%14–28'i** giriş barında zaten stop oluyordu ve
+    ölçüm bunları hiç saymıyordu — yani gerçekte yaşamayan işlemler ölçüme
+    canlı giriyordu. Bayrak açıkken giriş barının kendi dibi/tepesi de stop
+    için kontrol edilir.
+
+    Neden yalnız STOP: dolumun bar içinde tam olarak ne zaman olduğunu
+    bilmiyoruz. Hedefin aynı barda vurulduğunu saymak, dolumdan ÖNCE
+    vurulmuş olabileceği için stratejiyi kayırırdı. "Aynı barda iki bariyer
+    de vurulursa stop kazanır" kuralının aynı mantığı.
 
     Yeterli ileri bar yoksa ya da risk sıfır/negatifse `None` döner; eksik
     veriyi "başabaş" saymak stratejiyi kayırır.
@@ -187,6 +202,13 @@ def barrier_outcome(
     son = min(i + max_bars, len(ohlc) - 1)
     yuksek = ohlc["high"].to_numpy(dtype=float)
     dusuk = ohlc["low"].to_numpy(dtype=float)
+
+    if giris_bari_riskli:
+        vuruldu = dusuk[i] <= stop if yon > 0 else yuksek[i] >= stop
+        if vuruldu:
+            return BarrierOutcome(
+                symbol, entry_t, ohlc.index[i], -1.0 - _maliyet(stop), "stop", 0
+            )
 
     for j in range(i + 1, son + 1):
         if yon > 0:
@@ -354,6 +376,7 @@ def measure_r(
     kayma: float = VARSAYILAN_KAYMA,
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
+    giris_bari_riskli: bool = False,
 ) -> RResult:
     """Evren geneli R ölçümü.
 
@@ -399,6 +422,9 @@ def measure_r(
                 df, sinyal.detected_at, stop=stop, target=hedef,
                 direction=sinyal.direction, max_bars=max_bars, symbol=sembol,
                 entry=giris_seviyesi, komisyon=komisyon, kayma=kayma,
+                # Limit dolumda giriş barının kalanı hâlâ canlı; çağıran
+                # stratejisinin nasıl girdiğini bilir (bkz. docstring).
+                giris_bari_riskli=giris_bari_riskli,
             )
             if s is None:
                 continue
