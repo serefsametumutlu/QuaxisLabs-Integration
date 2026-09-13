@@ -146,42 +146,70 @@ def barrier_outcome(
     return BarrierOutcome(symbol, entry_t, ohlc.index[son], r, "zaman", son - i)
 
 
-def _rastgele_baz(
+#: Sembol başına, işlem başına kaç rastgele bar denenecek. Boş dağılım bu
+#: havuzdan ÖRNEKLENEREK kurulur.
+VARSAYILAN_HAVUZ = 400
+
+
+def _bos_havuzu(
     ohlc: pd.DataFrame,
-    sonuclar: Sequence[BarrierOutcome],
     risk_orani: Sequence[float],
     hedef_orani: Sequence[float],
     yon: Sequence[float],
     max_bars: int,
     r: np.random.Generator,
-    oos_i: int = 0,
-) -> float:
-    """Aynı sembolde, AYNI risk/hedef mesafeleriyle rastgele barlardan giriş.
+    oos_i: int,
+    havuz: int = VARSAYILAN_HAVUZ,
+) -> list[np.ndarray] | None:
+    """Her işlemin risk yapısı için rastgele barlardan R havuzu.
 
-    Adil baz budur: "bu sinyalde girmek, aynı risk yapısıyla rastgele bir
-    barda girmekten daha iyi mi?" Piyasanın genel yönü böylece ayıklanır.
+    Adil baz şu soruyu sorar: "bu sinyalde girmek, AYNI risk yapısıyla
+    rastgele bir barda girmekten daha iyi mi?" Piyasanın genel yönü böylece
+    ayıklanır. Rastgele barlar da sinyallerle AYNI pencereden seçilir
+    (`oos_i`); farklı pencereden seçilirse baz, ölçtüğü şeyden başka bir
+    dönemi anlatır.
 
-    Rastgele barlar da sinyallerle AYNI pencereden seçilir (`oos_i`); farklı
-    pencereden seçilirse baz, ölçtüğü şeyden başka bir dönemi anlatır.
+    **Neden havuz.** Her permütasyon turunda bariyerleri yeniden yürümek
+    O(tur × işlem × bar) demekti: 648 sembollük bir evrende saatler. Bunun
+    yerine işlem başına `havuz` kadar rastgele bar BİR KEZ yürünür, sonra
+    turlar bu havuzdan örnekler. Boş dağılımın tanımı değişmez — "aynı risk
+    yapısı, rastgele bar" hâlâ aynı — yalnızca aynı örneklem uzayından
+    tekrar tekrar çekilir.
     """
     n = len(ohlc)
     secilebilir = np.arange(oos_i, n - max_bars - 1)
-    if len(secilebilir) == 0 or not sonuclar:
-        return 0.0
-    toplam = []
-    for k in range(len(sonuclar)):
-        i = int(r.choice(secilebilir))
-        giris = float(ohlc["close"].iloc[i])
+    if len(secilebilir) == 0 or not risk_orani:
+        return None
+
+    boyut = min(havuz, len(secilebilir))
+    kapanis = ohlc["close"].to_numpy(dtype=float)
+    havuzlar: list[np.ndarray] = []
+    for k in range(len(risk_orani)):
         y = yon[k]
-        stop = giris - risk_orani[k] * giris * y
-        hedef = giris + hedef_orani[k] * giris * y
-        s = barrier_outcome(
-            ohlc, ohlc.index[i], stop=stop, target=hedef,
-            direction="long" if y > 0 else "short", max_bars=max_bars,
-        )
-        if s is not None:
-            toplam.append(s.r_multiple)
-    return float(np.mean(toplam)) if toplam else 0.0
+        idx = r.choice(secilebilir, size=boyut, replace=boyut > len(secilebilir))
+        degerler = []
+        for i in idx:
+            giris = float(kapanis[i])
+            stop = giris - risk_orani[k] * giris * y
+            hedef = giris + hedef_orani[k] * giris * y
+            sonuc = barrier_outcome(
+                ohlc, ohlc.index[int(i)], stop=stop, target=hedef,
+                direction="long" if y > 0 else "short", max_bars=max_bars,
+            )
+            if sonuc is not None:
+                degerler.append(sonuc.r_multiple)
+        havuzlar.append(np.array(degerler) if degerler else np.zeros(1))
+    return havuzlar
+
+
+def _bos_dagilim(
+    havuzlar: list[np.ndarray], permutations: int, r: np.random.Generator
+) -> np.ndarray:
+    """Havuzlardan tur sayısı kadar sembol ortalaması çeker."""
+    ornek = np.vstack(
+        [h[r.integers(0, len(h), size=permutations)] for h in havuzlar]
+    )
+    return ornek.mean(axis=0)
 
 
 def measure_r(
@@ -236,15 +264,13 @@ def measure_r(
 
         if not kendi:
             continue
+        havuzlar = _bos_havuzu(df, risk_o, hedef_o, yonler, max_bars, r, oos_i)
+        if havuzlar is None:
+            continue  # bazsız işlem sayılmaz: n_trades ile n_symbols ayrışmasın
+
         sonuclar += kendi
         gercek = float(np.mean([s.r_multiple for s in kendi]))
-
-        bos = np.array(
-            [
-                _rastgele_baz(df, kendi, risk_o, hedef_o, yonler, max_bars, r, oos_i)
-                for _ in range(permutations)
-            ]
-        )
+        bos = _bos_dagilim(havuzlar, permutations, r)
         sembol_farklari.append(gercek - float(bos.mean()))
         sembol_bos.append(bos)
 
