@@ -17,6 +17,7 @@ import {
   type MumSerisi,
 } from "@/lib/chartspec";
 import { ciz, type Cerceve } from "./overlay";
+import { pngIndir } from "./png";
 import { tokenRengi } from "./roller";
 
 /** Sağ oluk: fibo etiketleri ve son fiyat rozeti burada durur (referans
@@ -25,6 +26,22 @@ import { tokenRengi } from "./roller";
 // taşıyordu (f4i2 bulgusu). Maketin PAD.r değeriyle de aynı.
 const OLUK = 186;
 const OLUK_DAR = 104;
+
+/** Görünür aralık seçenekleri. `kurulum` = spec'in tamamını sığdır.
+ *
+ * **Neden sabit takvim aralığı TEK BAŞINA yetmez:** bir spec yalnız
+ * kurulumun etrafındaki barları taşır (Golden Zone'da ~70 bar). "Son 1 yıl"
+ * demek o levhada çoğu zaman "hepsi" demektir. Varsayılan bu yüzden
+ * `kurulum`: önce kurulum çerçevelenir, kullanıcı isterse geriye açar. */
+export const ARALIKLAR = [
+  { value: "kurulum", label: "Kurulum", gun: 0 },
+  { value: "1a", label: "1A", gun: 30 },
+  { value: "3a", label: "3A", gun: 90 },
+  { value: "6a", label: "6A", gun: 180 },
+  { value: "1y", label: "1Y", gun: 365 },
+] as const;
+
+export type Aralik = (typeof ARALIKLAR)[number]["value"];
 
 export type GrafikProps = {
   spec: ChartSpec;
@@ -50,8 +67,13 @@ export function Grafik({
   const sarmalRef = useRef<HTMLDivElement>(null);
   const tuvalRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  // Grafik nesnesi EFEKTİN DIŞINDAN da lazım: aralık değişince grafiği
+  // yeniden kurmak zoom/pan durumunu ve aboneleri çöpe atardı.
+  const chartRef = useRef<IChartApi | null>(null);
   const [cizimHatasi, setCizimHatasi] = useState<string | null>(null);
   const [hud, setHud] = useState<Hud>(null);
+  const [aralik, setAralik] = useState<Aralik>("kurulum");
+  const [indiriliyor, setIndiriliyor] = useState(false);
 
   // Doğrulama SAF bir iş: render sırasında yapılır, efekt içinde durum
   // kurcalanmaz. Çizici kaynağına güvenerek çizmez — ChartSpec dosya olarak
@@ -157,6 +179,7 @@ export function Grafik({
       );
     }
 
+    chartRef.current = chart;
     chart.timeScale().fitContent();
 
     // ---------------------------------------------------------- overlay çizimi
@@ -237,10 +260,53 @@ export function Grafik({
       sistemTema.removeEventListener("change", cizdir);
       gozlemci.disconnect();
       temaGozlemci.disconnect();
+      chartRef.current = null;
       chart.remove();
       svg.replaceChildren();
     };
   }, [spec, yukseklik, dar, seviyeler]);
+
+  // Aralık değişince yalnız görünür pencere güncellenir. Grafiği yeniden
+  // kurmak zoom/pan durumunu ve tüm aboneleri çöpe atardı.
+  useEffect(() => {
+    const chart = chartRef.current;
+    const mumSeri = spec?.seriler.find((x): x is MumSerisi => x.tur === "mum");
+    if (!chart || !mumSeri || mumSeri.veri.length === 0) return;
+
+    const secim = ARALIKLAR.find((x) => x.value === aralik);
+    if (!secim || secim.gun === 0) {
+      chart.timeScale().fitContent();
+      return;
+    }
+    const son = mumSeri.veri[mumSeri.veri.length - 1].t;
+    const ilk = mumSeri.veri[0].t;
+    // İstenen pencere serinin başından geriye taşıyorsa tamamı gösterilir:
+    // olmayan barlara doğru boş alan açmak levhayı yalancı yapar.
+    const bas = Math.max(ilk, son - secim.gun * 86400);
+    if (bas <= ilk) {
+      chart.timeScale().fitContent();
+      return;
+    }
+    chart.timeScale().setVisibleRange({
+      from: bas as UTCTimestamp,
+      to: son as UTCTimestamp,
+    });
+  }, [aralik, spec]);
+
+  const indir = async () => {
+    const chart = chartRef.current;
+    const svg = svgRef.current;
+    const sarmal = sarmalRef.current;
+    if (!chart || !svg || !sarmal || !spec) return;
+    setIndiriliyor(true);
+    try {
+      await pngIndir(chart, svg, sarmal, spec, dar ? OLUK_DAR : OLUK);
+    } catch (e) {
+      setCizimHatasi(e instanceof Error ? e.message : String(e));
+    } finally {
+      setIndiriliyor(false);
+    }
+  };
 
   const hata = sozlesmeHatasi ?? cizimHatasi ?? (spec ? null : "ChartSpec okunamadı.");
   if (hata) {
@@ -259,6 +325,35 @@ export function Grafik({
   const yukari = son ? son.kapanis >= son.acilis : true;
 
   return (
+    <>
+      {/* Araç şeridi levhanın İÇİNDE değil ÜSTÜNDE. İçindeyken sağ oluktaki
+          fibo etiketlerinin üstüne biniyor ve "0.0 (hedef): 335.00" gibi
+          sayıları kapatıyordu (i1 bulgusu). PNG'ye de girmiyor — indirilen
+          görüntüde arayüz düğmesi işi yok. */}
+      <div className="qgrafik-araclar">
+        <div className="qgrafik-aralik" role="group" aria-label="Görünür aralık">
+          {ARALIKLAR.map((x) => (
+            <button
+              key={x.value}
+              type="button"
+              className={x.value === aralik ? "etkin" : undefined}
+              aria-pressed={x.value === aralik}
+              onClick={() => setAralik(x.value)}
+            >
+              {x.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="qgrafik-indir"
+          onClick={indir}
+          disabled={indiriliyor}
+          title="Levhayı PNG olarak indir"
+        >
+          {indiriliyor ? "…" : "PNG"}
+        </button>
+      </div>
     <div
       className="qgrafik"
       ref={sarmalRef}
@@ -289,5 +384,6 @@ export function Grafik({
         {hudEk ? <div className="l2">{hudEk}</div> : null}
       </div>
     </div>
+    </>
   );
 }

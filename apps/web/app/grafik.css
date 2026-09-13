@@ -72,3 +72,27 @@
 /* Lightweight Charts kendi bağlantı rozetini kapatıyoruz; yine de gelirse
    görünmesin — levhada bizim olmayan hiçbir işaret durmaz. */
 .qgrafik #tv-attr-logo { display: none !important; }
+
+/* Araç çubuğu: görünür aralık + PNG indirme.
+   Sağ ÜSTTE durur çünkü HUD sol üstte; ikisi çakışmaz. `z-index: 3` —
+   overlay (1) ve HUD'un (2) üstünde, çünkü tıklanabilir olan tek katman. */
+/* Şerit levhanın ÜSTÜNDE, içinde değil: içindeyken sağ oluktaki fibo
+   etiketlerini kapatıyordu (i1 bulgusu). */
+.qgrafik-araclar {
+  display: flex; gap: 6px; align-items: center; justify-content: flex-end;
+  padding: 0 10px 7px;
+}
+.qgrafik-aralik { display: flex; gap: 2px; }
+.qgrafik-araclar button {
+  font-family: var(--f-mono); font-size: 10.5px; line-height: 1;
+  color: var(--text-3); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 9px; cursor: pointer;
+  transition: color .12s, border-color .12s;
+}
+.qgrafik-araclar button:hover:not(:disabled) { color: var(--text); border-color: var(--text-3); }
+.qgrafik-araclar button:disabled { opacity: .5; cursor: default; }
+/* Etkin aralık AKSANLA değil opaklıkla ayrılır: aksan bu levhada
+   0.618 seviyesinin ve OTE bandının rengi, bir düğmeye harcanmaz. */
+.qgrafik-aralik button.etkin { color: var(--text); border-color: var(--text-2); }
+.qgrafik-araclar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

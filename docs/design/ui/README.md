@@ -334,3 +334,81 @@ komposer o görsellerin düzenini taklit etmiyor; K0'daki mekanik kuralı
 **Merdivenin tamamı çizilmiyor:** bandın kenarları zaten 0.62 ve 0.79;
 ayrıca çizgi olarak koymak dar bandın içinde üç çizgi = okunmaz yığın
 demekti.
+
+---
+
+# Faz 7 · Arayüz — aralık seçici, PNG indirme, okunabilirlik (2026-09-13)
+
+Görüntüler: `ui-{koyu,acik,sistem}-{1440,768}-i4.png`. **4 iterasyon.**
+
+Üç eksik birlikte ele alındı çünkü üçü de aynı soruna bakıyordu: levha
+neyi, ne kadarını ve nasıl gösteriyor.
+
+## 1. Görünür aralık seçici
+
+`Kurulum · 1A · 3A · 6A · 1Y`. **Varsayılan `Kurulum`** (spec'in tamamını
+sığdır), sabit takvim aralığı değil.
+
+Sebep: bir spec yalnız kurulumun etrafındaki barları taşır (Golden Zone'da
+~100 bar). O levhada "son 1 yıl" demek çoğu zaman "hepsi" demektir. Önce
+kurulum çerçevelenir; kullanıcı isterse daraltır.
+
+**Mum okunabilirliği sorununu çözen şey bu oldu.** `1A` seçilince ~28 bar
+kalıyor ve mumlar fibo çizgileri arasında kaybolmuyor. Y ekseni merdivene
+göre açıldığı için dikeyde sıkışma sürüyor; yatayda daralmak yeterli geldi.
+
+İstenen pencere serinin başından geriye taşıyorsa **tamamı gösterilir**:
+olmayan barlara doğru boş alan açmak levhayı yalancı yapardı.
+
+Aralık değişince grafik **yeniden kurulmaz**, yalnız görünür pencere
+güncellenir — yeniden kurmak zoom/pan durumunu ve tüm aboneleri çöpe atardı.
+
+## 2. PNG indirme
+
+Levha iki katmandan oluşuyor: mumlar bir `<canvas>`'ta (Lightweight Charts),
+seviyeler ve rozetler bizim SVG'mizde. **Tek başına hiçbiri grafiğin
+tamamı değil.** `pngIndir` ikisini tek tuvalde birleştiriyor; sıra ekrandaki
+yığınlama sırasıyla aynı (zemin → tuval → SVG).
+
+SVG'yi resme çevirmek onun **kendi kendine yeter** olmasını gerektiriyor.
+Overlay zaten token'ları gerçek renk değerlerine çözüp yazdığı için
+(`roller.ts::tokenRengi`) bu çalışıyor — CSS değişkeni yazsaydı indirilen
+görüntü renksiz çıkardı.
+
+Dosya adı: `thyao-golden-zone-1d-2026-09-13.png`.
+
+## Görerek bulunan kusurlar
+
+1. **Araç şeridi sağ oluktaki fiyat etiketlerini kapatıyordu** (i1) —
+   `0.0 (hedef): 335.00` düğmelerin altında kayboluyordu. Şerit levhanın
+   İÇİNDEN çıkarılıp ÜSTÜNE alındı. Yan fayda: PNG'ye de girmiyor,
+   indirilen görüntüde arayüz düğmesi işi yok.
+
+2. **İndirilen PNG neyin grafiği olduğunu söylemiyordu** (i2) — ekrandaki
+   künye bir HTML katmanı (HUD), ne tuvale ne SVG'ye giriyor. Künye
+   tuvale ayrıca yazıldı. **Verdikt de yazılıyor ve bu zorunluluk:**
+   verdikti taşımayan bir grafik paylaşıldığında "kanıtlandı" ima eder.
+
+3. **Künye levhanın İÇİNE yazılınca yine fiyat etiketiyle çakıştı** (i3) —
+   ekrandaki şeritte yaşanan sorunun birebir aynısı. Künye levhanın
+   ÜSTÜNE 26px'lik kendi bandına alındı, altına ince ayraç kondu.
+
+4. **Görünür alan dışındaki rozet kenara sıkışıyordu** (i2, `1A`
+   aralığında) — çapası ekran dışında kalan "giriş 306.32" rozeti sol
+   kenarda kırpık duruyordu. Kenara sıkıştırmak onu ait olmadığı bir bara
+   bağlarmış gibi gösterirdi; çapası görünür alanın dışındaysa rozet
+   artık **çizilmiyor**.
+
+### Doğrulanıp kusur bulunmayanlar
+- Üç tema × iki genişlik: şerit 768'de de taşmıyor.
+- Etkin aralık **aksanla değil opaklıkla** ayrılıyor — aksan bu levhada
+  0.618 seviyesinin ve OTE bandının rengi, bir düğmeye harcanmaz.
+- Klavye: düğmeler gerçek `<button>`, `aria-pressed` taşıyor, odak halkası
+  aksanlı.
+
+### Görsel değil İŞLEVSEL doğrulama da yapıldı
+
+Ekran görüntüsü tıklamayı göstermez. Playwright ile her aralık düğmesine
+tıklanıp levha yeniden çekildi ve PNG indirme **gerçekten dosya üretiyor
+mu** diye indirme olayı yakalandı (`thyao-golden-zone-1d-2026-09-13.png`,
+53 KB). Bir düğmenin "var olması" çalıştığı anlamına gelmez.

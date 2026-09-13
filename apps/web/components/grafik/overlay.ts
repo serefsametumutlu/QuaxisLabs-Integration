@@ -340,6 +340,13 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
       }
 
       case "rozet": {
+        // Çapası görünür alanın dışındaysa rozet çizilmez. Kenara
+        // sıkıştırmak onu ait olmadığı bir bara bağlarmış gibi gösterirdi
+        // (i2, "1A" aralığı bulgusu).
+        {
+          const cx = c.x(k.nokta.t);
+          if (cx == null || cx < 0 || cx > sag) break;
+        }
         const s = rozetStili(k.rol);
         const x = c.x(k.nokta.t);
         const y = c.y(k.nokta.fiyat);
