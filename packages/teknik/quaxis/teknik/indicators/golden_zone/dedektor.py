@@ -342,6 +342,31 @@ class GoldenZone(BaseIndicator):
         )
 
 
+#: `hedef_modu="r_kati"` varyantının katalog adı. Aynı dedektör, farklı
+#: hedef — iki AYRI soru sorulduğu için iki ayrı künye.
+R_KATI_AD = "golden_zone_r2"
+
+META_R_KATI = IndicatorMeta(
+    name=R_KATI_AD,
+    version=META.version,
+    category=META.category,
+    description="OTE bölgesi, hedef sabit 2R (derinlikten arındırılmış ölçüm)",
+    supported_timeframes=META.supported_timeframes,
+)
+
+
 def olustur(params: GoldenZoneParams | None = None) -> GoldenZone:
     """Katalog adresi bu fabrikayı gösterir (bkz. core/catalog.py)."""
     return GoldenZone(params)
+
+
+def olustur_r_kati() -> GoldenZone:
+    """Hedefi sabit R katına koyan varyant.
+
+    Yapısal modda hedef mesafesi giriş derinliğiyle değişir (0.62'de 1.63R,
+    0.79'da 3.76R). Bu varyant hepsini aynı risk profiline sabitler ve
+    "bölgenin kendisi öngörü taşıyor mu" sorusunu derinlikten arındırır.
+    """
+    d = GoldenZone(GoldenZoneParams(hedef_modu="r_kati"))
+    d.meta = META_R_KATI
+    return d
