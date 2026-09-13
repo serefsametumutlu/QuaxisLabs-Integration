@@ -26,6 +26,28 @@ kapilar:
 
 # Golden Zone — Strateji Pasaportu
 
+> ## ⏸ DURDURULDU — 2026-09-13
+>
+> **Karar:** Ürünleştirme durduruldu. Strateji **silinmedi**; kodu, testleri
+> ve ölçümleri yerinde duruyor.
+>
+> **Gerekçe:** Kenar bulunamadı ve aranması gereken her yer arandı —
+> 35 koşulluk tarama, çift eksende (zaman + sembol) bölme, ön kayıtlı
+> kombinasyon testi, iki zaman dilimi, likidite/fiyat/sektör kırılımı,
+> işlem maliyeti ve maliyet duyarlılığı. Özet:
+> [`docs/olcum/GOLDEN-ZONE-OZET.md`](../olcum/GOLDEN-ZONE-OZET.md)
+>
+> **Neden silinmedi:** Dedektör çalışıyor, non-repaint testinden geçti ve
+> sinyal başına zengin bir bağlam üretiyor. İleride **başka bir stratejinin
+> ek koşulu** olarak değerlendirilebilir — "fiyat OTE bölgesinde mi" bir
+> filtre olarak, tek başına bir kurulum olmaktan daha anlamlı olabilir.
+>
+> **K5 kapısı AÇIK kaldı:** komposer yazıldı, 11 iterasyonluk görsel kabul
+> yapıldı, ama **kullanıcı onayı alınmadı** — onay istenmeden ölçüme geri
+> dönüldü. Kapı onaysız kapatılmaz.
+>
+> **K6 hiç başlamadı.**
+
 > **Bu dosya stratejinin kimliğidir.** Kod, ölçüm ve görsel onay buraya
 > bağlanır. Bir kapı geçilmeden sonraki açılmaz; yedisi geçilmeden **sıradaki
 > stratejiye geçilmez** (README madde 4).
@@ -45,7 +67,8 @@ kapilar:
 | **Zaman dilimleri** | 1G · 4S (K3 hangisinin makul aday ürettiğini söyleyecek) |
 | **Yön** | İki yönlü |
 | **Referans görsel** | `references/G8es0m9W4AAiTAK.png` — **anlamak için**, kopyalamak için değil |
-| **Verdikt** | **kanıtlanmadı** — 543 sembol, 8432 işlem, kenar bulunamadı |
+| **Verdikt** | **kanıtlanmadı** — 543 sembol, 8432 işlem (1G) + 1499 (1H), kenar bulunamadı |
+| **Durum** | ⏸ durduruldu (2026-09-13) — kod duruyor, ürünleştirme yok |
 
 ---
 
