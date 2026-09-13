@@ -72,7 +72,12 @@ def main() -> int:
     if a.test not in aile:
         ap.error("--test ailenin içinde olmalı")
 
+    # Göreli yol verilirse kök'e göre çözülür: aksi hâlde son satırdaki
+    # `relative_to` patlıyor ve ÖLÇÜM BİTTİKTEN SONRA koşuyu hata gibi
+    # gösteriyordu (sonuç zaten yazılmış oluyor).
     kayit = pathlib.Path(a.kayit)
+    if not kayit.is_absolute():
+        kayit = (KOK / kayit).resolve()
     if not kayit.exists():
         ap.error(f"ön kayıt belgesi yok: {kayit}. Test KOŞULMADAN ÖNCE yazılmalıydı.")
 
