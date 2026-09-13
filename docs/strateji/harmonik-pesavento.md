@@ -394,6 +394,17 @@ Etkinin tamamı geçmişte; görülmemiş dönemde **sıfır**.
 Bu, kitabın "körlemesine girme" tavsiyesinin boş olmadığını gösteriyor.
 Ama etki adil bazdan ayrılacak kadar büyük ve kararlı değil.
 
+### İleriye dönük izleme — kalan tek meşru yol
+
+`abcd·teyit` kuralı **2026-09-14'te donduruldu** (`e5556aa`) ve bundan
+sonra gelecek veride izlenecek:
+[`ileri-izleme-abcd-teyit.md`](../olcum/ileri-izleme-abcd-teyit.md).
+
+Geçmişte arama yapmak bitti. Bir kuralın çalıştığını gösteren tek meşru
+yol, kural donduktan SONRA gelen veride ölçmektir — çünkü o veriye
+bakarak kimse hiçbir seçim yapmadı. Eşik **30 sembol**; dolana kadar
+rapor boş kalır ve **boş kalması doğru davranıştır.**
+
 ### Verdikt
 
 **kanıtlanmadı.** Dört formasyonun hiçbiri, iki stop varyantının hiçbiri
