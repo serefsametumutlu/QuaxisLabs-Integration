@@ -209,6 +209,53 @@ serbestlik derecesinden geliyordur — Pardo s.291-293.)*
 """
 
 
+def k3_raporu(k: KatmanSonucu, slug: str, tf: Timeframe, donem: str) -> str:
+    """Katman başına K3 kalibrasyon raporu.
+
+    Pasaportun K0 eşik tablosu bu dosyaları `K3:` kaynağı olarak gösterir;
+    doğrulayıcı dosyayı DİSKTE arar. Yazılmazsa K0 kapanamaz — bu kasıtlı.
+    """
+    c = k.kalibrasyon
+    return f"""# {slug} — K3 Kalibrasyon · Katman {k.ad}
+
+**Tarih:** {dt.date.today().isoformat()} · **Gösterge:** `{c.indicator}`
+**Zaman dilimi:** {c.timeframe}
+
+**Katman {k.ad}:** {k.aciklama}
+
+| Ölçüt | Değer |
+|---|---|
+| Evren | {c.universe} sembol |
+| Toplam aday | {c.total_candidates} |
+| **Sıfır aday veren sembol** | **{c.zero_candidate_symbols}** (%{c.zero_ratio * 100:.1f}) |
+| Veri hatası alan sembol | {c.error_symbols} |
+| Sembol başına ortalama | {c.per_symbol_mean:.2f} |
+| Sembol başına ortanca | {c.per_symbol_median:.1f} |
+| Sembol başına en çok | {c.per_symbol_max} |
+| Dönem | {donem} |
+
+## Teşhis
+
+{c.diagnosis}
+
+## Eşikler bu ölçümden nasıl türetildi
+
+*(K0'ın eşik tablosundaki her `K3:` devri burada kapanır. Hangi sayı hangi
+gözlemden geldi — "makul göründü" bir gerekçe değildir.)*
+
+| Eşik | Değer | Bu ölçümden türetilişi |
+|---|---|---|
+| bolge_sig | | |
+| bolge_derin | | |
+| yer_degistirme_atr | | |
+| donus_max_bar | | |
+
+> "Veri çekilemedi" ile "aday bulunamadı" AYRI sayılır. Önceki projede
+> 648/648 sembolde sıfır aday çıkmıştı ve kimse kaçının veri hatası
+> olduğunu bilmiyordu.
+"""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Katmanlı K3+K4 koşucusu")
     ap.add_argument("--katalog", required=True)
@@ -251,6 +298,16 @@ def main() -> int:
         )
 
     OLCUM_KOK.mkdir(parents=True, exist_ok=True)
+    donem = "—"
+    if ohlc:
+        ilk = min(df.index[0] for df in ohlc.values())
+        son = max(df.index[-1] for df in ohlc.values())
+        donem = f"{ilk.date()} – {son.date()}"
+    for k in sonuclar:
+        k3 = OLCUM_KOK / f"{a.slug}-K3-{k.ad}.md"
+        k3.write_text(k3_raporu(k, a.slug, tf, donem), encoding="utf-8")
+        print(f"{k3.relative_to(KOK)} yazıldı.")
+
     hedef = OLCUM_KOK / f"{a.slug}-K4-katmanli-{dt.date.today().isoformat()}.md"
     hedef.write_text(rapor(sonuclar, a.slug, a.gosterge, tf), encoding="utf-8")
     print(f"\n{hedef.relative_to(KOK)} yazıldı.")
