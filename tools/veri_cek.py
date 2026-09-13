@@ -35,6 +35,10 @@ def main() -> int:
     ap.add_argument("--evren", default=None, help="virgülle ayrılmış; yoksa config'ten")
     ap.add_argument("--baslangic", default="2010-01-01")
     ap.add_argument("--atla-var-olani", action="store_true", help="dosyası olanı hiç çekme")
+    ap.add_argument(
+        "--rapor", action="store_true",
+        help="hataların TAM dökümünü docs/olcum/ altına yaz (K3'ün 'veri hatası' satırı için)",
+    )
     a = ap.parse_args()
 
     market = Market(a.market)
