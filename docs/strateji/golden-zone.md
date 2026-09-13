@@ -14,6 +14,17 @@ referans: "references/G8es0m9W4AAiTAK.png"   # ANLAMAK için, kopyalamak için d
 #   kenar-var     — ölçüldü, FDR eşiğini geçti
 verdikt: kanitlanmadi
 
+# Ürünleştirme durduruldu. Bu üçü BİRLİKTE olmadan `pasaport.py` bunu
+# "bitmiş" saymaz — "hepsini durduruldu yaz, yenisine başla" yolu kapalı.
+durum: durduruldu
+durdurma_gerekcesi: >
+  Kenar bulunamadi. 35 kosulluk tarama, cift eksende (zaman + sembol) bolme,
+  on kayitli kombinasyon testi, iki zaman dilimi ve likidite/fiyat/sektor
+  kirilimi olculdu; isleme maliyeti dahil hicbirinde adil bazi asan kalici
+  bir fark cikmadi. Dedektor ve komposer duruyor; ileride baska bir
+  stratejinin ek kosulu olarak degerlendirilecek.
+  Ozet: docs/olcum/GOLDEN-ZONE-OZET.md
+
 kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/golden-zone-K0.md", "docs/olcum/golden-zone-K3-A.md"] }
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/golden_zone/parametreler.py"] }

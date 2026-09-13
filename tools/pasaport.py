@@ -23,6 +23,11 @@ Doğrulayıcının tuttuğu kurallar:
 5. **K5 kullanıcı onayı olmadan kapanmaz** ve en az üç iterasyon karesi ister.
 6. **Tek seferde tek strateji.** Aynı anda birden fazla strateji yolda olamaz
    (README madde 4) — biri K6'ya varmadan diğeri K0'ı geçemez.
+   **İstisna:** künyesinde `durum: durduruldu` + gerçek bir `verdikt` +
+   `durdurma_gerekcesi` taşıyan strateji "yolda" sayılmaz. Ölçülüp kenar
+   bulunamayan strateji yarım değil, olumsuz BİTMİŞTİR. Üçü birden
+   olmadan istisna geçerli değildir — "hepsini durduruldu yaz, yenisine
+   başla" yolu böyle kapalı tutulur.
 """
 
 from __future__ import annotations
@@ -89,6 +94,26 @@ class Pasaport:
     @property
     def bitti(self) -> bool:
         return "K6" in self.gecilen
+
+    @property
+    def durduruldu(self) -> bool:
+        """Ölçülüp durdurulmuş mu — yarım bırakılmış mı?
+
+        **Bu ayrım olmadan kural yanlış yeri koruyordu.** "Tek seferde tek
+        strateji" kuralının amacı işi yarım bırakıp yenisine atlamayı
+        engellemek. Ama ölçülüp kenar bulunamayan bir strateji YARIM DEĞİL,
+        BİTMİŞTİR — sadece olumsuz bitmiştir.
+
+        Kaçak kapısı kapalı: `durum: durduruldu` yazmak YETMEZ; künyede
+        gerçek bir `verdikt` (yani K4 açılmış) ve `durdurma_gerekcesi`
+        de olmak zorunda. Aksi hâlde "her şeyi durduruldu yaz, yenisine
+        başla" yolu açılırdı.
+        """
+        if str(self.kunye.get("durum", "")).strip() != "durduruldu":
+            return False
+        verdikt = str(self.kunye.get("verdikt", "olculmedi")).strip()
+        gerekce = str(self.kunye.get("durdurma_gerekcesi", "")).strip()
+        return verdikt != "olculmedi" and len(gerekce) >= 20
 
 
 # ------------------------------------------------------------------ okuma
@@ -248,7 +273,7 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
 
 def tek_strateji_kurali(hepsi: list[Pasaport]) -> list[Bulgu]:
     """README madde 4: bir strateji bitmeden sıradakine geçilmez."""
-    yolda = [p for p in hepsi if p.gecilen and not p.bitti]
+    yolda = [p for p in hepsi if p.gecilen and not p.bitti and not p.durduruldu]
     if len(yolda) > 1:
         adlar = ", ".join(f"{p.slug} ({p.son_kapi})" for p in yolda)
         return [
@@ -319,7 +344,9 @@ def komut_yeni(slug: str, ad: str, paket: str) -> int:
     if hedef.exists():
         print(f"HATA: {hedef.name} zaten var.", file=sys.stderr)
         return 2
-    yolda = [p for p in pasaportlar() if p.gecilen and not p.bitti]
+    # `tek_strateji_kurali` ile AYNI ölçüt: durdurulmuş strateji yolu
+    # kapatmaz. İki yerde ayrı ayrı yazılırsa er geç ayrışırlar.
+    yolda = [p for p in pasaportlar() if p.gecilen and not p.bitti and not p.durduruldu]
     if yolda:
         print(
             f"HATA: '{yolda[0].slug}' hâlâ yolda ({yolda[0].son_kapi}). "

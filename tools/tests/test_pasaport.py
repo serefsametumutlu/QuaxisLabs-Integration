@@ -268,3 +268,61 @@ def test_depodaki_sablon_okunabilir_ve_bos_kapilarla_gelir() -> None:
     assert p.gecilen == []
     assert p.kunye["verdikt"] == "olculmedi"
     assert set(p.kunye["kapilar"]) == set(pasaport.KAPILAR)
+
+
+# ------------------------------------------------- durdurulmuş strateji
+
+
+def _durduruldu(tmp, slug, **ek):
+    """Durdurulmuş bir pasaport: K4 geçilmiş, verdikt var."""
+    # Kanıt dosyası pasaport KLASÖRÜNÜN DIŞINA yazılır: içine yazılırsa
+    # glob onu da pasaport sanıp künye arar.
+    (tmp.parent / "k.md").write_text("x", encoding="utf-8")
+    kunye = KUNYE.format(
+        slug=slug, verdikt=ek.get("verdikt", "kanitlanmadi"),
+        kapilar=_kapilar({"K4": {"gecildi": "2026-01-01", "kanit": ["k.md"]}}),
+    )
+    satirlar = kunye.splitlines()
+    i = next(n for n, x in enumerate(satirlar) if x.startswith("kapilar:"))
+    ekler = []
+    if "durum" in ek:
+        ekler.append(f"durum: {ek['durum']}")
+    if "gerekce" in ek:
+        ekler.append(f"durdurma_gerekcesi: {ek['gerekce']}")
+    satirlar[i:i] = ekler
+    yol = tmp / f"{slug}.md"
+    yol.write_text("\n".join(satirlar), encoding="utf-8")
+    return yol
+
+
+def test_durdurulmus_strateji_yolu_kapatmaz(pasaport_koku: pathlib.Path) -> None:
+    """Ölçülüp kenar bulunamayan strateji YARIM DEĞİL, olumsuz BİTMİŞTİR.
+    Kural yarım bırakmayı engellemek için var; sonuçlanmış işi değil."""
+    _durduruldu(
+        pasaport_koku, "eski",
+        durum="durduruldu",
+        gerekce="Kenar bulunamadi; 35 kosulluk tarama ve on kayitli test sonrasi durduruldu.",
+    )
+    _yaz(pasaport_koku, "yeni", {"K0": {"gecildi": "2026-02-01", "kanit": ["k.md"]}})
+    hepsi = [pasaport.oku(y) for y in sorted(pasaport_koku.glob("*.md"))]
+    assert pasaport.tek_strateji_kurali(hepsi) == []
+
+
+def test_gerekcesiz_durdurma_kacak_kapisi_degildir(pasaport_koku: pathlib.Path) -> None:
+    """"durum: durduruldu" yazıp gerekçe yazmamak, "hepsini durduruldu yaz
+    yenisine başla" yolunu açardı."""
+    _durduruldu(pasaport_koku, "eski", durum="durduruldu")
+    _yaz(pasaport_koku, "yeni", {"K0": {"gecildi": "2026-02-01", "kanit": ["k.md"]}})
+    hepsi = [pasaport.oku(y) for y in sorted(pasaport_koku.glob("*.md"))]
+    assert pasaport.tek_strateji_kurali(hepsi) != []
+
+
+def test_olculmeden_durdurma_da_kacak_kapisi_degildir(pasaport_koku: pathlib.Path) -> None:
+    """Verdikt "olculmedi" iken durdurmak, hiç ölçmeden strateji değiştirmek
+    demektir — kuralın tam olarak engellediği şey."""
+    yol = _durduruldu(
+        pasaport_koku, "eski", durum="durduruldu", verdikt="olculmedi",
+        gerekce="Canim istemedi, baska bir seye gecmek istiyorum simdilik.",
+    )
+    p = pasaport.oku(yol)
+    assert not p.durduruldu
