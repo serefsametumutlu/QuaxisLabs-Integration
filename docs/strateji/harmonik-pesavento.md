@@ -13,7 +13,7 @@ kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/harmonik-pesavento-K0.md"] }
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/parametreler.py"] }
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/dedektor.py", "packages/teknik/quaxis/teknik/indicators/harmonik/pivotlar.py", "packages/teknik/tests/test_harmonik.py"] }
-  K3: { gecildi: null, kanit: [] }
+  K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K3-1D.md", "docs/olcum/harmonik-pesavento-K3-karar-kurali.md"] }
   K4: { gecildi: null, kanit: [] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
@@ -34,7 +34,7 @@ kapilar:
 | **Zaman dilimleri** | 4S · 1G · 1H |
 | **Yön** | Boğa ve ayı kurulumu da üretilir. Ayı tarafı BIST'te işleme çevrilemez (açığa satış kısıtlı) ama **ölçüm nesnesi** olarak tutulur. |
 | **Referans görsel** | henüz yok (K5) |
-| **Verdikt** | **ölçülmedi** — K3/K4 açılmadı |
+| **Verdikt** | **ölçülmedi** — K3 kapandı, K4 sırada |
 | **Durum** | aktif |
 
 ### Aile dört üyeden oluşuyor — ve dördü AYRI ölçülecek
@@ -87,10 +87,10 @@ Tam kaynak dosyası:
 | Gartley D · stop | .786 XA · X'in ötesi | `K0: docs/strateji/kaynak/harmonik-pesavento-K0.md#FORMASYON-02` |
 | Kelebek D · stop · azami | 1.272 · 1.618 · 2.618 | `K0: docs/strateji/kaynak/harmonik-pesavento-K0.md#FORMASYON-03` |
 | Three Drives sürüş uzantısı | 1.272 | `K0: docs/strateji/kaynak/harmonik-pesavento-K0.md#FORMASYON-04` |
-| **tolerans** | 0.05 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` — **kitapta yok**, ölçümden türetilecek |
-| **donus_max_bar** | 40 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` — **kitapta yok** |
-| **pivot kolları** | 3 / 3 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` — **kitapta yok**; şimdilik Golden Zone ile aynı |
-| **AB=CD stop oranı** | 1.272 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` — kitap formül vermiyor; başlangıç noktası |
+| **tolerans** | abcd .02 · gartley .02 · kelebek .02 · üç sürüş **.05** | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §1, §7 — kitapta yok, ÖLÇÜLDÜ |
+| **donus_max_bar** | 55 · 35 · 60 · 25 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §3, §7 — dağılımın %90'lık dilimi |
+| **pivot kolları** | abcd **5** · diğerleri 4 | `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §2, §7 — Golden Zone'un 3'ü iki formasyonda üst sınırı aştı |
+| **AB=CD stop oranı** | 1.272 | `K4: docs/olcum/harmonik-pesavento-K4-1D-long.md` — **K3'te KAPATILAMAZ**: hangi stop mesafesinin doğru olduğu bir getiri sorusu |
 
 > Sayfa numarası neden yok: kaynak çıkarımında sayfa numarası bulunmuyor,
 > bölüm kimlikleri var. `s.123` yazmak uydurma olurdu. Çıpalar `pasaport.py`
@@ -197,26 +197,65 @@ Bu yüzden `bar_time` (C'nin barı) ile `detected_at` (D'ye dokunulan bar)
 
 ## K3 · Kalibrasyon
 
-> **Bitti kriteri:** tam BIST evreninde aday sayısı ölçülmüş. Sıfıra yakınsa
-> bozuk, on binlerse çok gevşek.
-
 | | |
 |---|---|
-| Ölçüm dosyası | *(bekliyor)* |
-| Evren | 545 BIST sembolü, 1G |
-| Aday sayısı | *(bekliyor)* |
-| Sonuç | *(bekliyor)* |
+| Ölçüm dosyası | [`harmonik-pesavento-K3-1D.md`](../olcum/harmonik-pesavento-K3-1D.md) |
+| Karar kuralı | [`harmonik-pesavento-K3-karar-kurali.md`](../olcum/harmonik-pesavento-K3-karar-kurali.md) — **sonuçlar görülmeden** yazılıp commit edildi |
+| Evren | 545 BIST sembolü · 1 437 257 bar · 5 703 sembol-yıl (2010-01-01 → 2026-09-11) |
+| Sonuç | Dördü de kalibre edildi; hiçbiri elenmedi |
 
-**K3'ün burada cevaplaması gereken iki özel soru var:**
+### Türetilen eşikler
 
-1. `tolerans` kaç olmalı? Kitap vermiyor; sinyal sayısının toleransa göre
-   nasıl değiştiği ölçülüp karar verilecek.
-2. Gartley'in AB bacağı gerçekten **.49–.65 bandında** mı yoğunlaşıyor?
-   Kitabın iki kuralı (D=.786 XA + içeride AB=CD) bu bandı matematiksel
-   olarak dayatıyor (bkz. K0 §3.1). Ölçüm bandın dışında yoğunluk
-   gösterirse kurallar birbiriyle çelişiyor demektir.
+| formasyon | tolerans | pivot kolu | donus_max_bar | sinyal | sembol |
+|---|---|---|---|---|---|
+| `harmonik_abcd` | 0.02 | **5** | 55 | 6 009 | 506 |
+| `harmonik_gartley` | 0.02 | 4 | 35 | 262 | 185 |
+| `harmonik_kelebek` | 0.02 | 4 | 60 | 304 | 207 |
+| `harmonik_uc_surus` | **0.05** | 4 | 25 | 267 | 199 |
 
----
+Getiriye **bakılmadı**: karar ölçütü yalnız aday sayısı ve dağılım şekli.
+Eşiği getiriye bakarak seçmek, K4'ün ölçeceği şeyi K3'te seçmek olurdu.
+
+### İki taramanın ayrı koştuğu ve bunun nasıl yakalandığı
+
+Tolerans taraması pivot=3 ile, pivot taraması tolerans=0.05 ile koştu.
+Seçilen **birleşimler** böylece hiç ölçülmemişti — "tek tek geçmişti"
+gerekçesiyle parametreye yazılabilirdi. `--dogrula` bunları ayrıca ölçtü
+(rapor §7); dördü de iki sınırı sağladı ve `donus_max_bar` yeniden okundu
+(`abcd` 40 → 55, `kelebek` 55 → 60).
+
+### Bulgu: kitabın iki kuralı AB bacağını gerçekten kısıtlıyor
+
+K0 §3.1 cebirsel olarak `AB = r / (k + 1 − BC)` demişti. 2 081 gerçek
+Gartley'de ölçülen AB dağılımı:
+
+| AB | pay |
+|---|---|
+| .382 | %18 |
+| .500 | %44 |
+| .618 | %38 |
+| **.786** | **%0 — hiç görülmedi** |
+
+`.786` sıfır çıkması tesadüf değil, cebirin sonucu: `AB = .786` için
+`k = BC` gerekir, ama `k ≥ 1` ve `BC < 1`. **Kitabın kuralları AB=.786'lı
+bir Gartley'i imkânsız kılıyor.** Kitap bunu hiçbir yerde yazmıyor.
+
+Kelebek'te tablo terse dönüyor: AB'nin %58'i `.786`. Aynı cebir, farklı
+`r` (1.272), farklı çözüm kümesi.
+
+### Bulgu: ayı kurulumu boğadan daha sık
+
+| formasyon | boğa | ayı | boğa oranı |
+|---|---|---|---|
+| `abcd` | 8 103 | 11 747 | %41 |
+| `gartley` | 874 | 1 207 | %42 |
+| `kelebek` | 1 014 | 1 184 | %46 |
+| `uc_surus` | 197 | 153 | %56 |
+
+BIST nominal olarak yükselen bir piyasa olduğu hâlde **düşüş formasyonları
+daha sık oluşuyor.** Bu bir kenar iddiası değil; sinyal sayımı. Ama K4'te
+yalnız alış tarafı ölçüleceği için örneklemin yarısından azını
+kullanacağımız anlamına geliyor ve bu yazılı olmalı.
 
 ## K4 · İstatistik
 

@@ -84,14 +84,29 @@ def aynala(df: pd.DataFrame, eksen: float) -> pd.DataFrame:
 #
 # Oranlar kitaptan. Gartley ve Kelebek'te AB bacağı SERBEST seçilmedi:
 # "içinde AB=CD olmalı" kuralı, D'nin XA'ya sabitlenmesiyle birleşince AB'yi
-# belirli bir bantla sınırlar. Aşağıdaki değerler o bandın içinden.
+# bir bantla sınırlar. Genel bağıntı (D = r·XA, içerideki AB=CD oranı k):
+#
+#     AB = r / (k + 1 − BC)
+#
+# K3 toleransı **0.02**'ye indirdi ve bu, kurguyu değiştirmeyi gerektirdi:
+# eski `ab=.647` (k=1.0, BC=.786) .618'e 0.029 uzaktı — yeni eşikte artık
+# formasyon sayılmıyor. Testin kitaba değil ÖLÇÜLEN eşiğe uyması gerekir;
+# aksi hâlde test, kodun gerçekte yaptığı şeyi kilitlemiyor olurdu.
 
 X, A = 100.0, 200.0
 XA = A - X
 
 
+#: Gartley kurgusunun oranları. Üç ayrı test aynı formasyonu kuruyor;
+#: kopyalanmış sayılar K3 eşiği değiştiğinde birinde güncellenip
+#: diğerlerinde unutuluyordu — tam olarak bu oldu.
+GARTLEY_AB, GARTLEY_BC = 0.50, 0.618
+
+
 def gartley_yolu() -> np.ndarray:
-    ab, bc = 0.647, 0.786  # ab = .786 / (2 - bc)
+    # ab=.50 ve bc=.618 İKİSİ DE küme üyesi (sapma 0); içerideki AB=CD
+    # oranı 1.19 çıkıyor ve 1.272'ye 0.082 uzak — `abcd_tolerans` 0.10.
+    ab, bc = GARTLEY_AB, GARTLEY_BC
     b = A - ab * XA
     c = b + bc * (A - b)
     d = A - 0.786 * XA
@@ -221,7 +236,7 @@ def test_d_onceden_vurulmussa_kurulum_acilmaz() -> None:
     O aralıkta formasyonun varlığını bilmiyorduk; dokunuşu sinyal saymak
     gerçekte verilemeyecek bir emri ölçüme eklemek olurdu.
     """
-    ab, bc = 0.647, 0.786
+    ab, bc = GARTLEY_AB, GARTLEY_BC
     b = A - ab * XA
     c = b + bc * (A - b)
     d = A - 0.786 * XA
@@ -234,7 +249,7 @@ def test_d_onceden_vurulmussa_kurulum_acilmaz() -> None:
 def test_sure_dolunca_kurulum_olur() -> None:
     """D'ye uzun süre dokunulmazsa kurulum ölür; aylar sonraki tesadüfi bir
     dokunuş formasyonun sonucu sayılamaz."""
-    ab, bc = 0.647, 0.786
+    ab, bc = GARTLEY_AB, GARTLEY_BC
     b = A - ab * XA
     c = b + bc * (A - b)
     d = A - 0.786 * XA
@@ -249,7 +264,7 @@ def test_sure_dolunca_kurulum_olur() -> None:
 def test_c_asilirsa_kurulum_gecersizdir() -> None:
     """C'nin ötesinde GÖVDE kapanışı formasyonu bozar: C'nin son salınım ucu
     olduğu varsayımı çöker."""
-    ab, bc = 0.647, 0.786
+    ab, bc = GARTLEY_AB, GARTLEY_BC
     b = A - ab * XA
     c = b + bc * (A - b)
     d = A - 0.786 * XA

@@ -116,6 +116,28 @@ class Pasaport:
         return verdikt != "olculmedi" and len(gerekce) >= 20
 
 
+def _dosya_dogrula(slug: str, ad: str, kaynak: str, kapi: str) -> list[Bulgu]:
+    """`K3:`/`K4:` bir SÖZ değil, bir DOSYADIR.
+
+    "K3'ten türetilecek" yazıp kapıyı geçmek, ezberden sayı yazmanın kibar
+    hâlidir — K0'ın kapatmak için var olduğu şeyin ta kendisi.
+    """
+    yollar = re.findall(rf"{kapi}:\s*([^\s`,)]+\.md)", kaynak)
+    if not yollar:
+        return [
+            Bulgu(
+                slug, "K0",
+                f"'{ad}' kaynağı '{kapi}:' diyor ama ölçüm dosyası göstermiyor: "
+                f"{kaynak!r} — söz kanıt değildir",
+            )
+        ]
+    return [
+        Bulgu(slug, "K0", f"'{ad}' eşiğinin {kapi} ölçüm dosyası diskte yok: {y}")
+        for y in yollar
+        if not (KOK / y).exists()
+    ]
+
+
 def _capa_dogrula(slug: str, ad: str, kaynak: str) -> list[Bulgu]:
     """`K0: <dosya>#<bölüm>` çıpasını DİSKTE doğrular.
 
@@ -283,24 +305,17 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
                 pass  # sayfa alıntısı
             elif "K0:" in kaynak:
                 b += _capa_dogrula(p.slug, ad, kaynak)
+            elif "K4:" in kaynak:
+                # Bazı eşikler kalibrasyonla KAPATILAMAZ: hangi stop
+                # mesafesinin doğru olduğu bir GETİRİ sorusudur. Böyle bir
+                # eşiği K3'e bağlamak, kapanmamış bir kapıyı kapalı
+                # göstermek olurdu.
+                b += _dosya_dogrula(p.slug, ad, kaynak, "K4")
             elif "K3:" in kaynak:
                 # "K3:" bir SÖZ değil, bir DOSYADIR. "K3'ten türetilecek"
                 # yazıp kapıyı geçmek, ezberden sayı yazmanın kibar hâlidir —
                 # K0'ın kapatmak için var olduğu şeyin ta kendisi.
-                yollar = re.findall(r"K3:\s*([^\s`,)]+\.md)", kaynak)
-                if not yollar:
-                    b.append(
-                        Bulgu(
-                            p.slug, "K0",
-                            f"'{ad}' kaynağı 'K3:' diyor ama ölçüm dosyası göstermiyor: "
-                            f"{kaynak!r} — söz kanıt değildir",
-                        )
-                    )
-                for y in yollar:
-                    if not (KOK / y).exists():
-                        b.append(
-                            Bulgu(p.slug, "K0", f"'{ad}' eşiğinin K3 ölçüm dosyası diskte yok: {y}")
-                        )
+                b += _dosya_dogrula(p.slug, ad, kaynak, "K3")
             else:
                 b.append(
                     Bulgu(

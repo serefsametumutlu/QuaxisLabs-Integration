@@ -62,8 +62,10 @@ class HarmonikParams(BaseParams):
 
     #: Bir oranın "tuttuğu" sayılması için izin verilen sapma (oran
     #: biriminde; 0.05 = ±5 puan). **KİTAPTA YOK.** Önceki projede kullanılan
-    #: ±.05 kitaptan değil Carney'den ödünç alınmıştı; buraya *arama noktası*
-    #: olarak yazıldı, kural olarak değil. GEÇİCİ — K3'ten.
+    #: ±.05 kitaptan değil Carney'den ödünç alınmıştı.
+    #:
+    #: Bu TABAN değerdir; her formasyon kendi K3 değerini taşır (aşağıda).
+    #: `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §1 ve §7.
     tolerans: float = 0.05
 
     #: Geri çekilme bacaklarının uyması gereken oran kümesi (kitap, Böl. 3).
@@ -74,6 +76,10 @@ class HarmonikParams(BaseParams):
     #: sınırı vermez. Sınırsız beklemek ölçümü bozar: aylar sonra tesadüfen
     #: dokunulan bir seviye formasyonun sonucu sayılamaz. GEÇİCİ; takvimsel
     #: süre olduğu için zaman dilimine göre ÖLÇEKLENİR.
+    #:
+    #: TABAN değer; her formasyon kendi K3 değerini taşır. Taranarak değil
+    #: DAĞILIMDAN okundu: gerçek dokunuşların %90'ı pencerenin içinde kalır.
+    #: `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §3 ve §7.
     donus_max_bar: int = 40
 
     #: Stop, hesaplanan stop seviyesinin ne kadar ötesine konur (çıpa
@@ -122,6 +128,18 @@ class HarmonikParams(BaseParams):
 class AbcdParams(HarmonikParams):
     """AB=CD — X'siz üç bacak."""
 
+    # --- K3'ten türetilen eşikler · `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §7 ---
+    #: Tolerans taramasında 0.05 üst sınırı aştı (sembol başına yılda 3.48
+    #: sinyal); iki sınırı sağlayan en dar değer 0.02.
+    tolerans: float = 0.02
+    #: Pivot kolu: 2 ve 3 üst sınırı aştı, 4 ve 5 geçti; kural ortancayı
+    #: seçiyor. Dört formasyon içinde SADECE bunda 5 çıktı — AB=CD üç
+    #: bacaklı olduğu için doğal olarak daha sık oluşuyor.
+    pivot_sol: int = 5
+    pivot_sag: int = 5
+    #: Seçilen tolerans+pivot birleşiminde dokunuş süresinin %90'lık dilimi.
+    donus_max_bar: int = 55
+
     #: CD / AB oranı. Kitap: **1.0** vakaların ~%40'ında (simetrik AB=CD),
     #: **1.27–2.00** ~%60'ında. Hangisi olacağı ÖNCEDEN bilinemez; tek bir
     #: seviye seçmek zorundayız çünkü seviyeye dokunma anı sinyalin ta
@@ -151,6 +169,12 @@ class AbcdParams(HarmonikParams):
 @dataclass(frozen=True)
 class GartleyParams(HarmonikParams):
     """Gartley '222' — kitabın en çok üstünde durduğu formasyon."""
+
+    # --- K3'ten türetilen eşikler · `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §7 ---
+    tolerans: float = 0.02
+    pivot_sol: int = 4
+    pivot_sag: int = 4
+    donus_max_bar: int = 35
 
     #: D, XA bacağının bu kadarını geri çeker. Kitap kesin bir aralık
     #: yazmıyor ama **tüm ticaret örneklerinde .786**. Kitaptan.
@@ -183,6 +207,14 @@ class GartleyParams(HarmonikParams):
 @dataclass(frozen=True)
 class KelebekParams(HarmonikParams):
     """Butterfly — D, X'in ÖTESİNE geçer."""
+
+    # --- K3'ten türetilen eşikler · `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §7 ---
+    tolerans: float = 0.02
+    pivot_sol: int = 4
+    pivot_sag: int = 4
+    #: Dört formasyonun en uzunu. Kelebek D'si X'in ÖTESİNDE olduğu için
+    #: fiyatın oraya ulaşması daha uzun sürüyor — beklenen bir sonuç.
+    donus_max_bar: int = 60
 
     #: D, XA'nın bu uzantısında tamamlanır. Kitap: 1.272 · 1.618 · 2.00 ·
     #: 2.618. Girişin yapıldığı seviye 1.272 (kitabın 'shaded area'sı).
@@ -220,6 +252,15 @@ class KelebekParams(HarmonikParams):
 @dataclass(frozen=True)
 class UcSurusParams(HarmonikParams):
     """Three Drives — üç ardışık uzantı sürüşü."""
+
+    # --- K3'ten türetilen eşikler · `K3: docs/olcum/harmonik-pesavento-K3-1D.md` §7 ---
+    #: TEK istisna: 0.02 ve 0.03'te sembol sayısı 100'ün ALTINDA kaldı
+    #: (16 ve 85 sembol), yani iki sınırı sağlayan en dar değer 0.05.
+    #: Üç sürüşün üçü birden dar toleransa uyamıyor.
+    tolerans: float = 0.05
+    pivot_sol: int = 4
+    pivot_sag: int = 4
+    donus_max_bar: int = 25
 
     #: Her sürüş, kendinden önceki geri çekilmenin bu uzantısıdır.
     #: Kitap: 1.272 veya 1.618 (genelde ikisinde de aynı oran).
