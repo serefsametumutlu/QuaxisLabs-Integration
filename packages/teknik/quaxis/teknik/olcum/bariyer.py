@@ -42,6 +42,16 @@ VARSAYILAN_TUR = 2000
 #: iki sütun farklı şeyleri anlatır ve rapor sessizce yanıltır.
 VARSAYILAN_OOS_ORANI = 0.30
 
+#: Taraf başına komisyon (fiyatın oranı). BIST'te aracı kurumlar tipik olarak
+#: %0.05–%0.15 arası alır; muhafazakâr taraf ALT değil ÜST uçtur, ama abartmak
+#: da ölçümü sahte karamsar yapar. %0.05 orta yol ve açıkça değiştirilebilir.
+VARSAYILAN_KOMISYON = 0.0005
+
+#: Çıkışta kayma (fiyatın oranı). Giriş LİMİT emirdir (bölge seviyesine
+#: konur), kayma yemez. Çıkış ise stop ya da hedef — piyasa emri gibi
+#: davranır ve kayar.
+VARSAYILAN_KAYMA = 0.0005
+
 
 @dataclass(frozen=True)
 class BarrierOutcome:
@@ -100,6 +110,8 @@ def barrier_outcome(
     max_bars: int = 60,
     symbol: str = "",
     entry: float | None = None,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> BarrierOutcome | None:
     """Girişten sonraki barları tek tek yürüyüp hangi bariyerin vurulduğunu bulur.
 
@@ -113,6 +125,12 @@ def barrier_outcome(
     kapanış stop'un dibindeydi ve risk SIFIRA inip R'yi patlatıyordu —
     rastgele baz +12R gibi imkânsız değerler veriyordu. Bölgeden ölçülen
     riskin en düşüğü %0.8 iken kapanıştan ölçülenin en düşüğü %0.0'dı.
+
+    **İşlem maliyeti R'den DÜŞÜLÜR.** Maliyetsiz ölçüm her kenarı olduğundan
+    büyük gösterir ve bu soyut bir endişe değil: koşul taraması +0.069R'lik
+    bir etki buldu, aynı dönemde %0.3 gidiş-dönüş maliyet 0.068R ediyordu.
+    Yani maliyet, bulunan kenarın TAMAMI kadardı. `komisyon=kayma=0` vererek
+    kapatılabilir, ama o zaman rapor bunu yazmak zorundadır.
 
     Yeterli ileri bar yoksa ya da risk sıfır/negatifse `None` döner; eksik
     veriyi "başabaş" saymak stratejiyi kayırır.
@@ -130,6 +148,11 @@ def barrier_outcome(
     if risk <= 0:
         return None  # stop yanlış tarafta: sinyal geçersiz, ölçüme girmez
 
+    # Maliyet R cinsinden: girişte komisyon, çıkışta komisyon + kayma.
+    # Risk'e bölünür çünkü R'nin birimi risktir.
+    def _maliyet(cikis_fiyati: float) -> float:
+        return (giris * komisyon + cikis_fiyati * (komisyon + kayma)) / risk
+
     son = min(i + max_bars, len(ohlc) - 1)
     yuksek = ohlc["high"].to_numpy(dtype=float)
     dusuk = ohlc["low"].to_numpy(dtype=float)
@@ -145,13 +168,14 @@ def barrier_outcome(
         # İKİSİ DE aynı barda vurulduysa STOP kazanır — bar içi sıralamayı
         # bilmiyoruz, emin olmadığımız yerde stratejinin lehine varsaymayız.
         if stop_vuruldu:
-            return BarrierOutcome(symbol, entry_t, ohlc.index[j], -1.0, "stop", j - i)
+            r = -1.0 - _maliyet(stop)
+            return BarrierOutcome(symbol, entry_t, ohlc.index[j], r, "stop", j - i)
         if hedef_vuruldu:
-            r = (target - giris) * yon / risk
+            r = (target - giris) * yon / risk - _maliyet(target)
             return BarrierOutcome(symbol, entry_t, ohlc.index[j], r, "hedef", j - i)
 
     kapanis = float(ohlc["close"].iloc[son])
-    r = (kapanis - giris) * yon / risk
+    r = (kapanis - giris) * yon / risk - _maliyet(kapanis)
     return BarrierOutcome(symbol, entry_t, ohlc.index[son], r, "zaman", son - i)
 
 
@@ -169,11 +193,15 @@ def _toplu_r(
     hedef_orani: float,
     yon: float,
     max_bars: int,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> np.ndarray:
     """Çok sayıda girişin R sonucunu TEK seferde hesaplar.
 
     `barrier_outcome` ile aynı kuralları uygular — **aynı barda iki bariyer
-    de vurulursa stop kazanır** dahil — ama bar bar Python döngüsü yerine
+    de vurulursa stop kazanır** ve **işlem maliyeti** dahil. Maliyeti yalnız
+    gerçek işlemlere uygulayıp baz havuzuna uygulamamak, ölçümü stratejinin
+    ALEYHİNE saptırırdı — ama bar bar Python döngüsü yerine
     bar adımı başına tek bir numpy işlemi yapar. Havuz kurarken giriş başına
     40 bar yürümek 543 sembolde saatlere çıkıyordu.
     """
@@ -186,6 +214,13 @@ def _toplu_r(
     r = np.zeros(len(girisler))
     acik = risk > 0  # stop yanlış taraftaysa işlem hiç açılmaz
     r[~acik] = np.nan
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        giris_maliyeti = giris * komisyon / risk
+
+    def _mal(cikis: np.ndarray) -> np.ndarray:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            return giris_maliyeti + cikis * (komisyon + kayma) / risk
 
     for adim in range(1, max_bars + 1):
         j = girisler + adim
@@ -202,18 +237,18 @@ def _toplu_r(
 
         # STOP önce: bar içi sıralama bilinmiyor, belirsizlikte stratejinin
         # lehine varsaymıyoruz (`barrier_outcome` ile aynı kural).
-        r[stop_vuruldu] = -1.0
+        r[stop_vuruldu] = (-1.0 - _mal(stop))[stop_vuruldu]
         acik &= ~stop_vuruldu
         hedefe = hedef_vuruldu & acik
         with np.errstate(invalid="ignore", divide="ignore"):
-            r[hedefe] = ((hedef - giris) * yon / risk)[hedefe]
+            r[hedefe] = ((hedef - giris) * yon / risk - _mal(hedef))[hedefe]
         acik &= ~hedefe
 
     # Kalanlar zaman bariyerinden çıkar.
     if acik.any():
         son_j = np.minimum(girisler + max_bars, n - 1)
         with np.errstate(invalid="ignore", divide="ignore"):
-            zaman_r = (kapanis[son_j] - giris) * yon / risk
+            zaman_r = (kapanis[son_j] - giris) * yon / risk - _mal(kapanis[son_j])
         r[acik] = zaman_r[acik]
     return r[~np.isnan(r)]
 
@@ -228,6 +263,8 @@ def _bos_havuzu(
     oos_i: int,
     havuz: int = VARSAYILAN_HAVUZ,
     ust_sinir: int | None = None,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> list[np.ndarray] | None:
     """Her işlemin risk yapısı için rastgele barlardan R havuzu.
 
@@ -258,7 +295,8 @@ def _bos_havuzu(
     for k in range(len(risk_orani)):
         idx = r.choice(secilebilir, size=boyut, replace=False)
         degerler = _toplu_r(
-            yuksek, dusuk, kapanis, idx, risk_orani[k], hedef_orani[k], yon[k], max_bars
+            yuksek, dusuk, kapanis, idx, risk_orani[k], hedef_orani[k], yon[k], max_bars,
+            komisyon, kayma,
         )
         havuzlar.append(degerler if len(degerler) else np.zeros(1))
     return havuzlar
@@ -281,6 +319,8 @@ def measure_r(
     max_bars: int = 60,
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
     pencere: str = "oos",
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
 ) -> RResult:
@@ -327,7 +367,7 @@ def measure_r(
             s = barrier_outcome(
                 df, sinyal.detected_at, stop=stop, target=hedef,
                 direction=sinyal.direction, max_bars=max_bars, symbol=sembol,
-                entry=giris_seviyesi,
+                entry=giris_seviyesi, komisyon=komisyon, kayma=kayma,
             )
             if s is None:
                 continue
@@ -345,7 +385,8 @@ def measure_r(
             continue
         ust_sinir = kesim if pencere == "is" else len(df)
         havuzlar = _bos_havuzu(
-            df, risk_o, hedef_o, yonler, max_bars, r, oos_i, ust_sinir=ust_sinir
+            df, risk_o, hedef_o, yonler, max_bars, r, oos_i, ust_sinir=ust_sinir,
+            komisyon=komisyon, kayma=kayma,
         )
         if havuzlar is None:
             continue  # bazsız işlem sayılmaz: n_trades ile n_symbols ayrışmasın

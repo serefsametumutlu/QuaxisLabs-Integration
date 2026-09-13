@@ -205,7 +205,9 @@ serbestlik derecesinden geliyordur — Pardo s.291-293.)*
 |---|---|
 | Dönem | *(hangi tarih aralığı)* |
 | Evren | *(kaç sembol, neden)* |
-| İşlem maliyeti | **yok** — komisyon/spread hesaba katılmadı |
+| İşlem maliyeti | **dahil** — taraf başına %0.05 komisyon + çıkışta %0.05
+kayma. Giriş limit emir sayıldığı için kayma yemez; çıkış (stop/hedef)
+piyasa emri gibi davranır. |
 | Hayatta kalma yanlılığı | *(evren bugünkü listeden geliyorsa belirt)* |
 | Aynı barda stop+hedef | **stop** sayıldı (iyimserliğe karşı) |
 

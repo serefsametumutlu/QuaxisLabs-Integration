@@ -222,7 +222,7 @@ imzasıdır ve belirtilir.)*
 | Eşikler | Koşul eşikleri (EMA50, RSI 40-60, hacim 1.5×…) **denenmiş
 değerlerdir**, optimize EDİLMEDİ — optimize edilseydi aşırı uydurma riski
 katlanırdı |
-| İşlem maliyeti | yok |
+| İşlem maliyeti | **dahil** — taraf başına %0.05 komisyon + çıkışta %0.05 kayma |
 | Aynı barda stop+hedef | **stop** sayıldı |
 
 > Bağımsız gözlem birimi **sembol**dür, bar değil.
