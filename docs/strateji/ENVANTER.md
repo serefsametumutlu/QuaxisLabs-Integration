@@ -13,10 +13,10 @@ Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 | **Golden Zone** (ICT OTE) | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | **Kesitsel Momentum** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | Kesitsel Dönüş (ters varyant) | ✅ | — | *(momentumun içinde)* | ✅ | **reddedildi** (ön kayıtlı) |
-| **Harmonik · AB=CD** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
-| **Harmonik · Gartley 222** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
-| **Harmonik · Butterfly** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
-| **Harmonik · Three Drives** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
+| **Harmonik · AB=CD** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
+| **Harmonik · Gartley 222** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
+| **Harmonik · Butterfly** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
+| **Harmonik · Three Drives** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | **Salınım Fibo ABCD** | ❌ **YOK** | ✅ | ❌ | ❌ | — |
 
 **Yayınlanmış (K6) strateji: 0.**
@@ -24,6 +24,8 @@ Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 Dört harmonik formasyon tek pasaport altında
 ([`harmonik-pesavento.md`](harmonik-pesavento.md)) ama **dört ayrı künye**
 ve dört ayrı ölçüm. Soru "harmonikler çalışıyor mu" değil, **hangisi**.
+Cevap: **hiçbiri** — beş testin (dört formasyon + AB=CD'nin ikinci stop
+varyantı) beşi de BH-FDR'yi geçemedi.
 
 `Salınım Fibo ABCD` özel bir durum: **çizimi var, dedektörü yok.** Yani
 grafiği elle girilmiş sayılarla çiziliyor; "bu formasyon ne zaman oluştu"
@@ -80,11 +82,12 @@ bilinmiyor. Ama **beklentiyi yönetmesi gereken bir uyarı**: harmonikler
 Kullanıcı kararı (2026-09-13): **Pesavento'nun dört formasyonu birlikte
 kodlansın; diğer dört ekol sonra — toplam sekiz.**
 
-Dördü kodlandı (K0/K1/K2). Sıradaki iş **K3 kalibrasyonu**, çünkü kitabın
-vermediği dört eşik (`tolerans`, `donus_max_bar`, pivot kolları, AB=CD'nin
-stop oranı) oradan türetilecek. `pasaport.py dogrula` bu dördünü **bulgu
-olarak yazmaya devam ediyor** ve ölçüm dosyası diskte belirene kadar
-susmayacak.
+Dördü kodlandı, kalibre edildi ve ölçüldü (K0→K4). **Kenar bulunamadı.**
+
+En öğretici sayı `abcd`'nin yalnız alış satırı: +0.459R, profit factor
+1.80, %41.6 isabet. Adil baz olmadan raporlansa "çalışan strateji" diye
+sunulurdu. **Adil baz +0.367R** — aynı risk yapısını rastgele barlara
+koyunca da neredeyse aynı sonuç çıkıyor. Kalan +0.092R, p=0.5612.
 
 ### Sonraki turda gelecek dört ekol
 

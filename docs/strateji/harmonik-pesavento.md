@@ -5,16 +5,24 @@ ad: Harmonik Formasyonlar (Pesavento)
 paket: formasyon
 referans: ""
 
-verdikt: olculmedi
+verdikt: kanitlanmadi
 
-durum: aktif
+durum: durduruldu
+durdurma_gerekcesi: >
+  Dort formasyon + AB=CD'nin ikinci stop varyanti, bes test, BH-FDR
+  (q=0.05): HICBIRI gecemedi. Yalniz alis penceresinde abcd +0.459R
+  gorunuyor ama ADIL BAZ da +0.367R -- fark +0.092R, p=0.5612. Iki yon
+  birlikte olculunce (ornegin buyusun diye) fark +0.05R'ye ve p=0.36'ya
+  dusuyor. Tek yonlu "kar" formasyonun degil, BIST'in yukselis
+  surukleyisinin. IS penceresi OOS ile CELISIYOR (abcd IS -0.114R).
+  Ozet: docs/olcum/harmonik-pesavento-K4-1D-long.md
 
 kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/harmonik-pesavento-K0.md"] }
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/parametreler.py"] }
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/dedektor.py", "packages/teknik/quaxis/teknik/indicators/harmonik/pivotlar.py", "packages/teknik/tests/test_harmonik.py"] }
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K3-1D.md", "docs/olcum/harmonik-pesavento-K3-karar-kurali.md"] }
-  K4: { gecildi: null, kanit: [] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K4-1D-long.md", "docs/olcum/harmonik-pesavento-K4-1D-hepsi.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -34,8 +42,8 @@ kapilar:
 | **Zaman dilimleri** | 4S · 1G · 1H |
 | **Yön** | Boğa ve ayı kurulumu da üretilir. Ayı tarafı BIST'te işleme çevrilemez (açığa satış kısıtlı) ama **ölçüm nesnesi** olarak tutulur. |
 | **Referans görsel** | henüz yok (K5) |
-| **Verdikt** | **ölçülmedi** — K3 kapandı, K4 sırada |
-| **Durum** | aktif |
+| **Verdikt** | **kanıtlanmadı** — beş testin beşi de BH-FDR'yi geçemedi |
+| **Durum** | ⏸ durduruldu (2026-09-13) |
 
 ### Aile dört üyeden oluşuyor — ve dördü AYRI ölçülecek
 
@@ -259,35 +267,101 @@ kullanacağımız anlamına geliyor ve bu yazılı olmalı.
 
 ## K4 · İstatistik
 
-> **Bitti kriteri:** sembol-kümelenmiş test, IS/OOS, permütasyon + BH-FDR.
+| | |
+|---|---|
+| Ölçüm dosyaları | [yalnız alış](../olcum/harmonik-pesavento-K4-1D-long.md) · [iki yön](../olcum/harmonik-pesavento-K4-1D-hepsi.md) |
+| Ölçüt | Üç bariyerli R (stop / hedef / zaman), işlem maliyeti dahil |
+| Aynı barda stop+hedef | **stop** |
+| Bağımsız gözlem | sembol |
+| Aile | **5 test**, önceden sabit → BH-FDR (q=0.05) |
 
-| Formasyon | İşlem | Sembol | İsabet | Beklenen R | Adil baz | p | FDR |
-|---|---|---|---|---|---|---|---|
-| `harmonik_abcd` | | | | | | | |
-| `harmonik_gartley` | | | | | | | |
-| `harmonik_kelebek` | | | | | | | |
-| `harmonik_uc_surus` | | | | | | | |
+### Yalnız alış · OOS (birincil)
 
-### Baştan yazılan beklenti
+| formasyon | işlem | sembol | isabet | beklenen R | **adil baz** | fark | PF | p |
+|---|---|---|---|---|---|---|---|---|
+| `abcd` stop 1.272 | 622 | 325 | %41.6 | +0.459R | **+0.367R** | +0.092R | 1.80 | 0.5612 |
+| `abcd` stop 1.618 | 622 | 325 | %59.3 | +0.317R | **+0.225R** | +0.093R | 2.02 | 0.2619 |
+| `gartley` | 29 | 27 | %41.4 | +0.218R | +0.318R | −0.100R | 1.36 | 0.5332 |
+| `kelebek` | 21 | 21 | %33.3 | −0.112R | +0.348R | −0.461R | 0.81 | 0.9240 |
+| `uc_surus` | 46 | 43 | %32.6 | +0.016R | +0.192R | −0.175R | 1.02 | 0.7051 |
 
-Önceki projenin ölçümünde `harmonic.carney` **−%3.66 (n=68)** ile negatif
-taraftaydı. O ölçüm bu makineyle yapılmadı, n çok küçük ve formasyonların
-nasıl kodlandığı bilinmiyor — **kanıt değil**. Ama harmoniklerin önceki
-turda üstte değil altta çıktığı bir gerçek ve bu pasaport onu saklamıyor.
+**BH-FDR: beşin beşi de geçemedi.** Gartley ve Kelebek'te OOS sembol sayısı
+30'un altında (27 ve 21) — Pardo s.295 gereği o iki satırın **sayısı
+yazılır, verdikti yazılmaz**.
 
-Kitabın Gartley için ~**%70 isabet** iddiası bir **kitap iddiasıdır**.
-Ölçeceğimiz tam olarak budur.
+### Asıl bulgu: +0.459R'nin ne kadarı formasyonun
 
-### Ne zaman çürütülmüş sayılır
+`abcd` satırı tek başına iyi bir strateji gibi duruyor: %41.6 isabet,
+profit factor 1.80, işlem başına +0.459R. Bu sayı, adil baz olmadan
+raporlansaydı "çalışan bir strateji" diye sunulurdu.
 
-* R, adil bazın altında kalırsa → kenar yok.
-* Dört formasyonun hiçbiri BH-FDR'yi geçemezse → aile çürütülmüş sayılır.
-* Bir formasyon geçer ama işlem maliyeti eşiğinde sıfırlanırsa →
-  uygulanamaz.
-* Sembol başına gözlem 30'un altına inerse → sayı yazılır, verdikt yazılmaz
-  (Pardo s.295).
+**Adil baz +0.367R.** Yani aynı risk yapısıyla (aynı stop mesafesi, aynı
+hedef mesafesi) **rastgele barlarda** açılan işlemler de neredeyse aynı
+kadar kazanıyor. Geriye kalan +0.092R, p=0.5612 ile tesadüfden ayırt
+edilemiyor.
 
----
+Bunun sebebi iki şeyin çarpımı:
+
+1. **Geometri zaten lehte.** AB=CD'nin ödül/risk oranı ~3.2:1. %25 isabetle
+   başabaş olan bir yapıda %41 isabet pozitif R verir — formasyon hiçbir
+   şey bilmese bile.
+2. **BIST nominal olarak yükseliyor.** Yalnız alış tarafı bu sürüklenişi
+   üstleniyor.
+
+### Kanıt: iki yön birlikte ölçülünce ne oluyor
+
+Pasaportta K4'ten ÖNCE yazılmıştı: ayı tarafı BIST'te işleme çevrilemez
+ama **ölçüm nesnesi** olarak tutulur. Tutulmasının karşılığı bu tablo.
+
+| formasyon | işlem | sembol | beklenen R | adil baz | fark | p |
+|---|---|---|---|---|---|---|
+| `abcd` stop 1.272 | 1587 | 435 | −0.025R | −0.076R | +0.051R | 0.3578 |
+| `abcd` stop 1.618 | 1587 | 435 | −0.069R | −0.104R | +0.035R | 0.3298 |
+| `gartley` | 58 | 53 | +0.071R | +0.016R | +0.055R | 0.4033 |
+| `kelebek` | 51 | 50 | −0.139R | −0.027R | −0.112R | 0.6827 |
+| `uc_surus` | 71 | 65 | +0.101R | +0.023R | +0.078R | 0.2629 |
+
+Yükseliş sürüklenişi iki yönde birbirini götürünce **hem strateji hem baz
+sıfıra iniyor.** Formasyonun kendi katkısı +0.03R ile +0.08R arasında ve
+hiçbiri anlamlı değil. Örneklem de artık yeterli: beş satırın beşinde de
+sembol sayısı 50'nin üstünde, yani "az veri vardı" mazereti yok.
+
+### IS penceresi OOS'u DOĞRULAMIYOR
+
+| formasyon | OOS farkı | IS farkı |
+|---|---|---|
+| `abcd` stop 1.272 | **+0.092R** | **−0.114R** |
+| `abcd` stop 1.618 | +0.093R | −0.028R |
+| `gartley` | −0.100R | −0.097R |
+| `kelebek` | −0.461R | −0.233R |
+| `uc_surus` | −0.175R | −0.137R |
+
+En iyi görünen satır iki pencerede **ters işaret** taşıyor. Bu, kalan
++0.092R'nin bile kararlı bir şey olmadığını gösteriyor.
+
+### Çıkış kırılımı — neden böyle
+
+| formasyon | hedef | stop | zaman | ort. kazanç | ort. kayıp |
+|---|---|---|---|---|---|
+| `abcd` stop 1.272 | %29 | %54 | %17 | +2.47R | −0.98R |
+| `gartley` | %34 | %59 | %7 | +1.98R | −1.03R |
+| `kelebek` | %19 | %52 | %29 | +1.42R | −0.88R |
+| `uc_surus` | %33 | %67 | %0 | +2.22R | −1.05R |
+
+Golden Zone'daki tablonun aynısı: **geometri lehte, isabet tam olarak onu
+götürüyor.** Kazanan işlem 2.5R getiriyor, kaybeden 1R alıyor, ama kayıp
+kazançtan iki kat sık. Çarpım sıfır.
+
+### Verdikt
+
+**kanıtlanmadı.** Dört formasyonun hiçbiri, iki stop varyantının hiçbiri
+BH-FDR'yi geçemedi. Bu "zarar ettiriyor" demek DEĞİL — `abcd` mutlak
+olarak pozitif. Bu, **"formasyonun kendisinin bilgi taşıdığına dair kanıt
+yok"** demek: aynı risk yapısını rastgele barlara koysanız da aynı sonucu
+alıyorsunuz.
+
+Kitabın Gartley için ~%70 isabet iddiası **doğrulanmadı**: ölçülen %41.4
+(yalnız alış, n=29) ve %36.2 (iki yön, n=58).
 
 ## K5 · Görsel
 
