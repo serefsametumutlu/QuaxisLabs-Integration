@@ -36,7 +36,7 @@ for akis in (sys.stdout, sys.stderr):
         akis.reconfigure(encoding="utf-8", errors="replace")
 
 from katmanli_olcum import tara  # noqa: E402
-from kosul_taramasi import KOSULLAR, _islemler  # noqa: E402
+from kosul_taramasi import KOSULLAR, _grup, _islemler  # noqa: E402
 from quaxis.teknik.core.types import Market, Timeframe  # noqa: E402
 from quaxis.teknik.olcum.bariyer import measure_r  # noqa: E402
 
@@ -64,6 +64,11 @@ def main() -> int:
     ap.add_argument("--market", default="bist")
     ap.add_argument("--tur", type=int, default=2000)
     ap.add_argument("--evren", default=None)
+    ap.add_argument(
+        "--grup", type=int, default=None,
+        help="0=A (arama) · 1=B (doğrulama). Doğrulanmış bir bulgunun maliyet "
+             "eşiği, bulgunun DOĞRULANDIĞI grupta ölçülmeli.",
+    )
     a = ap.parse_args()
 
     market, tf = Market(a.market), Timeframe(a.zaman_dilimi)
@@ -75,6 +80,9 @@ def main() -> int:
         evren = load_universe(market)
 
     ohlc, sinyaller, _ = tara(a.katalog, a.gosterge, evren, tf, market)
+    if a.grup is not None:
+        ohlc, sinyaller = _grup(ohlc, a.grup), _grup(sinyaller, a.grup)
+        print(f"Grup {'AB'[a.grup]}: {len(sinyaller)} sembol", flush=True)
     kosul = KOSULLAR[a.kosul][1] if a.kosul else None
     hipotez = KOSULLAR[a.kosul][0] if a.kosul else "koşulsuz taban"
     islemler = _islemler(sinyaller, kosul)
@@ -109,7 +117,8 @@ def main() -> int:
     hedef.write_text(f"""# {a.slug} — Maliyet Duyarlılığı
 
 **Tarih:** {dt.date.today().isoformat()} · **Koşul:** `{a.kosul or "—"}` ({hipotez})
-**Pencere:** OOS · **İşlem:** {sum(len(v) for v in islemler.values())}
+**Pencere:** OOS · **Grup:** {"AB"[a.grup] if a.grup is not None else "hepsi"} ·
+**İşlem:** {sum(len(v) for v in islemler.values())}
 
 Tek bir maliyet düzeyinde "kenar var" demek, o düzeyin doğru olduğunu
 varsaymaktır. Bu tablo bunun yerine **kenarın hangi maliyette sıfırlandığını**

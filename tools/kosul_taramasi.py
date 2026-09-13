@@ -241,7 +241,10 @@ def _olc(ohlc, islemler, pencere: str, bariyer: int, turlar: int) -> RResult:
 def rapor(
     taban_ic: RResult, taban_dis: RResult, sonuclar: list[KosulSonucu],
     fdr: dict[str, bool], slug: str, gosterge: str,
+    onkayit: set[str] | None = None, onkayit_fdr: dict[str, bool] | None = None,
 ) -> str:
+    onkayit = onkayit or set()
+    onkayit_fdr = onkayit_fdr or {}
     arama = []
     for k in sorted(sonuclar, key=lambda x: -(x.ic.mean_r - taban_ic.mean_r)):
         d = k.ic.mean_r - taban_ic.mean_r
@@ -251,18 +254,28 @@ def rapor(
             f"{d:+.3f}R | {k.ic.p_value:.4f} | {'geçti' if fdr.get(k.ad) else '—'} |"
         )
 
-    gecenler = [k for k in sonuclar if fdr.get(k.ad) and k.guvenilir]
+    gecenler = [k for k in sonuclar if (fdr.get(k.ad) and k.guvenilir) or k.ad in onkayit]
     if gecenler:
         dogrulama = "\n".join(
             f"| `{k.ad}` | {k.dis.n_trades if k.dis else 0} | "
             f"{k.dis.mean_r:+.3f}R | {k.dis.baseline_mean_r:+.3f}R | "
             f"{k.dis.mean_r - taban_dis.mean_r:+.3f}R | {k.dis.p_value:.4f} | "
+            f"{'geçti' if onkayit_fdr.get(k.ad) else '—' if k.ad in onkayit else 'n/a'} | "
             f"{'**kenar-var**' if k.dis and k.dis.p_value <= 0.05 else 'kanıtlanmadı'} |"
             for k in gecenler if k.dis is not None
         )
-        dogrulama_bolumu = f"""| Koşul | İşlem | Ort. R | Adil baz | ΔR | p | Verdikt |
-|---|---|---|---|---|---|---|
-{dogrulama}"""
+        ek = (
+            "\n\n"
+            f"**Ön kayıtlı aile:** `{'`, `'.join(sorted(onkayit))}`. Bu {len(onkayit)} "
+            f"koşul, B grubu / OOS penceresine **BAKILMADAN ÖNCE** sabitlendi; seçim "
+            f"gerekçesi iki bağımsız arama koşusunda da en tutarlı sonucu vermeleriydi. "
+            f"BH-FDR bu küçük aileye uygulanır — 35 koşulluk aileninkinden gevşektir ve "
+            f"bu meşrudur, çünkü aile sonuca bakılarak seçilmedi."
+            if onkayit else ""
+        )
+        dogrulama_bolumu = f"""| Koşul | İşlem | Ort. R | Adil baz | ΔR | p | Aile FDR | Verdikt |
+|---|---|---|---|---|---|---|---|
+{dogrulama}{ek}"""
     else:
         dogrulama_bolumu = (
             "**Arama penceresinde BH-FDR'yi geçen koşul olmadı.** Doğrulanacak "
@@ -338,6 +351,11 @@ def main() -> int:
     ap.add_argument("--market", default="bist")
     ap.add_argument("--tur", type=int, default=2000)
     ap.add_argument("--evren", default=None)
+    ap.add_argument(
+        "--onkayit", default=None,
+        help="virgülle ayrılmış koşul adları: FDR'den bağımsız olarak B/OOS'ta ölçülür. "
+             "Yalnızca aile ÖNCEDEN sabitlendiğinde kullanılır; rapor bunu yazar.",
+    )
     a = ap.parse_args()
 
     market, tf = Market(a.market), Timeframe(a.zaman_dilimi)
@@ -386,8 +404,18 @@ def main() -> int:
 
     fdr = bh_fdr({k.ad: k.ic.p_value for k in sonuclar if k.guvenilir}, q=0.05)
 
+    onkayit = {x.strip() for x in (a.onkayit or "").split(",") if x.strip()}
+    if onkayit:
+        bilinmeyen = onkayit - set(KOSULLAR)
+        if bilinmeyen:
+            ap.error(f"bilinmeyen ön kayıtlı koşul: {sorted(bilinmeyen)}")
+        # Ön kayıtlı aile KENDİ İÇİNDE düzeltilir: iki koşulluk bir ailede
+        # BH eşiği 35 koşulluk aileninkinden çok daha gevşektir ve bu
+        # meşrudur — çünkü aile B/OOS'a BAKILMADAN sabitlendi.
+        print(f"Ön kayıtlı aile ({len(onkayit)}): {', '.join(sorted(onkayit))}", flush=True)
+
     for k in sonuclar:
-        if fdr.get(k.ad) and k.guvenilir:
+        if (fdr.get(k.ad) and k.guvenilir) or k.ad in onkayit:
             k.dis = _olc(
                 b_ohlc, _islemler(b_sinyal, KOSULLAR[k.ad][1]), "oos", bariyer, a.tur
             )
@@ -396,8 +424,17 @@ def main() -> int:
 
     OLCUM_KOK.mkdir(parents=True, exist_ok=True)
     hedef = OLCUM_KOK / f"{a.slug}-kosul-taramasi-{dt.date.today().isoformat()}.md"
-    hedef.write_text(rapor(taban_ic, taban_dis, sonuclar, fdr, a.slug, a.gosterge),
-                     encoding="utf-8")
+    if onkayit:
+        aile_p = {k.ad: k.dis.p_value for k in sonuclar if k.ad in onkayit and k.dis}
+        onkayit_fdr = bh_fdr(aile_p, q=0.05)
+        print(f"Ön kayıtlı aile BH-FDR: {onkayit_fdr}", flush=True)
+    else:
+        onkayit_fdr = {}
+
+    hedef.write_text(
+        rapor(taban_ic, taban_dis, sonuclar, fdr, a.slug, a.gosterge, onkayit, onkayit_fdr),
+        encoding="utf-8",
+    )
     print(f"\n{hedef.relative_to(KOK)} yazıldı.")
     return 0
 
