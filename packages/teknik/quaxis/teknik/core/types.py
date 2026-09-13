@@ -308,12 +308,27 @@ class IndicatorResult:
         )
 
 
+#: high/low tutarlılığında kabul edilen GÖRELİ tolerans.
+#:
+#: **Ölçülmüş gerekçe (2026-09-13).** BIST evreninin ~%30'u "high >= max(open,
+#: close) ihlali" ile reddediliyordu. Ölçünce sebebi çıktı: yfinance
+#: `auto_adjust=True` ile OHLC'yi bir düzeltme katsayısıyla ÇARPIYOR; ham
+#: veride birbirine EŞİT olan high ve close, çarpımdan sonra double'ın son
+#: bitinde ayrışıyor. AKBNK'te göreli fark 1.2e-16, AEFES'te 1.6e-16 —
+#: yani tam olarak bir ULP. Bu bozuk veri değil, aritmetik artığı.
+#:
+#: 1e-9 bu gürültünün yedi kat üstünde, gerçek bir hatanın ise çok altında:
+#: AGHOL'ün gerçek bir low ihlali 4.1e-3 göreliydi ve ELENMEYE devam ediyor.
+#: Toleransı buradan büyütmek, veri hatasını sessizce içeri almak demektir.
+OHLC_TOLERANS = 1e-9
+
+
 def validate_ohlcv(df: pd.DataFrame) -> None:
     """OHLCV DataFrame'inin şema ve tutarlılık kurallarını doğrular.
 
     Kurallar: tz-aware DatetimeIndex, monoton artan, tekrarsız; kolonlar
-    open/high/low/close/volume; high >= max(open,close); low <= min(open,close);
-    NaN yok. İhlalde OHLCVError fırlatır.
+    open/high/low/close/volume; high >= max(open,close); low <= min(open,close)
+    (`OHLC_TOLERANS` göreli payıyla); NaN yok. İhlalde OHLCVError fırlatır.
     """
     required_cols = {"open", "high", "low", "close", "volume"}
     missing = required_cols - set(df.columns)
@@ -332,11 +347,23 @@ def validate_ohlcv(df: pd.DataFrame) -> None:
     if df[list(required_cols)].isna().any().any():
         raise OHLCVError("OHLCV verisinde NaN değer var")
 
-    high_ok = df["high"] >= df[["open", "close"]].max(axis=1)
-    low_ok = df["low"] <= df[["open", "close"]].min(axis=1)
+    # Tolerans GÖRELİdir: fiyat ölçeği semboller arasında 100 kat değişiyor,
+    # mutlak bir pay ucuz hissede gevşek, pahalı hissede sıkı olurdu.
+    govde_ust = df[["open", "close"]].max(axis=1)
+    govde_alt = df[["open", "close"]].min(axis=1)
+    high_ok = df["high"] >= govde_ust - govde_ust.abs() * OHLC_TOLERANS
+    low_ok = df["low"] <= govde_alt + govde_alt.abs() * OHLC_TOLERANS
     if not bool(high_ok.all()):
         bad = df.index[~high_ok].tolist()
-        raise OHLCVError(f"high >= max(open, close) ihlali: {bad[:5]}")
+        sapma = ((govde_ust - df["high"]) / govde_ust.abs())[~high_ok].abs().max()
+        raise OHLCVError(
+            f"high >= max(open, close) ihlali: {bad[:5]} (en büyük göreli sapma {sapma:.2e}, "
+            f"tolerans {OHLC_TOLERANS:.0e})"
+        )
     if not bool(low_ok.all()):
         bad = df.index[~low_ok].tolist()
-        raise OHLCVError(f"low <= min(open, close) ihlali: {bad[:5]}")
+        sapma = ((df["low"] - govde_alt) / govde_alt.abs())[~low_ok].abs().max()
+        raise OHLCVError(
+            f"low <= min(open, close) ihlali: {bad[:5]} (en büyük göreli sapma {sapma:.2e}, "
+            f"tolerans {OHLC_TOLERANS:.0e})"
+        )
