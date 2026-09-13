@@ -15,14 +15,19 @@ durdurma_gerekcesi: >
   birlikte olculunce (ornegin buyusun diye) fark +0.05R'ye ve p=0.36'ya
   dusuyor. Tek yonlu "kar" formasyonun degil, BIST'in yukselis
   surukleyisinin. IS penceresi OOS ile CELISIYOR (abcd IS -0.114R).
-  Ozet: docs/olcum/harmonik-pesavento-K4-1D-long.md
+  IKINCI DENEME (on kayitli, KURAL-30 teyitli giris) da REDDEDILDI:
+  en iyi aday abcd.teyit p=0.0685, duz 0.05 esigini bile gecemedi ve
+  etkinin TAMAMI IS penceresinde (IS +0.582R, OOS -0.005R). Teyit
+  teknigi isabeti %32.8'den %45.3'e cikariyor ama adil bazdan
+  ayrilamiyor. On kayit §7 geregi ucuncu varyant denenmeyecek.
+  Ozet: docs/olcum/onkayit-harmonik-teyit.md
 
 kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/harmonik-pesavento-K0.md"] }
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/parametreler.py"] }
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/harmonik/dedektor.py", "packages/teknik/quaxis/teknik/indicators/harmonik/pivotlar.py", "packages/teknik/tests/test_harmonik.py"] }
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K3-1D.md", "docs/olcum/harmonik-pesavento-K3-karar-kurali.md"] }
-  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K4-1D-long.md", "docs/olcum/harmonik-pesavento-K4-1D-hepsi.md"] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K4-1D-long.md", "docs/olcum/harmonik-pesavento-K4-1D-hepsi.md", "docs/olcum/harmonik-pesavento-K4b-teyit-1D-long.md", "docs/olcum/onkayit-harmonik-teyit.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -351,6 +356,43 @@ En iyi görünen satır iki pencerede **ters işaret** taşıyor. Bu, kalan
 Golden Zone'daki tablonun aynısı: **geometri lehte, isabet tam olarak onu
 götürüyor.** Kazanan işlem 2.5R getiriyor, kaybeden 1R alıyor, ama kayıp
 kazançtan iki kat sık. Çarpım sıfır.
+
+### İkinci deneme — ön kayıtlı, ve o da reddedildi
+
+İlk ölçüm kitabın **yöntemini değil, basitleştirilmiş hâlini** ölçmüştü:
+"D'ye dokununca al". Pesavento bunu söylemiyor — KURAL-30 bir bar bekleme
+tekniğini tarif ediyor. Bu eksik, ön kayıtlı **tek bir** ikinci denemeyle
+kapatıldı: [`onkayit-harmonik-teyit.md`](../olcum/onkayit-harmonik-teyit.md).
+
+Aynı koşuda gerçek bir ölçüm hatası da düzeltildi: bariyer yürüyüşü giriş
+barını atlıyordu, ama D'de **limit dolum barın içinde** olur ve barın
+kalanı canlıdır. Sinyallerin **%14–28'i** giriş barında zaten stop oluyor
+ve ölçüme canlı giriyordu. Düzeltme, beklendiği gibi sonucu **kötüleştirdi**.
+
+**Sonuç: sekiz testin hiçbiri geçemedi.** En iyisi `abcd·teyit`, p=0.0685
+— sekiz test için BH eşiği 0.00625 olması bir yana, düz 0.05'i bile
+geçemedi.
+
+**Ve "az kalmıştı" diyemememin sebebi:**
+
+| pencere | işlem | fark | p |
+|---|---|---|---|
+| IS (ilk %70) | 502 | +0.582R | 0.0780 |
+| **OOS (son %30)** | 301 | **−0.005R** | 0.3953 |
+
+Etkinin tamamı geçmişte; görülmemiş dönemde **sıfır**.
+
+### KURAL-30 yine de ölçülebilir bir şey yapıyor
+
+| formasyon | isabet | stop oranı | teyidin katkısı |
+|---|---|---|---|
+| `abcd` | %32.8 → **%45.3** | %65 → %47 | +0.534R |
+| `kelebek` | %30.4 → **%45.5** | %65 → %41 | +0.414R |
+| `uc_surus` | %24.6 → **%51.4** | %75 → %38 | +0.475R |
+| `gartley` | %35.2 → %41.7 | %64 → %58 | −0.091R |
+
+Bu, kitabın "körlemesine girme" tavsiyesinin boş olmadığını gösteriyor.
+Ama etki adil bazdan ayrılacak kadar büyük ve kararlı değil.
 
 ### Verdikt
 
