@@ -177,6 +177,8 @@ def main() -> int:
         )
 
     genel = olc(ohlc, sinyaller)
+    cikis = (f"%{genel.target_rate * 100:.0f} / %{genel.stop_rate * 100:.0f}"
+             f" / %{genel.time_rate * 100:.0f}")
     print(f"GENEL: {genel.n_trades} işlem · isabet %{genel.win_rate * 100:.1f} · "
           f"PF {genel.profit_factor:.2f} · {genel.mean_r:+.3f}R", flush=True)
 
@@ -236,10 +238,7 @@ def main() -> int:
 | Ortalama R | {genel.mean_r:+.3f}R |
 | Adil baz | {genel.baseline_mean_r:+.3f}R |
 | Ortalama kazanç / kayıp | {genel.ortalama_kazanc:+.2f}R / {genel.ortalama_kayip:+.2f}R |
-| Ortalama kazanç / kayıp | {genel.ortalama_kazanc:+.2f}R /
-{genel.ortalama_kayip:+.2f}R |
-| Hedef / stop / zaman | %{genel.target_rate * 100:.0f} /
-%{genel.stop_rate * 100:.0f} / %{genel.time_rate * 100:.0f} |
+| Hedef / stop / zaman çıkışı | {cikis} |
 
 ## Likiditeye göre
 

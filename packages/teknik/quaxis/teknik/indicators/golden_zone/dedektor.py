@@ -55,7 +55,11 @@ META = IndicatorMeta(
     version="0.1.0",
     category="yapi",
     description="Yapı kırılımı sonrası 0.62-0.79 düzeltme bölgesine dönüş (ICT OTE)",
-    supported_timeframes=(Timeframe.H4, Timeframe.D1),
+    # W1 eklendi (Faz 7.1): kuralın kendisi zaman diliminden bağımsız ve
+    # bar-cinsi parametreler `for_timeframe` ile ölçekleniyor. Eklenmeden
+    # önce haftalık taramada motor HİÇ iş açmıyordu — doğru davranış, ama
+    # "haftalıkta kaç sinyal" sorusu da cevapsız kalıyordu.
+    supported_timeframes=(Timeframe.H4, Timeframe.D1, Timeframe.W1),
 )
 
 
