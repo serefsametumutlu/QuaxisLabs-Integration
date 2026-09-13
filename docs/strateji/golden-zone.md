@@ -166,23 +166,79 @@ sayısı görünür (Pardo s.295 — 30'un altında sayı yazılır, verdikt ür
 
 ### Parametreler
 
-`packages/teknik/quaxis/teknik/indicators/<…>/params.py` — `frozen dataclass`,
-sonuç kaydı `params_hash` taşır. Aynı veri + aynı parametre = bit bit aynı
-sonuç.
+`packages/teknik/quaxis/teknik/indicators/golden_zone/parametreler.py` —
+`frozen dataclass`, sonuç kaydı `params_hash` taşır. Aynı veri + aynı
+parametre = bit bit aynı sonuç.
+
+**Varsayılanların hiçbiri henüz gerekçeli değil.** Hepsi K3'ten türetilecek;
+tabloda "geçici" diyen her satır K3 raporu yazılınca kapanır.
 
 | Alan | Tip | Varsayılan | Düz Türkçe açıklama |
 |---|---|---|---|
-| | | | |
+| `bolge_sig` | float | 0.62 *(geçici)* | Bölgenin sığ ucu — düzeltmenin ilk geçerli temas seviyesi. Giriş burada olur. |
+| `bolge_derin` | float | 0.79 *(geçici)* | Bölgenin derin ucu — son geçerli giriş. Daha derin düzeltme bölgeyi geçersiz kılmaz, sadece kurulum "derin" sayılır. |
+| `tatli_nokta` | float | 0.705 *(geçici)* | ICT'nin "sweet spot"u. **Sinyal üretmez**, yalnızca payload'a yazılır ki K4 "derin girişler daha mı iyi" sorusunu ölçebilsin. |
+| `pivot_sol` / `pivot_sag` | int | 3 / 3 | Salınım ucunun onaylanması için sağında/solunda gereken bar. Non-repaint'in temeli: bir uç sağındaki 3 bar kapanmadan BİLİNEMEZ. |
+| `yer_degistirme_atr` | float | 1.5 *(geçici)* | Bacağın asgari boyu, ATR katı. Gürültüyü yapı kırılımı sanmayı engeller. |
+| `atr_periyot` | int | 14 | Wilder ATR. TA'nın evrensel kısaltması; zaman dilimine göre ölçeklenmez. |
+| `donus_max_bar` | int | 20 *(geçici)* | Kırılımdan sonra bölgeye dönüş için tanınan süre. Takvimsel olduğu için zaman dilimine göre ÖLÇEKLENİR. |
+| `stop_tamponu` | float | 0.0 *(geçici)* | Stop'un %100 çıpasının ne kadar ötesine konacağı. ICT "beyond this level" diyor ama sayı vermiyor. |
+| `fvg_min_atr` | float | 0.1 *(geçici)* | FVG sayılması için asgari boşluk, ATR katı. |
+| `zaman_bariyeri` | int | 40 *(geçici)* | K4'ün üç bariyerli ölçümünde zaman bariyeri. Takvimsel — ölçeklenir. |
+
+`__post_init__` üç şeyi reddeder: bölge sınırlarının ters ya da [0,1] dışı
+olması, tatlı noktanın bölgenin dışına düşmesi (ölçülemeyen bir sayı olurdu),
+pivot kolunun 1'den küçük olması.
 
 ### Durum makinesi
 
-*(pending → confirmed → invalidated … Hangi olay hangi geçişi tetikler?)*
+Kurulum bir dataclass olarak canlı tutulur; `SignalState` yalnızca son
+durumu taşır.
+
+```
+       yapı kırılımı (BOS)
+              │
+              ▼
+        [KURULUM CANLI] ──── %100 ötesinde GÖVDE kapanışı ──▶ ölür
+              │         └─── donus_max_bar aşıldı ──────────▶ ölür
+              │
+     fiyat 0.62 seviyesine dokundu
+              │
+              ▼
+         SİNYAL (confirmed)
+```
+
+| Olay | Geçiş | Kod |
+|---|---|---|
+| Kapanış onaylı salınım ucunu aşar (ve önceki bar aşmamış — kırılım TAZE) | kurulum doğar | `_kirilim_var_mi` |
+| Yeni tepe/dip | %0 çıpası büyür | `_capa0_guncelle` |
+| %100 ötesinde **gövde** kapanışı | kurulum ölür | `_yasiyor` |
+| `donus_max_bar` aşıldı | kurulum ölür | `_yasiyor` |
+| Fiyat bölgenin sığ ucuna dokunur | **sinyal** | `_bolgeye_girdi_mi` |
+
+Aynı yönde ikinci kurulum açılmaz: açılsaydı yükselen her bar ayrı bir
+kurulum doğurur ve sinyaller çoğalırdı.
 
 ### Non-repaint gerekçesi
 
-*(Sinyal neden **onaylandığı barın** tarihini taşır? Pivot kaç bar sonra
-kesinleşir? Açık bar neden sinyal üretemez? Bu bölüm, K2'deki walk-forward
-testinin neyi kanıtlaması gerektiğini tarif eder.)*
+Üç çıpanın üçü de sinyal barından **kesinlikle önce** sabitlenir:
+
+| Çıpa | Ne zaman kesinleşir |
+|---|---|
+| Salınım pivotları | sağındaki `pivot_sag` bar kapandığında — `_Pivot.onay_i` bunu taşır ve `_son_onayli` onaydan önce hiçbir pivotu vermez |
+| %100 (bacağın dibi) | kırılım barında; tamamen geçmiş barlardan |
+| %0 (bacağın zirvesi) | yalnızca BÜYÜR ve yalnızca `[köken, t]` barlarından hesaplanır; bar *t*'de yeniden hesaplandığında aynı değeri verir |
+
+Bu yüzden `bar_time` (bacağın zirvesinin barı) ile `detected_at` (bölgeye
+girilen bar) **farklıdır** ve fark kaydedilir. Bacağın "en iyi" ucunu
+sonradan seçmek — ileriye bakıp daha yüksek bir tepe bulunca çıpayı oraya
+kaydırmak — repaint'in ta kendisidir.
+
+**Görsel primitifler de aynı kurala tabidir** ve bu bedavaya gelmedi:
+walk-forward testi iki gerçek kusur yakaladı. `Level`'lar `start` taşımıyordu
+(zamansız seviye "hep vardı" sayılıyordu); kutunun `t0`'ı bacağın
+zirvesindeydi, oysa kutu sinyal barında doğuyor — geriye atılmış bir `t0`,
+geçmişi kaydıran birine bölgeyi daha bilinemezken çizilmiş gösterirdi.
 
 ---
 
@@ -193,10 +249,23 @@ testinin neyi kanıtlaması gerektiğini tarif eder.)*
 
 | | |
 |---|---|
-| Kod | *(dosya yolu)* |
-| Testler | *(test dosyası yolu)* |
-| Repaint testi | *(`repaint_test` ile mi, `register_verified_elsewhere` ile mi? İkincisiyse **neden** generic teste giremediği burada yazılı olmak zorunda.)* |
-| Lookahead lint | *(temiz / bulgular)* |
+| Kod | `packages/teknik/quaxis/teknik/indicators/golden_zone/dedektor.py` |
+| Parametreler | `packages/teknik/quaxis/teknik/indicators/golden_zone/parametreler.py` |
+| Katalog | `quaxis.teknik.indicators.katalog:KATALOG` |
+| Testler | `packages/teknik/tests/test_golden_zone.py` — 12 test |
+| Repaint testi | **`repaint_test`** (generic) — `test_repaint_yok`, 260 bar / 35 kesim noktası. İstisna yolu (`register_verified_elsewhere`) KULLANILMADI. |
+| Lookahead lint | `ruff` temiz |
+
+### Testlerin neyi kilitlediği
+
+| Test | Kilitlediği kural |
+|---|---|
+| `test_repaint_yok` | Walk-forward eşitlik. Kırılırsa strateji K2'yi geçemez. |
+| `test_govde_kapanisi_gecersiz_kilar_wick_kilmaz` | ICT'nin gövde/wick ayrımı. Wick'i de geçersiz saymak sinyal sayısını sessizce yarıya indirirdi. |
+| `test_stop_ve_hedef_payloadda` | K4'ün R ölçümü bu iki anahtarı okur; yoksa strateji kendi iddiasını göremeyen bir ölçüme girer. |
+| `test_katman_bayraklari_filtre_degil` | Süpürme/FVG/OB elemez, bayrak yazar — katmanlı ölçümün ön koşulu. |
+| `test_giris_bolgenin_sig_ucunda` | Giriş 0.62'de; 0.705'e kaydırmak sinyalin yarısını düşürürdü. |
+| `test_detected_at_bar_time_ile_ayni_degil` | İkisi aynı bar olsaydı imkânsız bir şey iddia ederdik. |
 
 ---
 
