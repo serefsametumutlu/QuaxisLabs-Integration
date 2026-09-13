@@ -87,6 +87,64 @@ def rsi(kapanis: np.ndarray, periyot: int = 14) -> np.ndarray:
     return (100.0 - 100.0 / (1.0 + rs)).to_numpy()
 
 
+def adx(df: pd.DataFrame, periyot: int = 14) -> np.ndarray:
+    """Wilder ADX — trendin GÜCÜ (yönü değil)."""
+    y, d = df["high"].to_numpy(float), df["low"].to_numpy(float)
+    k = df["close"].to_numpy(float)
+    up, dn = np.diff(y, prepend=np.nan), -np.diff(d, prepend=np.nan)
+    art_dm = np.where((up > dn) & (up > 0), up, 0.0)
+    eks_dm = np.where((dn > up) & (dn > 0), dn, 0.0)
+    onceki = np.concatenate(([np.nan], k[:-1]))
+    tr = np.maximum(y - d, np.maximum(np.abs(y - onceki), np.abs(d - onceki)))
+
+    def _w(x):
+        return pd.Series(x).ewm(alpha=1.0 / periyot, adjust=False, min_periods=periyot).mean()
+
+    atr_ = _w(tr)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        art_di = 100 * _w(art_dm) / atr_
+        eks_di = 100 * _w(eks_dm) / atr_
+        dx = 100 * (art_di - eks_di).abs() / (art_di + eks_di)
+    return _w(dx.to_numpy()).to_numpy()
+
+
+def macd_histogram(kapanis: np.ndarray) -> np.ndarray:
+    """MACD(12,26,9) histogramı — momentumun ivmesi."""
+    hizli = pd.Series(kapanis).ewm(span=12, adjust=False, min_periods=26).mean()
+    yavas = pd.Series(kapanis).ewm(span=26, adjust=False, min_periods=26).mean()
+    cizgi = hizli - yavas
+    sinyal = cizgi.ewm(span=9, adjust=False, min_periods=9).mean()
+    return (cizgi - sinyal).to_numpy()
+
+
+def bollinger_genislik(kapanis: np.ndarray, periyot: int = 20) -> np.ndarray:
+    """Bollinger bant genişliği / orta bant — sıkışma ölçüsü."""
+    s = pd.Series(kapanis)
+    orta = s.rolling(periyot, min_periods=periyot).mean()
+    sapma = s.rolling(periyot, min_periods=periyot).std(ddof=0)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return ((4 * sapma) / orta).to_numpy()
+
+
+def stokastik(df: pd.DataFrame, periyot: int = 14) -> np.ndarray:
+    """%K — barın N barlık aralıktaki yeri."""
+    y = pd.Series(df["high"].to_numpy(float)).rolling(periyot, min_periods=periyot).max()
+    d = pd.Series(df["low"].to_numpy(float)).rolling(periyot, min_periods=periyot).min()
+    k = pd.Series(df["close"].to_numpy(float))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return (100 * (k - d) / (y - d)).to_numpy()
+
+
+def obv_egim(df: pd.DataFrame, periyot: int = 20) -> np.ndarray:
+    """OBV'nin N barlık eğimi — hacim fiyatı teyit ediyor mu."""
+    k = df["close"].to_numpy(float)
+    h = df["volume"].to_numpy(float)
+    yon = np.sign(np.diff(k, prepend=k[0]))
+    obv = np.cumsum(yon * h)
+    s = pd.Series(obv)
+    return (s - s.shift(periyot)).to_numpy()
+
+
 @dataclass(frozen=True)
 class _Baglam:
     """Sinyal barında ölçülen bağlam değerleri.
@@ -99,11 +157,19 @@ class _Baglam:
     Hepsi t barına kadarki veriden hesaplanır; ileriye bakış yok.
     """
 
+    ema20: np.ndarray
     ema50: np.ndarray
     ema200: np.ndarray
     rsi14: np.ndarray
     atr50: np.ndarray
     hacim_ort: np.ndarray
+    adx14: np.ndarray
+    macd_hist: np.ndarray
+    bb_genislik: np.ndarray
+    bb_yuzdelik: np.ndarray
+    stok14: np.ndarray
+    obv_egim20: np.ndarray
+    ciro_ort: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -207,12 +273,25 @@ class GoldenZone(BaseIndicator):
         yuksek, dusuk = df["high"].to_numpy(float), df["low"].to_numpy(float)
         kapanis = df["close"].to_numpy(float)
         a = atr(df, p.atr_periyot)
+        bb = bollinger_genislik(kapanis, 20)
         bag = _Baglam(
+            ema20=ema(kapanis, 20),
             ema50=ema(kapanis, 50),
             ema200=ema(kapanis, 200),
             rsi14=rsi(kapanis, 14),
             atr50=atr(df, 50),
             hacim_ort=pd.Series(df["volume"].to_numpy(float))
+            .rolling(20, min_periods=20).mean().to_numpy(),
+            adx14=adx(df, 14),
+            macd_hist=macd_histogram(kapanis),
+            bb_genislik=bb,
+            # Bugünkü sıkışma son 120 bara göre nerede? Mutlak genişlik
+            # semboller arasında kıyaslanamaz, yüzdelik kıyaslanabilir.
+            bb_yuzdelik=pd.Series(bb).rolling(120, min_periods=120)
+            .rank(pct=True).to_numpy(),
+            stok14=stokastik(df, 14),
+            obv_egim20=obv_egim(df, 20),
+            ciro_ort=pd.Series(kapanis * df["volume"].to_numpy(float))
             .rolling(20, min_periods=20).mean().to_numpy(),
         )
         tepeler = _pivotlar(yuksek, p.pivot_sol, p.pivot_sag, tepe=True)
@@ -379,6 +458,41 @@ class GoldenZone(BaseIndicator):
             "bacak_atr": None if atr_t <= 0 else float(boy / atr_t),
             "donus_bar": int(t - kur.bos_i),
             "derinlik": None if derinlik is None else float(derinlik),
+            # --- ikinci tur: trend gücü, momentum, sıkışma, hacim teyidi ---
+            "adx14": _guvenli(bag.adx14[t]),
+            "macd_uyum": (
+                None if np.isnan(bag.macd_hist[t])
+                else bool(bag.macd_hist[t] * yon > 0)
+            ),
+            "bb_yuzdelik": _guvenli(bag.bb_yuzdelik[t]),
+            "stok14": _guvenli(bag.stok14[t]),
+            "obv_uyum": (
+                None if np.isnan(bag.obv_egim20[t])
+                else bool(bag.obv_egim20[t] * yon > 0)
+            ),
+            "ema20_50_uyum": (
+                None if np.isnan(bag.ema20[t]) or np.isnan(bag.ema50[t])
+                else bool((bag.ema20[t] - bag.ema50[t]) * yon > 0)
+            ),
+            # Fiyat ortalamadan ne kadar uzakta — aşırı uzaklaşmış mı?
+            "ema50_uzaklik_atr": (
+                None if np.isnan(e50) or atr_t <= 0 else float((k - e50) * yon / atr_t)
+            ),
+            # Sinyal barının karakteri: gövde/aralık oranı ve aralık/ATR.
+            "govde_orani": (
+                None if (float(df["high"].iloc[t]) - float(df["low"].iloc[t])) <= 0
+                else float(
+                    abs(k - float(df["open"].iloc[t]))
+                    / (float(df["high"].iloc[t]) - float(df["low"].iloc[t]))
+                )
+            ),
+            "aralik_atr": (
+                None if atr_t <= 0
+                else float((float(df["high"].iloc[t]) - float(df["low"].iloc[t])) / atr_t)
+            ),
+            # Likidite: ortalama ciro. Gösterge değil ama gerçek bir filtre —
+            # ince sembolde ölçülen kenar uygulanamaz.
+            "ciro": _guvenli(bag.ciro_ort[t]),
         }
 
     def _kaydet(
