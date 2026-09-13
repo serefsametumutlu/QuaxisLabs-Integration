@@ -62,6 +62,41 @@ Sebep: "648 sembollük evren" diye raporlanan her ölçüm aslında 544'te
 koşuyordu. Sayının yanlış olması, sonucun yanlış olmasından ayrı bir
 sorundur.
 
+#### ⚠ D3 UYGULAMASI BU PLANDAN SAPTI — sebebiyle
+
+Plan "önce yeniden çek, gelmiyorsa evren dosyasından düş" diyordu. Çünkü
+eksikliğin sebebinin **sağlayıcı** olduğunu varsaymıştım.
+
+Denendi ve sebep başka çıktı: **bu semboller sağlayıcıda var, bizim kendi
+doğrulayıcımız reddediyor.** `validate_ohlcv` tek bir OHLC ihlalinde
+`OHLCVError` fırlatıyor ve `Store.update` o sembolü hiç yazmıyor.
+Ölçüldü:
+
+| sembol | bar | ihlalli bar | en büyük sapma | yıl |
+|---|---|---|---|---|
+| MGROS | 4 284 | **1** (%0.02) | %0.9 | 2012 |
+| CCOLA | 4 285 | **1** (%0.02) | %0.2 | 2012 |
+| LOGO | 4 284 | **2** (%0.05) | %0.7 | 2011–12 |
+| AGHOL | 4 285 | **1** (%0.02) | %0.4 | 2011 |
+| SKBNK | 4 284 | **1** (%0.02) | %0.5 | 2013 |
+
+16 yıllık veri, 2012'deki tek bir barın binde dokuzluk sapması yüzünden
+çöpe gidiyordu — ve kaybedilenler arasında Migros, Coca-Cola İçecek,
+Logo, Anadolu Grubu, Şekerbank var.
+
+Dahası: **ayakta kalan semboller, bozuk barları tesadüfen toleransı
+aşmayanlardı.** Hayatta kalma yanlılığının üstüne binen ikinci bir seçim
+yanlılığı.
+
+Bu yüzden D3, sembolü düşürmek yerine **barı atacak** biçimde uygulandı
+(`ohlc_temizle`). Eşik yok: ihlalli bar atılır, sembol her zaman kalır,
+kaç bar atıldığı raporlanır.
+
+Bu bir sapmadır ve gizlenmiyor. Planın AMACI ("evren dosyası gerçek
+evreni göstersin") korunuyor, aracı değişiyor — ve değişen araç
+sembolleri **kaybetmek** yerine **kurtarıyor**. Hiçbir eşiğe, parametreye
+ya da strateji kuralına dokunulmadı.
+
 ### D4 · Gövde tabanlı kurallar 2014'ten başlar
 
 `açılış == kapanış` oranı 2012'de %96.5, 2010'da %81.6. Kaynak o dönemde

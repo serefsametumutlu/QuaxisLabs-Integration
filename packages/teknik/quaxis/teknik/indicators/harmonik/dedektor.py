@@ -184,6 +184,7 @@ class HarmonikTemel(BaseIndicator):
         yuksek = df["high"].to_numpy(float)
         dusuk = df["low"].to_numpy(float)
         kapanis = df["close"].to_numpy(float)
+        hacim = df["volume"].to_numpy(float)
         a = atr(df, p.atr_periyot)
         bag = self._baglam_serileri(df, kapanis, a)
 
@@ -204,6 +205,19 @@ class HarmonikTemel(BaseIndicator):
             #    bilinir hâle geldi, bar içinde değil.
             for kur in list(canli):
                 if t <= kur.dogdu_i:
+                    continue
+                # **D2 — hacimsiz barda sinyal DOĞMAZ** (ön kayıt:
+                # `docs/olcum/onkayit-veri-duzeltme.md`).
+                #
+                # Hacimsiz barda açılış = yüksek = düşük = kapanış olur,
+                # yani bar tek bir sayıdır ve bir seviyeye "dokunmuş"
+                # sayılabilir. Ama o fiyattan kimse işlem yapmadı;
+                # sağlayıcı son fiyatı tekrar ediyor. Böyle bir dokunuş
+                # gerçekte verilemeyecek bir emirdir.
+                #
+                # Kurulum ÖLMEZ, yalnız o bar atlanır: fiyat ertesi gün
+                # gerçekten seviyeye gelirse sinyal doğar.
+                if hacim[t] <= 0:
                     continue
                 if self._dokundu(kur, t, yuksek, dusuk):
                     self._kaydet(sonuc, kur, t, df, a, bag)

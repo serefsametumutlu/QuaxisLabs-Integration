@@ -336,6 +336,22 @@ def _bos_havuzu(
     """
     n = len(ohlc) if ust_sinir is None else min(ust_sinir, len(ohlc))
     secilebilir = np.arange(oos_i, n - max_bars - 1)
+
+    # **D1 — hacimsiz bar adil baza GİREMEZ** (ön kayıt:
+    # `docs/olcum/onkayit-veri-duzeltme.md`).
+    #
+    # Hacimsiz barın fiyatı kimsenin işlem yapmadığı bir fiyattır:
+    # sağlayıcı son fiyatı tekrar eder, işlem yeniden başlayınca fiyat
+    # sıçrar. Ölçüldü — o barlardan girilen işlemler 40 barda ortalama
+    # **%15.31** getiriyor, normal barlar %6.93. Medyan hacimsiz tarafta
+    # %0.00: barların çoğu düz, bir kuyruk ortalamayı çekiyor.
+    #
+    # Bu barlar havuzda kaldığı sürece adil baz, kimsenin giremeyeceği
+    # fiyatlardan alınmış hayalet işlemlerle besleniyordu.
+    if "volume" in ohlc.columns and len(secilebilir):
+        hacim = ohlc["volume"].to_numpy(dtype=float)
+        secilebilir = secilebilir[hacim[secilebilir] > 0]
+
     if len(secilebilir) == 0 or not risk_orani:
         return None
 

@@ -237,6 +237,12 @@ class GoldenZone(BaseIndicator):
             self._capa0_guncelle(canli, t, yuksek, dusuk)
 
             for kur in list(canli):
+                # **D2 — hacimsiz barda sinyal DOĞMAZ** (ön kayıt:
+                # `docs/olcum/onkayit-veri-duzeltme.md`). Hacimsiz barda
+                # dört fiyat da aynı sayıdır ve bölgeye "girmiş"
+                # sayılabilir; ama o fiyattan kimse işlem yapmadı.
+                if float(df["volume"].iloc[t]) <= 0:
+                    continue
                 sinyal = self._bolgeye_girdi_mi(kur, t, df, a)
                 if sinyal is not None:
                     self._kaydet(sonuc, kur, sinyal, t, df, a, bag)

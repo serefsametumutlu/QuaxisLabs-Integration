@@ -323,6 +323,52 @@ class IndicatorResult:
 OHLC_TOLERANS = 1e-9
 
 
+def ohlc_ihlal_maskesi(df: pd.DataFrame) -> pd.Series:
+    """`high >= max(o,c)` ya da `low <= min(o,c)` kuralını çiğneyen barlar.
+
+    `validate_ohlcv` ile AYNI toleransı kullanır; iki yerde iki farklı
+    tanım olsaydı biri atarken diğeri kabul ederdi.
+    """
+    govde_ust = df[["open", "close"]].max(axis=1)
+    govde_alt = df[["open", "close"]].min(axis=1)
+    high_ok = df["high"] >= govde_ust - govde_ust.abs() * OHLC_TOLERANS
+    low_ok = df["low"] <= govde_alt + govde_alt.abs() * OHLC_TOLERANS
+    return ~(high_ok & low_ok)
+
+
+def ohlc_temizle(df: pd.DataFrame) -> tuple[pd.DataFrame, list]:
+    """İhlalli BARLARI atar ve atılanları döner. Sembolü ASLA atmaz.
+
+    **Ölçülmüş bir tasarım hatasının düzeltmesi** (ön kayıt:
+    `docs/olcum/onkayit-veri-duzeltme.md`, D3).
+
+    Eskiden tek bir ihlalli bar `OHLCVError` fırlatıyordu ve `Store.update`
+    o sembolü hiç yazmıyordu. Sonuç: evren dosyasındaki 648 sembolün
+    **104'ünün** verisi yoktu ve aralarında MGROS, CCOLA, LOGO, AGHOL,
+    SKBNK gibi BIST'in en büyük şirketleri vardı. Ölçüldü:
+
+        MGROS  4284 barın 1'i ihlalli (%0.02), sapma %0.9, yıl 2012
+        CCOLA  4285 barın 1'i (%0.02)
+        LOGO   4284 barın 2'si (%0.05)
+
+    Yani 16 yıllık veri, 2012'deki tek bir barın binde dokuzluk sapması
+    yüzünden çöpe gidiyordu. Üstelik ayakta kalan semboller, bozuk barları
+    tesadüfen toleransı aşmayanlardı — hayatta kalma yanlılığının üstüne
+    binen ikinci bir seçim yanlılığı.
+
+    **Eşik yok.** İhlalli bar atılır, sembol her zaman kalır. Kaç bar
+    atıldığı DÖNDÜRÜLÜR; çağıran onu raporlamakla yükümlüdür. Sessizce
+    temizlenen veri, sessizce bozulmuş veriden daha tehlikelidir.
+    """
+    bozuk = ohlc_ihlal_maskesi(df)
+    if not bool(bozuk.any()):
+        return df, []
+    # ISO metin olarak dönüyor, Timestamp olarak değil: bu liste
+    # `df.attrs`'e yazılıyor ve parquet metadata'sı JSON serileştiriyor —
+    # Timestamp orada patlıyordu.
+    return df[~bozuk], [t.isoformat() for t in df.index[bozuk]]
+
+
 def validate_ohlcv(df: pd.DataFrame) -> None:
     """OHLCV DataFrame'inin şema ve tutarlılık kurallarını doğrular.
 
