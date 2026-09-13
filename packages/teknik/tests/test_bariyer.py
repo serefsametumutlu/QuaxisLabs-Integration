@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 from quaxis.teknik.core.types import Signal
-from quaxis.teknik.olcum.bariyer import barrier_outcome, measure_r
+from quaxis.teknik.olcum.bariyer import _toplu_r, barrier_outcome, measure_r
 
 TUR = 200  # testte hız için düşük; üretimde 2000
 
@@ -177,6 +178,45 @@ def test_is_penceresindeki_islemler_sayilmaz() -> None:
     s = measure_r({"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1)
     assert s.n_trades == 0
     assert s.verdict == "olculmedi"
+
+
+def test_toplu_r_tek_tek_hesapla_ayni_sonucu_verir() -> None:
+    """Hız için yazılan vektörel yol ile referans yol AYNI sayıyı vermeli.
+
+    Boş dağılım vektörel yoldan, gerçek sinyaller referans yoldan geçiyor.
+    İkisi sessizce ayrışırsa sinyal ile bazı FARKLI kurallarla ölçmüş
+    oluruz ve p değeri anlamını kaybeder — hem de hiçbir test kırılmadan.
+    """
+    df = _rastgele_ohlc(n=600, tohum=17)
+    yuksek = df["high"].to_numpy(float)
+    dusuk = df["low"].to_numpy(float)
+    kapanis = df["close"].to_numpy(float)
+    girisler = np.arange(100, 400, 7)
+
+    for risk_o, hedef_o, yon in ((0.02, 0.04, 1.0), (0.03, 0.09, 1.0), (0.02, 0.05, -1.0)):
+        toplu = _toplu_r(yuksek, dusuk, kapanis, girisler, risk_o, hedef_o, yon, 30)
+        tek_tek = []
+        for i in girisler:
+            giris = float(kapanis[i])
+            s = barrier_outcome(
+                df, df.index[int(i)],
+                stop=giris - risk_o * giris * yon,
+                target=giris + hedef_o * giris * yon,
+                direction="long" if yon > 0 else "short", max_bars=30,
+            )
+            if s is not None:
+                tek_tek.append(s.r_multiple)
+        assert toplu == pytest.approx(np.array(tek_tek))
+
+
+def test_toplu_r_ayni_barda_stopu_secer() -> None:
+    """Vektörel yol da iyimserliğe karşı aynı kararı vermeli."""
+    df = _ohlc([100, 100], yuksek=[100, 120], dusuk=[100, 90])
+    r = _toplu_r(
+        df["high"].to_numpy(float), df["low"].to_numpy(float), df["close"].to_numpy(float),
+        np.array([0]), 0.05, 0.10, 1.0, 5,
+    )
+    assert r == pytest.approx(np.array([-1.0]))
 
 
 def test_islemsiz_evren_olculmedi_doner() -> None:

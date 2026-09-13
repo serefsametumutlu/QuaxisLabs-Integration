@@ -151,6 +151,64 @@ def barrier_outcome(
 VARSAYILAN_HAVUZ = 400
 
 
+def _toplu_r(
+    yuksek: np.ndarray,
+    dusuk: np.ndarray,
+    kapanis: np.ndarray,
+    girisler: np.ndarray,
+    risk_orani: float,
+    hedef_orani: float,
+    yon: float,
+    max_bars: int,
+) -> np.ndarray:
+    """Çok sayıda girişin R sonucunu TEK seferde hesaplar.
+
+    `barrier_outcome` ile aynı kuralları uygular — **aynı barda iki bariyer
+    de vurulursa stop kazanır** dahil — ama bar bar Python döngüsü yerine
+    bar adımı başına tek bir numpy işlemi yapar. Havuz kurarken giriş başına
+    40 bar yürümek 543 sembolde saatlere çıkıyordu.
+    """
+    n = len(kapanis)
+    giris = kapanis[girisler]
+    stop = giris - risk_orani * giris * yon
+    hedef = giris + hedef_orani * giris * yon
+    risk = (giris - stop) * yon
+
+    r = np.zeros(len(girisler))
+    acik = risk > 0  # stop yanlış taraftaysa işlem hiç açılmaz
+    r[~acik] = np.nan
+
+    for adim in range(1, max_bars + 1):
+        j = girisler + adim
+        var = acik & (j < n)
+        if not var.any():
+            break
+        jj = np.where(var, j, 0)
+        if yon > 0:
+            stop_vuruldu = var & (dusuk[jj] <= stop)
+            hedef_vuruldu = var & (yuksek[jj] >= hedef)
+        else:
+            stop_vuruldu = var & (yuksek[jj] >= stop)
+            hedef_vuruldu = var & (dusuk[jj] <= hedef)
+
+        # STOP önce: bar içi sıralama bilinmiyor, belirsizlikte stratejinin
+        # lehine varsaymıyoruz (`barrier_outcome` ile aynı kural).
+        r[stop_vuruldu] = -1.0
+        acik &= ~stop_vuruldu
+        hedefe = hedef_vuruldu & acik
+        with np.errstate(invalid="ignore", divide="ignore"):
+            r[hedefe] = ((hedef - giris) * yon / risk)[hedefe]
+        acik &= ~hedefe
+
+    # Kalanlar zaman bariyerinden çıkar.
+    if acik.any():
+        son_j = np.minimum(girisler + max_bars, n - 1)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            zaman_r = (kapanis[son_j] - giris) * yon / risk
+        r[acik] = zaman_r[acik]
+    return r[~np.isnan(r)]
+
+
 def _bos_havuzu(
     ohlc: pd.DataFrame,
     risk_orani: Sequence[float],
@@ -182,23 +240,17 @@ def _bos_havuzu(
         return None
 
     boyut = min(havuz, len(secilebilir))
+    yuksek = ohlc["high"].to_numpy(dtype=float)
+    dusuk = ohlc["low"].to_numpy(dtype=float)
     kapanis = ohlc["close"].to_numpy(dtype=float)
+
     havuzlar: list[np.ndarray] = []
     for k in range(len(risk_orani)):
-        y = yon[k]
-        idx = r.choice(secilebilir, size=boyut, replace=boyut > len(secilebilir))
-        degerler = []
-        for i in idx:
-            giris = float(kapanis[i])
-            stop = giris - risk_orani[k] * giris * y
-            hedef = giris + hedef_orani[k] * giris * y
-            sonuc = barrier_outcome(
-                ohlc, ohlc.index[int(i)], stop=stop, target=hedef,
-                direction="long" if y > 0 else "short", max_bars=max_bars,
-            )
-            if sonuc is not None:
-                degerler.append(sonuc.r_multiple)
-        havuzlar.append(np.array(degerler) if degerler else np.zeros(1))
+        idx = r.choice(secilebilir, size=boyut, replace=False)
+        degerler = _toplu_r(
+            yuksek, dusuk, kapanis, idx, risk_orani[k], hedef_orani[k], yon[k], max_bars
+        )
+        havuzlar.append(degerler if len(degerler) else np.zeros(1))
     return havuzlar
 
 

@@ -160,11 +160,7 @@ def measure_symbol(
     kapanis = close.to_numpy(dtype=float)
     ileri = kapanis[secilebilir + horizon] / kapanis[secilebilir] - 1.0
     yon_dizi = np.asarray(yonler)
-
-    ortalamalar = np.empty(permutations)
-    for b in range(permutations):
-        sec = r.integers(0, len(secilebilir), size=len(yon_dizi))
-        ortalamalar[b] = float(np.mean(ileri[sec] * yon_dizi))
+    ortalamalar = _permutasyon_ortalamalari(ileri, yon_dizi, permutations, r)
 
     return SymbolMeasurement(
         symbol=symbol,
@@ -256,13 +252,21 @@ def _null_distribution(
 
     kapanis = close.to_numpy(dtype=float)
     ileri = kapanis[secilebilir + horizon] / kapanis[secilebilir] - 1.0
-    yon_dizi = np.asarray(yonler)
+    return _permutasyon_ortalamalari(ileri, np.asarray(yonler), permutations, r)
 
-    out = np.empty(permutations)
-    for b in range(permutations):
-        sec = r.integers(0, len(secilebilir), size=len(yon_dizi))
-        out[b] = float(np.mean(ileri[sec] * yon_dizi))
-    return out
+
+def _permutasyon_ortalamalari(
+    ileri: np.ndarray, yon: np.ndarray, permutations: int, r: np.random.Generator
+) -> np.ndarray:
+    """Tüm turları TEK seferde çeker: (tur, sinyal) matrisi → tur ortalamaları.
+
+    Tur başına ayrı bir numpy çağrısı yapmak 543 sembol × 2000 tur = 1.1
+    milyon küçük çağrı demekti; matris hâli aynı sayıyı dakikalar yerine
+    saniyelerde üretiyor. Çekiliş ve sonuç AYNI — yalnızca aynı işlem
+    toplu yapılıyor.
+    """
+    sec = r.integers(0, len(ileri), size=(permutations, len(yon)))
+    return (ileri[sec] * yon).mean(axis=1)
 
 
 def bh_fdr(p_values: dict[str, float], q: float = 0.05) -> dict[str, bool]:
