@@ -90,6 +90,37 @@ class RResult:
         return self.mean_r
 
     @property
+    def profit_factor(self) -> float:
+        """Kazançların toplamı / kayıpların toplamı.
+
+        1.0 başabaş. Ortalama R ile aynı şeyi söylemez: küçük ama sık
+        kazançlarla büyük ama seyrek kayıpları ayırt eder. Hiç kayıp yoksa
+        `inf` döner — ve o durumda örneklem zaten sorgulanmalıdır.
+        """
+        if not self.outcomes:
+            return 0.0
+        r = np.array([o.r_multiple for o in self.outcomes])
+        kazanc = float(r[r > 0].sum())
+        kayip = float(-r[r < 0].sum())
+        if kayip == 0:
+            return float("inf") if kazanc > 0 else 0.0
+        return kazanc / kayip
+
+    @property
+    def ortalama_kazanc(self) -> float:
+        """Kazanan işlemlerin ortalama R'si."""
+        r = np.array([o.r_multiple for o in self.outcomes]) if self.outcomes else np.array([])
+        kz = r[r > 0]
+        return float(kz.mean()) if len(kz) else 0.0
+
+    @property
+    def ortalama_kayip(self) -> float:
+        """Kaybeden işlemlerin ortalama R'si (negatif)."""
+        r = np.array([o.r_multiple for o in self.outcomes]) if self.outcomes else np.array([])
+        ky = r[r < 0]
+        return float(ky.mean()) if len(ky) else 0.0
+
+    @property
     def verdict(self) -> str:
         if self.n_symbols == 0:
             return "olculmedi"

@@ -315,3 +315,29 @@ def test_maliyet_baza_da_uygulanir() -> None:
         if s is not None:
             tek_tek.append(s.r_multiple)
     assert toplu == pytest.approx(np.array(tek_tek))
+
+
+def test_profit_factor_kazanc_kayip_oranidir() -> None:
+    """PF, ortalama R ile AYNI şeyi söylemez: küçük ama sık kazançlarla
+    büyük ama seyrek kayıpları ayırt eder."""
+    df = _rastgele_ohlc(tohum=5)
+    kayit = []
+    for b in (300, 310, 320, 330, 340):
+        giris = float(df["close"].iloc[b])
+        kayit.append((_sinyal(df.index[b]), giris * 0.97, giris * 1.06))
+    s = measure_r({"S": df}, {"S": kayit}, max_bars=25, permutations=20, seed=3, **BEDAVA)
+    r = np.array([o.r_multiple for o in s.outcomes])
+    beklenen = r[r > 0].sum() / -r[r < 0].sum()
+    assert s.profit_factor == pytest.approx(beklenen)
+    assert s.ortalama_kayip <= 0 <= s.ortalama_kazanc
+
+
+def test_kayipsiz_seride_profit_factor_sonsuz() -> None:
+    """Hiç kayıp yoksa PF tanımsızdır; sessizce büyük bir sayı uydurmak
+    yerine `inf` döner ve okuyan örneklemi sorgular."""
+    df = _ohlc([100, 101, 102, 103, 104, 105, 106])
+    kayit = [(_sinyal(df.index[0]), 95.0, 104.0)]
+    s = measure_r({"S": df}, {"S": kayit}, max_bars=5, permutations=10, seed=1,
+                  pencere="hepsi", **BEDAVA)
+    if s.n_trades:
+        assert s.profit_factor == float("inf")
