@@ -1,4 +1,4 @@
-# Sonraki oturum promptu — Faz 2 (kod)
+# Sonraki oturum promptu — Faz 7.1 (Golden Zone · K3'ten devam)
 
 Aşağıdaki bloğu **olduğu gibi kopyalayıp** temiz bir oturuma (`/clear` sonrası)
 yapıştır. Çalışma dizini `C:\Users\Samet\Desktop\QuaxisLabs` olmalı.
@@ -6,91 +6,86 @@ yapıştır. Çalışma dizini `C:\Users\Samet\Desktop\QuaxisLabs` olmalı.
 ---
 
 ```
-QuaxisLabs projesinde Faz 2'nin kod kısmına başlıyoruz.
+QuaxisLabs — Faz 7.1 Golden Zone (ICT OTE), K3 kapısından devam ediyoruz.
 
 ÖNCE ŞUNLARI OKU (sırayla, tamamını):
-1. docs/karar/ADR-001-yeniden-insa.md
-2. docs/karar/ADR-002-strateji-kodlari-sifirdan.md
-3. docs/design/TASARIM_DILI.md   (7 bölümün hepsi — ölçülmüş token'lar,
-   9 ortak ilke, turkuaz aksan kararı, sayfa yapıları, strateji sayfası iskeleti)
-4. docs/design/maket_v1.html     (ONAYLANMIŞ maket — token sistemi, bileşenler,
-   beş yüzey. Bu dosya şartnamedir, ilham panosu değil.)
-5. README.md                     (müzakereye kapalı 7 kural + faz tablosu)
+1. docs/strateji/kaynak/golden-zone-K0.md   (kuralın kaynağı — mekanik + yöntem)
+2. docs/strateji/golden-zone.md             (pasaport — hangi kapı nerede)
+3. packages/teknik/quaxis/teknik/indicators/golden_zone/dedektor.py
+4. tools/katmanli_olcum.py                  (katmanlı K3+K4 koşucusu)
 
-DURUM:
-- Faz 0 (depo, iskelet, ADR'ler) ve Faz 1 (tasarım dili) bitti ve push edildi.
-- Maket kullanıcı tarafından onaylandı. Aksan turkuaz #2ED3C0, koyu tema
-  varsayılan, üç tema desteklenecek.
-- apps/web şu an boş bir klasör.
+DURUM: K0 yazıldı (bilerek AÇIK), K1/K2 bitti ve push edildi.
+Sıradaki iş K3: gerçek evrende kalibrasyon + katmanlı K4.
 
-GÖREV — Faz 2'nin kod kısmı: apps/web kurulumu ve tasarım sistemi.
+İLK KOMUT (veri indi mi diye bak, eksikse tamamla):
+  ls data/ohlcv/bist | wc -l        # 648'e yakın olmalı
+  python tools/veri_cek.py --market bist --zaman-dilimi 1D --atla-var-olani
 
-1. apps/web altına Next.js 16 + React 19 + TypeScript + Tailwind 4 projesi kur
-   (App Router, src dizini yok, import alias @/*).
+SONRA katmanlı ölçümü koş:
+  python tools/katmanli_olcum.py \
+    --katalog "quaxis.teknik.indicators.katalog:KATALOG" \
+    --gosterge golden_zone --slug golden-zone --zaman-dilimi 1D --ufuk 20
 
-2. maket_v1.html'in <style> bloğundaki TOKEN SİSTEMİNİ globals.css'e taşı.
-   BİREBİR taşı, yeniden yorumlama. Üç durum da korunacak: bare :root (koyu,
-   varsayılan), @media (prefers-color-scheme: light) içinde
-   :root:not([data-theme="dark"]), ve :root[data-theme="light"].
-   data-accent varyantları da gelecek.
-
-3. Fontlar next/font ile YEREL: Archivo (display), Inter (arayüz),
-   JetBrains Mono (sayı + eyebrow). CDN bağımlılığı OLMAYACAK.
-   Türkçe glifleri (İ ı Ğ ğ Ş ş Ç ç Ö ö Ü ü) üç fontta da ekran görüntüsü
-   alıp GÖZLE doğrula.
-
-4. components/ui/ altına maketteki bileşenleri React'e çevir:
-   Eyebrow, Pill, Chip, ChipGroup, Button, Card, Panel, StatTile, DataTable,
-   Sparkline, EmptyState, Skeleton, ThemeSegment (sistem/açık/koyu),
-   Tab/Seg, Faq(details).
-   DataTable ZORUNLU: sıralanabilir kolonlar, sanallaştırma (500+ satırda
-   60fps), tabular-nums, satır-üzeri kancası, klavye gezinmesi.
-
-5. /tasarim iç vitrin sayfası: tüm bileşenleri üç temada yan yana gösterir.
-   Gelecekteki her tasarım işinin referansı bu sayfa olacak.
-
-KURALLAR (README.md'den, müzakereye kapalı):
-- Gölge YOK. Yüzeyler bir tık açık zemin + beyaz alfa kenarlıkla ayrılır.
-- Ağırlık 400 varsayılan; 500 yalnızca vurgu. 700 kullanma.
-- Hiyerarşi boyutla değil OPAKLIKLA (%100 / %62 / %34).
-- Panel/kart yarıçapı 2px, kontrol tam hap. Ara değer yalnızca medya kutusunda.
-- Aksan ASLA mum ölçeğinde dolu bir leke değil. Yön renkleri her zaman dolu.
-- Her sayı mono + font-variant-numeric: tabular-nums.
-- Kaydırma tetikli açılış animasyonu YASAK — sayfa ilk boyamada eksiksiz okunur.
-  prefers-reduced-motion her zaman saygı görür.
-- Hardcoded renk YASAK; her renk token'dan gelir.
-
-BU TURDA YAPMA:
-- Grafik motoru (Lightweight Charts + SVG overlay) Faz 4'ün işi.
-- Gerçek veri, API, gösterge kodu YOK. Bileşenler maketteki örnek veriyle
-  beslenecek ve "örnek veri" olarak işaretlenecek.
-- packages/teknik'e dokunma — motor göçü Faz 5.
-
-DOĞRULAMA (ZORUNLU):
-- npm run build ve npm run lint temiz.
-- /tasarim sayfasının 3 temada, 2 genişlikte (1440 ve 768) ekran görüntüsünü al,
-  docs/design/ui/ altına kaydet, Read ile AÇ VE GÖR, sorunları madde madde yaz,
-  düzelt, tekrarla. EN AZ 3 İTERASYON.
-- DataTable'ı 500 satırla ölç ve raporla.
-
-BİTTİ KRİTERİ:
-apps/web derleniyor, 15 bileşen var, /tasarim üç temada çalışıyor, ekran
-görüntüleri görülmüş ve en az 3 iterasyondan geçmiş, README'deki faz tablosu
-güncellenmiş, commit edilip push edilmiş.
-
-Her parça bitince commit + push et (kullanıcının kalıcı tercihi), oturum
-sonunu bekleme.
+Sonuç ne çıkarsa pasaporta ve rapora O yazılır. "Kenar yok" da bir sonuçtur.
 ```
 
 ---
 
-## Sonraki fazlar (bu oturumdan sonra)
+## Nerede kaldık (2026-09-13 gecesi)
 
-| Faz | İş | Ön koşul |
+### Bitenler — hepsi commit + push edildi
+
+| Commit | Ne |
+|---|---|
+| `c4824f9` | **K4'e üç bariyerli R ölçümü** — `olcum/bariyer.py` + 12 test |
+| `bc7ba10` | **Adlandırma düzeltmesi** — `altin_bolge` → `swing_fib_abcd` |
+| `620c79e` | **K0 kaynak dosyası** + pasaport doğrulayıcısının sıkılaştırılması |
+| `e6c66c5` | **K1/K2 dedektör** — `indicators/golden_zone/` + 12 test |
+| `eb731bd` | **Araçlar** — `tools/veri_cek.py`, `tools/katmanli_olcum.py` |
+
+Depo durumu: **197 test yeşil**, `ruff` temiz, `npm run build` ve
+`npm run lint` temiz.
+
+### Yarım kalan tek şey: veri indirmesi
+
+Oturum kapandığında `data/ohlcv/bist/` altında **267/648** sembol vardı.
+`tools/veri_cek.py --atla-var-olani` ile kaldığı yerden devam eder; arttırımlı
+çalışır, baştan indirmez. Sembol başına ~2.7 sn, kalan ~20 dakika.
+
+Bazı semboller (ör. `BAKAB`) sağlayıcıdan **OHLC tutarsız** veri geliyor
+(`high < close`). Araç bunları sessizce atlamaz, **hata olarak sayar** ve K3
+raporunda "veri hatası alan sembol" sütununda görünürler.
+
+### Kapı durumu
+
+| Kapı | Durum | Not |
 |---|---|---|
-| 3 | Uygulama kabuğu + sayfa iskeletleri (tarama, grafik, strateji sayfası) | Faz 2 |
-| 4 | `ChartSpec` v1 + grafik motoru (Lightweight Charts + SVG overlay) | Faz 3 |
-| — | **Kullanıcı onayı: "site artık istediğim gibi"** | Faz 4 |
-| 5 | Altyapı göçü: `core` + `testing` + `data` + `scanner` | onay |
-| 6 | Strateji Pasaportu süreci: şablon, agent'lar, skill'ler | Faz 5 |
-| 7.x | Stratejiler — birer birer, 7 kapı, sayı sınırı yok | Faz 6 |
+| K0 Kaynak | **bilerek AÇIK** | Karar "eşiklerin tamamı K3'ten türetilsin" olduğu için K0 ancak K3 raporu yazılınca kapanır. `pasaport.py dogrula` şu an temiz çünkü kapı `null`. |
+| K1 Sözleşme | kod hazır, kapı işaretlenmedi | `parametreler.py` frozen, `params_hash` deterministik |
+| K2 Dedektör | kod hazır, **repaint testi geçti** | walk-forward eşitlik, 260 bar / 35 kesim |
+| K3 Kalibrasyon | **SIRADAKİ** | veri tamamlanınca koşulacak |
+| K4 İstatistik | katmanlı koşucu hazır | K3'ten sonra |
+| K5 Görsel | başlanmadı | Golden Zone kendi komposerini alacak |
+| K6 Ürün | başlanmadı | |
+
+### Kararlar (değiştirmeden önce nedenini oku)
+
+* **Bölge:** ICT OTE 0.62–0.79, tatlı nokta 0.705 — hepsi **geçici**, K3'ten
+  türetilecek.
+* **Teyit:** BOS + bölge + (FVG veya Order Block) — ama dedektör bunları
+  **filtrelemiyor**, payload'a bayrak yazıyor. Katmanlar dedektörde
+  sabitlenirse hangisinin kenar *eklediği* ölçülemez.
+* **Katmanlar:** A = BOS+OTE · B = A + (FVG veya bölgedeki OB) · C = B + süpürme.
+  Soru "kenar var mı" değil **"kenar EKLİYOR mu"**.
+* **Örneklem tabanı:** 30 işlemin altındaki katman sayı üretir, **verdikt
+  üretmez** (Pardo s.295).
+* **Aynı barda stop+hedef → stop.** Bar içi sıralama bilinmiyor; belirsizlikte
+  stratejinin lehine varsaymıyoruz.
+* **Geçersizlik:** %100 çıpasının ötesinde **gövde** kapanışı. Wick geçebilir.
+
+### İlk koşuda beklenecek şey
+
+2 sembollük deneme koşusunda (ISCTR, TCELL) üç katman da `kanitlanmadi`
+verdi — örneklem anlamsız derecede küçüktü, makinenin çalıştığını gösterdi
+sadece. Gerçek evrende sonuç ne çıkarsa yazılacak; **olumsuz sonuç da
+sonuçtur** ve pasaporta öyle geçer.
