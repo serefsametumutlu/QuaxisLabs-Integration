@@ -33,6 +33,26 @@ const OLUK_DAR = 104;
  * kurulumun etrafındaki barları taşır (Golden Zone'da ~70 bar). "Son 1 yıl"
  * demek o levhada çoğu zaman "hepsi" demektir. Varsayılan bu yüzden
  * `kurulum`: önce kurulum çerçevelenir, kullanıcı isterse geriye açar. */
+/**
+ * Serinin TAMAMINI levhaya sığdırır.
+ *
+ * **`fitContent()` KULLANILMIYOR ve sebebi ölçüldü (K5 i5).** Grafik
+ * seçenekleri `barSpacing: 6` ile geliyor; `fitContent()` bu sabiti
+ * aşamıyor ve levha varsayılan aralıkla SON ~100 barı sağa yaslanmış
+ * gösteriyordu. Bugüne kadar görünmemesinin sebebi tesadüf: eski
+ * speclerin hepsi 100 barın altındaydı, yani zaten hepsi sığıyordu.
+ * 174 barlık Kelebek spec'i maskeyi kaldırdı — formasyonun dört köşesi de
+ * levhanın SOLUNDA, eksi koordinatlarda kaldı (DOM'da ölçüldü: X @ -518).
+ *
+ * `setVisibleLogicalRange` bar aralığını kendi hesaplar, sabiti aşar ve
+ * ne yaptığı belirlidir.
+ */
+function tumunuGoster(chart: IChartApi, barSayisi: number): void {
+  if (barSayisi <= 0) return;
+  // -1 ve +1: ilk ve son mum kenara yapışmasın.
+  chart.timeScale().setVisibleLogicalRange({ from: -1, to: barSayisi });
+}
+
 export const ARALIKLAR = [
   { value: "kurulum", label: "Kurulum", gun: 0 },
   { value: "1a", label: "1A", gun: 30 },
@@ -144,9 +164,25 @@ export function Grafik({
       priceLineVisible: false,
       lastValueVisible: false,
       // Panel oranı ChartSpec'ten gelir; hacim alttaki payı kaplar.
+      //
+      // **BİLİNEN SINIR (K5 i9–i12, ölçüldü).** Bu sağlayıcı MUMLARIN
+      // çizildiği ölçeği genişletiyor ama `priceToCoordinate` mum
+      // verisinin kendi aralığını kullanmaya devam ediyor. İkisi ayrışınca
+      // overlay ile mumlar farklı yerlere düşüyor; fark DOĞRUSAL olduğu
+      // için aralığın ortasındaki noktalar neredeyse yerinde kalıyor,
+      // yalnız UÇTAKİ nokta kayıyor — Kelebek'te formasyonun en yüksek
+      // köşesi mumların ~43 piksel üstünde duruyor.
+      //
+      // Görünmez bir çıpa serisi ve elle koordinat hesabı denendi; ikisi
+      // de sorunu çözmedi, ikincisi AB=CD'de işareti levhanın tamamen
+      // dışına çıkardı. Kütüphanenin ölçek anlamını tahmin ederek
+      // yazılmış bir düzeltme, düzelttiğinden fazlasını bozuyor.
+      // Doğru çözüm bu davranışın kaynaktan okunmasını gerektiriyor ve
+      // AÇIK BİR İŞ olarak kaydedildi (docs/design/ui/README.md).
       autoscaleInfoProvider: () => ({ priceRange: { minValue: aralik.alt, maxValue: aralik.ust } }),
     });
     mum.priceScale().applyOptions({ scaleMargins: { top: 0.04, bottom: 1 - fiyatPanel.oran + 0.02 } });
+
     mum.setData(
       mumSeri.veri.map((m) => ({
         time: m.t as UTCTimestamp,
@@ -180,7 +216,7 @@ export function Grafik({
     }
 
     chartRef.current = chart;
-    chart.timeScale().fitContent();
+    tumunuGoster(chart, mumSeri.veri.length);
 
     // ---------------------------------------------------------- overlay çizimi
     const cerceve = (): Cerceve => ({
@@ -203,6 +239,41 @@ export function Grafik({
     };
 
     cizdir();
+    // Görünür aralık HEMEN uygulanmaz; hemen ardından
+    // `timeToCoordinate` çağırmak ÖNCEKİ aralığın koordinatlarını verir.
+    // Bu yüzden bir kare sonra aralık YENİDEN kurulur ve ancak ondan
+    // sonra çizilir (K5 i5 bulgusu — gözle değil, DOM'daki `x` değerleri
+    // ölçülerek yakalandı).
+    let kare = requestAnimationFrame(() => {
+      tumunuGoster(chart, mumSeri.veri.length);
+      kare = requestAnimationFrame(cizdir);
+    });
+
+    // FİYAT ekseni için abone YOK — Lightweight Charts yalnız zaman ekseni
+    // değişimini bildirir. Ölçülen sonuç: ilk çizim, fiyat ölçeği son
+    // hâlini almadan yapılıyor ve overlay eski ölçekle konumlanıyor.
+    //
+    // Neden bugüne kadar görünmedi: iki ölçek arasındaki fark DOĞRUSAL, yani
+    // aralığın ortasındaki noktalar neredeyse yerinde kalıyor. Yalnız UÇTAKİ
+    // nokta belirgin kayıyor — Kelebek'te formasyonun en yüksek köşesi (A,
+    // serinin en yüksek fiyatı) mumların ~45 piksel ÜSTÜNDE, havada
+    // duruyordu. X/B/C/D ortada oldukları için doğru görünüyordu ve sorun
+    // fark edilmiyordu (K5 i8; piksel taramasıyla ölçüldü).
+    //
+    // Çözüm olay değil GÖZLEM: ilk saniye boyunca bilinen bir fiyatın
+    // koordinatı izlenir, değiştiyse yeniden çizilir. Koşulsuz yeniden
+    // çizmek yerine değişimi beklemek, gereksiz çizimi de önlüyor.
+    const olcekReferansi = mumSeri.veri[0].kapanis;
+    let sonY = mum.priceToCoordinate(olcekReferansi);
+    let tik = 0;
+    const olcekSaati = window.setInterval(() => {
+      const y = mum.priceToCoordinate(olcekReferansi);
+      if (y !== sonY) {
+        sonY = y;
+        cizdir();
+      }
+      if (++tik >= 10) window.clearInterval(olcekSaati);
+    }, 100);
     const zamanAbone = chart.timeScale().subscribeVisibleLogicalRangeChange(cizdir);
 
     chart.subscribeCrosshairMove((p) => {
@@ -256,6 +327,8 @@ export function Grafik({
     sistemTema.addEventListener("change", cizdir);
 
     return () => {
+      cancelAnimationFrame(kare);
+      window.clearInterval(olcekSaati);
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(zamanAbone as never);
       sistemTema.removeEventListener("change", cizdir);
       gozlemci.disconnect();
@@ -275,7 +348,7 @@ export function Grafik({
 
     const secim = ARALIKLAR.find((x) => x.value === aralik);
     if (!secim || secim.gun === 0) {
-      chart.timeScale().fitContent();
+      tumunuGoster(chart, mumSeri.veri.length);
       return;
     }
     const son = mumSeri.veri[mumSeri.veri.length - 1].t;
@@ -284,7 +357,7 @@ export function Grafik({
     // olmayan barlara doğru boş alan açmak levhayı yalancı yapar.
     const bas = Math.max(ilk, son - secim.gun * 86400);
     if (bas <= ilk) {
-      chart.timeScale().fitContent();
+      tumunuGoster(chart, mumSeri.veri.length);
       return;
     }
     chart.timeScale().setVisibleRange({

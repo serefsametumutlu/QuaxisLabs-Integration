@@ -124,7 +124,15 @@ export function ornekTarama(n: number): TaramaSatiri[] {
   return out;
 }
 
-/** Kütüphane kartları — maketteki dört kart. */
+/** Kütüphane kartları.
+ *
+ * **Dördü maket, beşi GERÇEK.** Harmonik kartlar ile Golden Zone kartı
+ * ölçülmüş stratejilerdir: `kaynak` alanı kitabı, `kapi` alanı pasaportun
+ * gerçekten geçtiği kapıyı, `verdikt` alanı K4'ün çıktısını taşır. Maket
+ * kartların (`Piyasa Yapısı`, `Arz–Talep`, `Adil Değer Boşluğu`) arkasında
+ * kod yoktur ve verdiktleri `ölçülmedi`dir — ikisi karışmasın diye bu not
+ * burada duruyor.
+ */
 export type StratejiKarti = {
   ad: string;
   kaynak: string;
@@ -136,6 +144,46 @@ export type StratejiKarti = {
 };
 
 export const ORNEK_KARTLAR: StratejiKarti[] = [
+  {
+    ad: "Harmonik · AB=CD",
+    kaynak: "PESAVENTO · TWYS BÖL.4",
+    kapi: "PASAPORT K4",
+    tip: "fib",
+    ozet:
+      "Üç bacak, X yok. BC bacağı AB'yi geri çeker, CD bacağı AB kadar uzar; D bu iki ölçüden HESAPLANIR ve fiyat oraya dokununca sinyal doğar.",
+    paket: "Formasyon",
+    verdikt: "kanıtlanmadı",
+  },
+  {
+    ad: "Harmonik · Gartley 222",
+    kaynak: "PESAVENTO · TWYS BÖL.5",
+    kapi: "PASAPORT K4",
+    tip: "fib",
+    ozet:
+      "D, XA bacağının .786 geri çekilmesi; stop X'in hemen ötesi. Kitap ~%70 isabet iddia ediyor — 543 sembolde ölçülen %35.2.",
+    paket: "Formasyon",
+    verdikt: "kanıtlanmadı",
+  },
+  {
+    ad: "Harmonik · Butterfly",
+    kaynak: "PESAVENTO · TWYS BÖL.6",
+    kapi: "PASAPORT K4",
+    tip: "fib",
+    ozet:
+      "Uzantı formasyonu: D, XA'nın 1.272 uzantısında tamamlanır ve X'i AŞAR. Dört formasyonun ölçümde en kötüsü.",
+    paket: "Formasyon",
+    verdikt: "kanıtlanmadı",
+  },
+  {
+    ad: "Harmonik · Three Drives",
+    kaynak: "PESAVENTO · TWYS BÖL.7",
+    kapi: "PASAPORT K4",
+    tip: "fib",
+    ozet:
+      "Üç ardışık sürüş, her biri bir öncekinin 1.272 uzantısı. Stop oranı %75 — dördünün en yükseği.",
+    paket: "Formasyon",
+    verdikt: "kanıtlanmadı",
+  },
   {
     ad: "Salınım Fibo ABCD",
     kaynak: "PESAVENTO · S.41-58",

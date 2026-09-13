@@ -104,7 +104,12 @@ def main() -> int:
                             locale="tr-TR",
                         )
                         sayfa = ctx.new_page()
-                        url = f"http://127.0.0.1:{port}{yol}?tema={tema}"
+                        # Yol zaten sorgu taşıyorsa tema `&` ile eklenir.
+                        # `?tema=` yapıştırmak `grafik.html?f=x?tema=koyu`
+                        # üretiyordu ve ikinci `?` sorgunun geri kalanını
+                        # sessizce tek bir değerin içine gömüyordu.
+                        ayrac = "&" if "?" in yol else "?"
+                        url = f"http://127.0.0.1:{port}{yol}{ayrac}tema={tema}"
                         sayfa.goto(url, wait_until="networkidle")
                         sayfa.wait_for_timeout(400)  # font yüklemesi otursun
                         hedef = cikti / f"{args.ad}-{ek}-{w}-{args.etiket}.png"

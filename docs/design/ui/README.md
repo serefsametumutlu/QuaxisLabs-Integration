@@ -412,3 +412,70 @@ Ekran görüntüsü tıklamayı göstermez. Playwright ile her aralık düğmesi
 tıklanıp levha yeniden çekildi ve PNG indirme **gerçekten dosya üretiyor
 mu** diye indirme olayı yakalandı (`thyao-golden-zone-1d-2026-09-13.png`,
 53 KB). Bir düğmenin "var olması" çalıştığı anlamına gelmez.
+
+---
+
+## Harmonik komposer — K5 görsel kabul (2026-09-14)
+
+Dört Pesavento formasyonu, **gerçek BIST verisinden** üretilmiş specler:
+`rtalb-abcd` · `dogub-gartley` · `srvgy-kelebek` · `burva-uc_surus`.
+
+Örnekleri seçen ölçüt **getiri değil okunaklılık** (`tools/harmonik_spec.py`
+içindeki `_okunaklilik`). Sonuç kendiliğinden karışık çıktı: biri hedefe
+ulaştı, ikisi stop oldu, biri süre doldurdu. Kârlı örnek seçmek verdikti
+gizlemenin görsel hâli olurdu.
+
+Ekran görüntüleri: `harmonik-<formasyon>-koyu-1440-son.png` ve `-768-`.
+Her formasyon `?f=harmonik-<ad>` bağlantısıyla ayrı ayrı yakalandı.
+
+### İterasyon kaydı — ne görüldü, ne düzeltildi
+
+| Tur | Görülen kusur | Düzeltme |
+|---|---|---|
+| i1 | Köşe etiketlerinden yalnız `X` okunuyordu | DOM ölçümü: hepsi VARDI, üst üste biniyordu. `B` ile `C` aynı barda, `D` ile "GİRİŞ" 5px arayla, `0.618` tam `B`'nin üstünde |
+| i1 | Oran etiketi yanlış bacakta | `ab` oranı (A−B)/(A−X) hesaplanır ama **A→B bacağını** anlatır; etiket X→A'ya konuyordu. `_ORAN_BACAK` düzeltildi |
+| i1 | Formasyon levhanın %55'ine sıkışıyordu | Pencere çıkış barına göre daraltıldı; `i + pencere` terimi kaldırıldı |
+| i2 | `D`'ye hem köşe rozeti hem "GİRİŞ" teması | Giriş fiyatı zaten sağ olukta yazılı; temas işareti kaldırıldı |
+| i2 | Durum rozeti `D`'nin üstünde, formasyon adını TEKRAR ediyordu | Ad künyede ve HUD'da zaten var; rozet çıkış barına taşındı |
+| i2 | Oran etiketleri hiç çizilmiyordu | **Sessiz kaybolma:** etiket iki barın epoch ORTALAMASINA konuyordu ve o an çoğu zaman hiçbir barın zamanı değil (hafta sonu). Çizici böyle bir zamanı çeviremeyince katmanı sessizce atıyordu. Ortası artık bar İNDEKSİNDEN alınıyor |
+| i2 | Kısa bacakta oran etiketi köşe rozetinin üstüne oturuyordu | `ASGARI_BACAK_BAR = 4`: kısa bacağın "ortası" yoktur, oran payload'da kalır |
+| i3 | 768'de çıkış rozeti `B` köşesini tamamen kapatıyordu | Rozet çapasının SOLUNA oturur; çıkış sağda olduğu için kutu formasyonun üstüne düşüyordu. İşaretin kendi metni (kompakt, zeminli) kullanıldı |
+| i3 | "DÖNÜŞ BÖLGESİ" etiketi bandın dışına taşıyordu | Çizici artık bant DARSA etiketi yazmıyor |
+| i4 | Aynı etiket `D` köşe rozetinin İÇİNDEN geçiyordu | `D` rozeti artık **riskin olduğu tarafa** konmuyor: boğada üste, ayıda alta |
+| i5 | Strateji değişince formasyon levhanın solunda, EKSİ koordinatlarda kalıyordu | `fitContent()` `barSpacing: 6` sabitini aşamıyor; 174 barlık Kelebek spec'i maskeyi kaldırdı. `setVisibleLogicalRange` ile değiştirildi |
+| i6–i7 | `?f=` derin bağlantısı sayfaya ulaşmıyordu | `useSyncExternalStore` hidrasyonda sunucu anlık görüntüsünü kullanır ve mağaza haber vermezse istemci değerini HİÇ okumaz. Abone artık bir kez bildiriyor |
+| i12 | Three Drives'ın `O` köşesi HUD metninin içine düşüyordu | HUD bir HTML katmanı, SVG onu göremez. Çizici sol üst köşeyi dışlama bölgesi sayıyor; ayrıca spec penceresi 22 bar sol pay bırakıyor |
+
+### Kapanmayan kusur — açık iş
+
+**Fiyat aralığının UCUNDAKİ köşe, mumlarından ~43 piksel uzağa düşüyor.**
+
+`Grafik.tsx`'teki `autoscaleInfoProvider` mumların çizildiği ölçeği
+ChartSpec'in panel aralığına göre genişletiyor (stop mum aralığının dışında
+kalabildiği için gerekli), ama `priceToCoordinate` mum verisinin KENDİ
+aralığını kullanmaya devam ediyor. Fark doğrusal: aralığın ortasındaki
+noktalar neredeyse yerinde kalıyor, yalnız uçtaki kayıyor.
+
+Piksel taramasıyla ölçüldü — Kelebek'te `A` köşesi serinin en yüksek
+fiyatı ve mumların 43 piksel üstünde duruyor; sağlayıcı kapatılınca fark
+5 piksele iniyor. **Bu kusur Golden Zone ve Salınım Fibo ABCD
+grafiklerinde de vardı**, oradaki köşeler uçta olmadığı için görünmüyordu.
+
+İki düzeltme denendi ve **ikisi de geri alındı**: görünmez bir çıpa serisi
+hiç etki etmedi; elle koordinat hesabı Kelebek'i düzeltirken AB=CD'de
+işareti levhanın tamamen dışına çıkardı. Kütüphanenin ölçek anlamını
+tahmin ederek yazılan bir düzeltme, düzelttiğinden fazlasını bozuyor.
+
+Doğru çözüm Lightweight Charts'ın kaynağından bu davranışın okunmasını
+gerektiriyor. **K5 kapısı bu yüzden KAPANMADI.**
+
+### Doğrulanıp kusur bulunmayanlar
+
+- Dört formasyonun dördü de köşelerini (X/A/B/C/D, O/S1/A/S2/C) çiziyor;
+  piksel sayımıyla doğrulandı.
+- Son bacak (→D) **kesik çizgi**: D gerçekleşmiş bir salınım ucu değil,
+  hesaplanmış bir hedef. Bu ayrım grafiğin taşıdığı en önemli bilgi.
+- Sağ olukta üç seviye (hedef · giriş · stop) ve ödül/risk; hepsi spec'in
+  kendi etiketlerinden üretiliyor, elle yazılan sayı yok.
+- Verdikt künyede: **"tarihsel isabet · kanıtlanmadı"** beş stratejinin
+  beşinde de görünüyor.

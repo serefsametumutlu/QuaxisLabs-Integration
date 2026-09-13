@@ -28,3 +28,24 @@ export const THYAO_SWING_FIB_ABCD: ChartSpec = dogrula(ham as unknown);
  * birbirine karışmasın.
  */
 export const THYAO_GOLDEN_ZONE: ChartSpec = dogrula(hamGz as unknown);
+
+/* ------------------------------------------------------------------ harmonik
+ *
+ * Dört Pesavento formasyonu, **gerçek** BIST verisinden üretilmiş specler:
+ *
+ *   tools/harmonik_spec.py --formasyon <ad> --en-iyi
+ *
+ * Örnekleri seçen ölçüt GETİRİ DEĞİL, okunaklılıktır (bkz. o aracın
+ * `_okunaklilik` fonksiyonu). Sonuç kendiliğinden karışık çıktı — biri
+ * hedefe ulaştı, ikisi stop oldu, biri süre doldu. Kârlı örnek seçmek,
+ * verdikti gizlemenin görsel hâli olurdu.
+ */
+import hamAbcd from "@/ornek/rtalb-abcd.chartspec.json";
+import hamGartley from "@/ornek/dogub-gartley.chartspec.json";
+import hamKelebek from "@/ornek/srvgy-kelebek.chartspec.json";
+import hamUcSurus from "@/ornek/burva-uc_surus.chartspec.json";
+
+export const HARMONIK_ABCD: ChartSpec = dogrula(hamAbcd as unknown);
+export const HARMONIK_GARTLEY: ChartSpec = dogrula(hamGartley as unknown);
+export const HARMONIK_KELEBEK: ChartSpec = dogrula(hamKelebek as unknown);
+export const HARMONIK_UC_SURUS: ChartSpec = dogrula(hamUcSurus as unknown);

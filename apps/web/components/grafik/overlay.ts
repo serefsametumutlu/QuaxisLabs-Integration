@@ -140,7 +140,13 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
             opacity: s.dolgu,
           }),
         );
-        if (k.etiket) {
+        // Bant DAR ise etiket yazılmaz. Harmonik dönüş bölgesi son
+        // pivottan çıkışa kadar sürüyor; 768 piksellik levhada bu birkaç
+        // bar ediyordu ve "DÖNÜŞ BÖLGESİ" metni bandın dışına taşıp D köşe
+        // rozetinin İÇİNDEN geçiyordu (K5 i3 bulgusu). Sığmayan etiket
+        // bilgi değil, gürültüdür.
+        const genis = x1 - x0 >= (k.etiket?.length ?? 0) * 6.2 + 18;
+        if (k.etiket && genis) {
           // Bant inceyse etiket içine sığmaz ve alt çizginin üstüne biner
           // (f4i6 bulgusu); o zaman bandın ÜSTÜNE yazılır.
           const h = Math.abs(y2 - y1);
@@ -264,8 +270,13 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
         // metnini sessizce düşürüyordu: çıkış işareti ("stop ✕") 3 piksellik
         // görünmez bir noktaya iniyordu (K5 i3 bulgusu). Hapsız roller de
         // yazar — zemini `zeminEkle` ile, mumların üstünde okunsun diye.
+        // HUD (sol üstteki sembol/strateji bloğu) bir HTML katmanı; SVG
+        // onu göremez. Three Drives'ın `O` köşesi levhanın sol üstünde
+        // duruyor ve rozeti tam HUD metninin İÇİNE düşüyordu (K5 i12).
+        // Etiket o bölgeye denk gelirse noktanın altına yazılır.
+        const hudIci = x < 230 && y < 104;
         if (!s.hap && k.metin) {
-          const dy = k.yerlesim === "alt" ? 15 : -13;
+          const dy = hudIci || k.yerlesim === "alt" ? 15 : -13;
           const t = el(
             "text",
             {
@@ -283,7 +294,7 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
           zeminEkle(svg, t, c);
         }
         if (s.hap && k.metin) {
-          const dy = k.yerlesim === "alt" ? 16 : -16;
+          const dy = hudIci || k.yerlesim === "alt" ? 16 : -16;
           svg.appendChild(
             el("rect", {
               x: x - 9,

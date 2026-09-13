@@ -153,3 +153,57 @@ class OTESonucu:
             f"{oran} seviyesi sonuçta yok. Komposer eksik bir sonuçtan grafik "
             f"uyduramaz — gösterge onu üretmediyse çizilmez."
         )
+
+
+@dataclass(frozen=True)
+class HarmonikSonucu:
+    """Pesavento harmonik formasyonunun tipli sonucu.
+
+    Dört formasyon (AB=CD · Gartley · Butterfly · Three Drives) **aynı**
+    tipi kullanır çünkü çizim tarafında farkları yalnız nokta sayısı ve
+    oranlardır. Dört ayrı tip yazmak, dört ayrı komposer doğururdu ve
+    aralarındaki tek fark bir döngünün uzunluğu olurdu.
+
+    Ölçüm tarafında ise dördü AYRI künyedir — orada soru "hangisi
+    çalışıyor" ve tek künyede toplamak o soruyu ölçülemez yapardı.
+    """
+
+    sembol: str
+    ad: str
+    zaman_dilimi: str
+    barlar: Sequence[Bar]
+
+    #: Formasyonun künyesi: `harmonik_abcd` · `harmonik_gartley` …
+    formasyon: str
+    #: ONAYLI pivotlar, sırayla. AB=CD'de A·B·C, Gartley/Kelebek'te
+    #: X·A·B·C, Three Drives'ta O·S1·A·S2·C. **D burada YOKTUR** — D bir
+    #: pivot değil, hesaplanmış bir fiyattır ve ayrı alanda durur.
+    noktalar: Sequence[Capa]
+    #: D: hesaplanan seviye ve fiyatın ona dokunduğu bar.
+    d: Capa
+
+    #: Giriş (= D fiyatı), stop ve hedef; hepsi formasyonun kendi
+    #: geometrisinden gelir. `oran` alanı hangi fibo seviyesi olduklarını
+    #: söyler, komposer rolü ondan türetir.
+    seviyeler: Sequence[FibSeviyesi]
+
+    yon: Yon
+    durum: str
+    #: K4'ün verdikti. Grafiğin künyesine AYNEN geçer.
+    verdikt: str = ""
+    #: Bacak oranları (`ab`, `bc`, `abcd`…). Grafikte bacak etiketi olur:
+    #: formasyonun NEDEN formasyon olduğunu gösteren tek şey bunlar.
+    oranlar: Mapping[str, float] = field(default_factory=dict)
+
+    cikis_t: int | None = None
+    cikis_fiyat: float | None = None
+    cikis_turu: str = ""
+
+    def seviye(self, ad: str) -> FibSeviyesi:
+        for s in self.seviyeler:
+            if s.ad == ad:
+                return s
+        raise ValueError(
+            f"{ad!r} seviyesi sonuçta yok. Komposer eksik bir sonuçtan grafik "
+            f"uyduramaz — gösterge onu üretmediyse çizilmez."
+        )

@@ -409,27 +409,52 @@ Kitabın Gartley için ~%70 isabet iddiası **doğrulanmadı**: ölçülen %41.4
 
 | | |
 |---|---|
-| Komposer | *(bekliyor)* — `packages/chart/quaxis/chart/komposer/harmonik.py` |
-| Referans | *(bekliyor)* |
-| İterasyonlar | *(bekliyor — en az 3)* |
-| Onay | *(kapı KAPALI)* |
+| Komposer | [`komposer/harmonik.py`](../../packages/chart/quaxis/chart/komposer/harmonik.py) |
+| Spec üretici | [`tools/harmonik_spec.py`](../../tools/harmonik_spec.py) — gerçek BIST verisi |
+| Örnekler | `rtalb-abcd` · `dogub-gartley` · `srvgy-kelebek` · `burva-uc_surus` |
+| İterasyonlar | **12** (`docs/design/ui/harmonik-*-koyu-1440-son.png`) |
+| İterasyon kaydı | [`docs/design/ui/README.md`](../design/ui/README.md) |
+| Onay | ❌ **KAPI KAPALI** |
 
-Dedektör çizim primitiflerini şimdiden üretiyor: formasyon bacakları
-`Line`, her nokta `Marker` (X/A/B/C/D), giriş·stop·hedef `Level`. Hepsi
-`start=tespit_t` taşıyor — `start` boş bırakılırsa walk-forward
-karşılaştırması seviyeleri "hep vardı" sayar ve sonradan doğan her seviye
-repaint görünür.
+### Kapının neden kapalı olduğu
 
----
+İki sebep var ve ikisi de yazılı:
+
+1. **Kullanıcı onayı alınmadı.** K5'in bitti kriteri bunu şart koşuyor.
+2. **Kapanmayan bir kusur var.** Fiyat aralığının UCUNDAKİ köşe, mumlarından
+   ~43 piksel uzağa düşüyor (Kelebek'te `A`). Sebebi ölçüldü:
+   `autoscaleInfoProvider` mumların ölçeğini genişletiyor ama
+   `priceToCoordinate` mum verisinin kendi aralığını kullanıyor. İki
+   düzeltme denendi, **ikisi de geri alındı** — biri hiç etki etmedi,
+   diğeri AB=CD'de işareti levhanın dışına çıkardı. Tahminle yazılan
+   düzeltme, düzelttiğinden fazlasını bozuyor.
+
+Bu kusur **Golden Zone ve Salınım Fibo ABCD'de de vardı**; oradaki köşeler
+fiyat aralığının ucunda olmadığı için görünmüyordu. Yani harmoniklerin
+getirdiği bir hata değil, harmoniklerin **ortaya çıkardığı** bir hata.
+
+### Örnekler nasıl seçildi
+
+Seçim ölçütü **getiri değil okunaklılık**. Sonuç kendiliğinden karışık
+çıktı: biri hedefe ulaştı, ikisi stop oldu, biri süre doldurdu. Kârlı
+örnek seçmek, verdikti gizlemenin görsel hâli olurdu.
+
+### Grafiğin taşıdığı en önemli ayrım
+
+Son bacak (→D) **kesik çizgi**, diğerleri düz. Harmonik grafiklerin klasik
+yanıltmacası D'yi diğer köşelerle aynı çizgiyle bağlamaktır; o zaman D de
+gerçekleşmiş bir salınım ucu gibi görünür. D bir pivot değil, C
+onaylandığında **hesaplanan** bir fiyattır.
 
 ## K6 · Ürün
 
 | | |
 |---|---|
-| Kütüphane kartı | *(bekliyor)* |
-| Strateji sayfası | `/stratejiler/harmonik-pesavento` |
+| Grafik yüzeyi | ✅ `/grafik` — strateji seçicide dört formasyon; `?f=harmonik-<ad>` derin bağlantısı |
+| Kütüphane kartı | ✅ `lib/ornek-veri.ts` — dört kart, gerçek kaynak ve verdiktle |
+| Strateji sayfası | *(bekliyor)* — `/stratejiler/harmonik-pesavento` |
 | Tarama kolonu | *(bekliyor)* |
-| Alarm kuralı | *(bekliyor)* |
+| Alarm kuralı | *(bekliyor)* — verdikt `kanıtlanmadı` olduğu için alarm **önerilmiyor** |
 
 ### Nasıl okunur — dört soru
 
