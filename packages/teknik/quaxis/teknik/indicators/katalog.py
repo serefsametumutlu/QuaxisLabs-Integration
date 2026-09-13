@@ -17,6 +17,16 @@ from quaxis.teknik.indicators.golden_zone import META as GOLDEN_ZONE_META
 from quaxis.teknik.indicators.golden_zone import olustur as golden_zone_olustur
 from quaxis.teknik.indicators.golden_zone import olustur_r_kati as golden_zone_r_kati
 from quaxis.teknik.indicators.golden_zone.dedektor import META_R_KATI
+from quaxis.teknik.indicators.harmonik import (
+    Abcd,
+    Gartley,
+    Kelebek,
+    UcSurus,
+    olustur_abcd,
+    olustur_gartley,
+    olustur_kelebek,
+    olustur_uc_surus,
+)
 from quaxis.teknik.indicators.kesitsel_momentum import META as KM_META
 from quaxis.teknik.indicators.kesitsel_momentum import META_ATLAMALI as KM_META_12_1
 from quaxis.teknik.indicators.kesitsel_momentum import olustur as km_olustur
@@ -61,6 +71,26 @@ KATALOG = Catalog.of(
             factory=km_olustur_donus, needs_universe=True,
             supported_timeframes=META_DONUS.supported_timeframes,
         ),
+        # Harmonikler: DÖRT AYRI künye. Tek bir "harmonik" göstergesi
+        # altında toplanmadılar çünkü sorulan soru "harmonikler çalışıyor
+        # mu" değil, HANGİSİ çalışıyor. Tek künye altında ölçülselerdi
+        # birinin kenarı diğerinin gürültüsüyle ortalanırdı.
+        #
+        # Dört test = BH-FDR zorunlu (bkz. harmonik-pesavento-K0.md §5).
+        *[
+            IndicatorSpec(
+                name=sinif.meta.name,
+                category=sinif.meta.category,
+                factory=fabrika,
+                supported_timeframes=sinif.meta.supported_timeframes,
+            )
+            for sinif, fabrika in (
+                (Abcd, olustur_abcd),
+                (Gartley, olustur_gartley),
+                (Kelebek, olustur_kelebek),
+                (UcSurus, olustur_uc_surus),
+            )
+        ],
     ]
 )
 

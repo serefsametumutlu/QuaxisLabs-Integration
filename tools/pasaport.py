@@ -116,6 +116,43 @@ class Pasaport:
         return verdikt != "olculmedi" and len(gerekce) >= 20
 
 
+def _capa_dogrula(slug: str, ad: str, kaynak: str) -> list[Bulgu]:
+    """`K0: <dosya>#<bölüm>` çıpasını DİSKTE doğrular.
+
+    Neden sayfa numarasının yanına ikinci bir biçim gerekti: bazı kaynak
+    çıkarımlarında sayfa numarası YOKTUR, yalnız bölüm kimlikleri vardır
+    (ör. Pesavento çıkarımındaki `FORMASYON-02`). Böyle bir kaynakta
+    's.123' yazmak, K0'ın önlemek için var olduğu şeyin ta kendisidir:
+    uydurma. Kuralı gevşetmek yerine ikinci bir KANIT biçimi tanımlandı.
+
+    Bu biçim sayfa numarasından daha zayıf değil, daha güçlü: `s.123`
+    kimse tarafından denetlenmez, buradaki çıpa ise dosya açılıp içinde
+    o bölüm ARANARAK doğrulanır. `K3:` mekanizmasının aynısı.
+    """
+    out: list[Bulgu] = []
+    capalar = re.findall(r"K0:\s*([^\s`,)#]+\.md)#([^\s`,)]+)", kaynak)
+    if not capalar:
+        return [
+            Bulgu(
+                slug, "K0",
+                f"'{ad}' kaynağı 'K0:' diyor ama '<dosya>.md#<bölüm>' çıpası "
+                f"vermiyor: {kaynak!r} — söz kanıt değildir",
+            )
+        ]
+    for yol, bolum in capalar:
+        hedef = KOK / yol
+        if not hedef.exists():
+            out.append(Bulgu(slug, "K0", f"'{ad}' eşiğinin kaynak dosyası diskte yok: {yol}"))
+        elif bolum not in hedef.read_text(encoding="utf-8"):
+            out.append(
+                Bulgu(
+                    slug, "K0",
+                    f"'{ad}' eşiğinin çıpası {yol} içinde bulunamadı: {bolum!r}",
+                )
+            )
+    return out
+
+
 # ------------------------------------------------------------------ okuma
 
 
@@ -128,11 +165,34 @@ def oku(yol: pathlib.Path) -> Pasaport:
     return Pasaport(yol=yol, kunye=kunye, govde=govde)
 
 
+def pasaport_mu(yol: pathlib.Path) -> bool:
+    """Künye bloğu olmayan dosya pasaport DEĞİLDİR.
+
+    `docs/strateji/` altında pasaport olmayan belgeler de var (ör.
+    `ENVANTER.md`). Bunları pasaport sanıp çökmek doğrulayıcıyı tamamen
+    kullanılmaz hâle getiriyordu — envanter eklendiği günden beri
+    `dogrula` hiç koşmuyordu.
+
+    Sessizce atlamıyoruz: `dogrula` atlanan dosyaları listeler. Künyesini
+    kaybetmiş GERÇEK bir pasaportun görünmez olması, çökmekten daha kötü
+    olurdu.
+    """
+    return yol.read_text(encoding="utf-8").startswith("---")
+
+
+def pasaport_disi() -> list[pathlib.Path]:
+    return [
+        p
+        for p in sorted(PASAPORT_KOK.glob("*.md"))
+        if not p.name.startswith("_") and not pasaport_mu(p)
+    ]
+
+
 def pasaportlar() -> list[Pasaport]:
     return [
         oku(p)
         for p in sorted(PASAPORT_KOK.glob("*.md"))
-        if p.name != "_SABLON.md" and not p.name.startswith("_")
+        if not p.name.startswith("_") and pasaport_mu(p)
     ]
 
 
@@ -221,6 +281,8 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
                 b.append(Bulgu(p.slug, "K0", f"'{ad}' eşiğinin kaynağı boş — ezberden sayı yasak"))
             elif re.search(r"s\.\s*\d+", kaynak):
                 pass  # sayfa alıntısı
+            elif "K0:" in kaynak:
+                b += _capa_dogrula(p.slug, ad, kaynak)
             elif "K3:" in kaynak:
                 # "K3:" bir SÖZ değil, bir DOSYADIR. "K3'ten türetilecek"
                 # yazıp kapıyı geçmek, ezberden sayı yazmanın kibar hâlidir —
@@ -291,6 +353,8 @@ def tek_strateji_kurali(hepsi: list[Pasaport]) -> list[Bulgu]:
 
 def komut_dogrula(slug: str | None) -> int:
     hepsi = pasaportlar()
+    for disi in pasaport_disi():
+        print(f"  atlandı (künye bloğu yok, pasaport değil): {disi.name}")
     if not hepsi:
         print("Henüz pasaport yok. Şablon: docs/strateji/_SABLON.md")
         print("Yeni pasaport: python tools/pasaport.py yeni <slug> --ad <Ad> --paket yapi")

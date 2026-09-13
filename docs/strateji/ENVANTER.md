@@ -1,6 +1,6 @@
 # Strateji Envanteri
 
-**Güncelleme:** 2026-09-13
+**Güncelleme:** 2026-09-13 (harmonikler eklendi)
 
 Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 
@@ -13,9 +13,17 @@ Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 | **Golden Zone** (ICT OTE) | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | **Kesitsel Momentum** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | Kesitsel Dönüş (ters varyant) | ✅ | — | *(momentumun içinde)* | ✅ | **reddedildi** (ön kayıtlı) |
+| **Harmonik · AB=CD** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
+| **Harmonik · Gartley 222** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
+| **Harmonik · Butterfly** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
+| **Harmonik · Three Drives** | ✅ | — | ✅ | ⏳ K3 | *ölçülmedi* |
 | **Salınım Fibo ABCD** | ❌ **YOK** | ✅ | ❌ | ❌ | — |
 
 **Yayınlanmış (K6) strateji: 0.**
+
+Dört harmonik formasyon tek pasaport altında
+([`harmonik-pesavento.md`](harmonik-pesavento.md)) ama **dört ayrı künye**
+ve dört ayrı ölçüm. Soru "harmonikler çalışıyor mu" değil, **hangisi**.
 
 `Salınım Fibo ABCD` özel bir durum: **çizimi var, dedektörü yok.** Yani
 grafiği elle girilmiş sayılarla çiziliyor; "bu formasyon ne zaman oluştu"
@@ -69,15 +77,25 @@ bilinmiyor. Ama **beklentiyi yönetmesi gereken bir uyarı**: harmonikler
 
 ## 3. Sıradaki karar
 
-Kullanıcı kararı: **harmoniklerden devam.** Başlamadan önce şunlar
-netleşmeli (bir sonraki turda tabloyla gelecek):
+Kullanıcı kararı (2026-09-13): **Pesavento'nun dört formasyonu birlikte
+kodlansın; diğer dört ekol sonra — toplam sekiz.**
 
-1. Hangi harmonik(ler) — 8 ekolün hepsi mi, biriyle mi başlanacak
-2. Her birinin **tam Fibonacci oranları** ve tolerans payı
-3. **AL sinyali tam olarak hangi barın kapanışında** doğuyor
-4. Stop ve hedef nereye
-5. Ne zaman geçersiz oluyor
-6. Kaynak: Pesavento / Carney, sayfa numarasıyla
+Dördü kodlandı (K0/K1/K2). Sıradaki iş **K3 kalibrasyonu**, çünkü kitabın
+vermediği dört eşik (`tolerans`, `donus_max_bar`, pivot kolları, AB=CD'nin
+stop oranı) oradan türetilecek. `pasaport.py dogrula` bu dördünü **bulgu
+olarak yazmaya devam ediyor** ve ölçüm dosyası diskte belirene kadar
+susmayacak.
+
+### Sonraki turda gelecek dört ekol
+
+| Ekol | Kaynak | Not |
+|---|---|---|
+| Bat · Crab · Shark | Carney | **Pesavento kitabında YOK** — ayrı K0 gerekir |
+| Cypher | Oglesbee | ayrı K0 |
+| 5-0 | Duddella | ayrı K0 |
+
+Kaynağı olmayan bir formasyonu Pesavento'nun altına yazmak K0'ın tek
+kuralını çiğnerdi; bu yüzden ayrı tutuldular.
 
 ---
 
