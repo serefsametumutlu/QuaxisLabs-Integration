@@ -227,6 +227,7 @@ def _bos_havuzu(
     r: np.random.Generator,
     oos_i: int,
     havuz: int = VARSAYILAN_HAVUZ,
+    ust_sinir: int | None = None,
 ) -> list[np.ndarray] | None:
     """Her işlemin risk yapısı için rastgele barlardan R havuzu.
 
@@ -243,7 +244,7 @@ def _bos_havuzu(
     yapısı, rastgele bar" hâlâ aynı — yalnızca aynı örneklem uzayından
     tekrar tekrar çekilir.
     """
-    n = len(ohlc)
+    n = len(ohlc) if ust_sinir is None else min(ust_sinir, len(ohlc))
     secilebilir = np.arange(oos_i, n - max_bars - 1)
     if len(secilebilir) == 0 or not risk_orani:
         return None
@@ -279,6 +280,7 @@ def measure_r(
     *,
     max_bars: int = 60,
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
+    pencere: str = "oos",
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
 ) -> RResult:
@@ -287,9 +289,13 @@ def measure_r(
     `islemler`: {sembol: [(sinyal, stop_fiyati, hedef_fiyati), …]}. Stop ve
     hedef STRATEJİNİN kendi kuralından gelir — ölçüm onları uydurmaz.
 
-    **Yalnız OOS penceresindeki sinyaller sayılır** — `ileri_getiri.measure`
-    ile aynı kesim. İddia görülmemiş dönemde ölçülür; iki ölçüm farklı
-    pencere kullanırsa katman tablosundaki iki sütun farklı şeyleri anlatır.
+    `pencere` hangi dönemin sayılacağını söyler: `"oos"` (varsayılan — iddia
+    GÖRÜLMEMİŞ dönemde ölçülür), `"is"` ya da `"hepsi"`.
+
+    **`"is"` yalnızca ARAMA içindir.** Bir koşulu IS'te arayıp yine IS'te
+    doğrulamak, cevabı bildiğin sınava girmektir. Koşul taraması (bkz.
+    `tools/kosul_taramasi.py`) IS'te arar, hayatta kalanı OOS'ta doğrular;
+    rapora giren sayı OOS'unkidir.
 
     p değeri, `ileri_getiri.measure` ile aynı mantıkta: sembol düzeyinde,
     aynı risk yapısıyla rastgele girişlere karşı permütasyon.
@@ -303,13 +309,17 @@ def measure_r(
         df = ohlc.get(sembol)
         if df is None or not kayitlar:
             continue
-        oos_i = int(len(df) * (1.0 - oos_ratio))
-        oos_bas = df.index[min(oos_i, len(df) - 1)]
+        kesim = int(len(df) * (1.0 - oos_ratio))
+        kesim_t = df.index[min(kesim, len(df) - 1)]
+        # Baz da sinyallerle AYNI pencereden çekilir.
+        oos_i = kesim if pencere == "oos" else 0
         kendi: list[BarrierOutcome] = []
         risk_o, hedef_o, yonler = [], [], []
         for sinyal, stop, hedef in kayitlar:
-            if sinyal.detected_at < oos_bas:
-                continue  # IS penceresi: iddia burada ölçülmez
+            if pencere == "oos" and sinyal.detected_at < kesim_t:
+                continue  # iddia GÖRÜLMEMİŞ dönemde ölçülür
+            if pencere == "is" and sinyal.detected_at >= kesim_t:
+                continue  # arama penceresi
             # Strateji kendi giriş seviyesini bildiriyorsa O kullanılır:
             # limit emirle çalışan bir kurulumda giriş, barın kapanışı değil
             # emrin konduğu seviyedir (bkz. `barrier_outcome` docstring'i).
@@ -333,7 +343,10 @@ def measure_r(
 
         if not kendi:
             continue
-        havuzlar = _bos_havuzu(df, risk_o, hedef_o, yonler, max_bars, r, oos_i)
+        ust_sinir = kesim if pencere == "is" else len(df)
+        havuzlar = _bos_havuzu(
+            df, risk_o, hedef_o, yonler, max_bars, r, oos_i, ust_sinir=ust_sinir
+        )
         if havuzlar is None:
             continue  # bazsız işlem sayılmaz: n_trades ile n_symbols ayrışmasın
 

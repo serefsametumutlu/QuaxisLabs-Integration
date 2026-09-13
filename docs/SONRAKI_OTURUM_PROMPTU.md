@@ -70,7 +70,7 @@ raporunda "veri hatası alan sembol" sütununda görünürler.
 
 ### Kararlar (değiştirmeden önce nedenini oku)
 
-* **Bölge:** ICT OTE 0.62–0.79, tatlı nokta 0.705 — hepsi **geçici**, K3'ten
+* **Bölge:** ICT OTE 0.62–0.79, orta eşik 0.705 — hepsi **geçici**, K3'ten
   türetilecek.
 * **Teyit:** BOS + bölge + (FVG veya Order Block) — ama dedektör bunları
   **filtrelemiyor**, payload'a bayrak yazıyor. Katmanlar dedektörde

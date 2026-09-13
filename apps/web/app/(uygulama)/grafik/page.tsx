@@ -21,7 +21,7 @@ function seviye(rol: string): number | null {
 const f = (n: number | null) => (n === null ? "—" : n.toFixed(2));
 
 const giris = seviye("fib_618");
-const tatli = seviye("fib_705");
+const ortaEsik = seviye("fib_705");
 const stop = seviye("fib_1");
 const hedef = seviye("fib_0");
 const bos = seviye("seviye");
@@ -108,8 +108,8 @@ export default function GrafikSayfasi() {
             <span style={{ color: "var(--accent)" }}>{f(giris)}</span>
           </div>
           <div className="r">
-            <span>Tatlı nokta (0.705)</span>
-            <span>{f(tatli)}</span>
+            <span>Orta eşik (0.705)</span>
+            <span>{f(ortaEsik)}</span>
           </div>
           <div className="r">
             <span>Stop (1.0)</span>

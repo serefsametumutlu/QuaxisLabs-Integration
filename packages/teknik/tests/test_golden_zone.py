@@ -133,7 +133,7 @@ def test_derin_giris_asimetriyi_iyilestirir() -> None:
         d = GoldenZone(
             GoldenZoneParams(
                 yer_degistirme_atr=1.0, hedef_modu="yapisal",
-                bolge_sig=sig, bolge_derin=max(sig + 0.01, 0.79), tatli_nokta=sig,
+                bolge_sig=sig, bolge_derin=max(sig + 0.01, 0.79), orta_esik=sig,
             )
         )
         s = _uzun(d(_kurulum_serisi()))
@@ -163,7 +163,7 @@ def test_giris_bolgenin_sig_ucunda(dedektor: GoldenZone) -> None:
     boy = s.payload["capa0"] - s.payload["capa100"]
     beklenen = s.payload["capa0"] - boy * 0.62
     assert s.payload["giris"] == pytest.approx(beklenen)
-    assert s.payload["bolge_derin"] < s.payload["tatli_nokta"] < s.payload["giris"]
+    assert s.payload["bolge_derin"] < s.payload["orta_esik"] < s.payload["giris"]
 
 
 def test_katman_bayraklari_filtre_degil(dedektor: GoldenZone) -> None:
@@ -225,9 +225,9 @@ def test_bolge_sinirlari_dogrulanir() -> None:
         GoldenZoneParams(bolge_sig=0.8, bolge_derin=0.6)
 
 
-def test_tatli_nokta_bolgenin_disinda_olamaz() -> None:
+def test_orta_esik_bolgenin_disinda_olamaz() -> None:
     with pytest.raises(ValueError, match="ölçülemeyen bir sayı"):
-        GoldenZoneParams(tatli_nokta=0.95)
+        GoldenZoneParams(orta_esik=0.95)
 
 
 def test_params_hash_deterministik() -> None:

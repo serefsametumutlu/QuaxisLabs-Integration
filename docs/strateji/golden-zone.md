@@ -122,7 +122,7 @@ ICT'nin sayıları aramanın başlangıç noktasıdır, gerekçesi değil.
 |---|---|---|
 | bolge_sig | 0.62 | `K3: docs/olcum/golden-zone-K3-A.md` |
 | bolge_derin | 0.79 | `K3: docs/olcum/golden-zone-K3-A.md` |
-| sweet_spot | 0.705 | `K3: docs/olcum/golden-zone-K3-A.md` |
+| orta_esik | 0.705 | `K3: docs/olcum/golden-zone-K3-A.md` |
 | yer_degistirme_atr | 1.5 | `K3: docs/olcum/golden-zone-K3-A.md` |
 | supurme (bayrak) | — | `K3: docs/olcum/golden-zone-K3-A.md` |
 | fvg_min_atr | 0.1 | `K3: docs/olcum/golden-zone-K3-B.md` |
@@ -177,7 +177,7 @@ tabloda "geçici" diyen her satır K3 raporu yazılınca kapanır.
 |---|---|---|---|
 | `bolge_sig` | float | 0.62 *(geçici)* | Bölgenin sığ ucu — düzeltmenin ilk geçerli temas seviyesi. Giriş burada olur. |
 | `bolge_derin` | float | 0.79 *(geçici)* | Bölgenin derin ucu — son geçerli giriş. Daha derin düzeltme bölgeyi geçersiz kılmaz, sadece kurulum "derin" sayılır. |
-| `tatli_nokta` | float | 0.705 *(geçici)* | ICT'nin "sweet spot"u. **Sinyal üretmez**, yalnızca payload'a yazılır ki K4 "derin girişler daha mı iyi" sorusunu ölçebilsin. |
+| `orta_esik` | float | 0.705 *(geçici)* | ICT'nin "sweet spot"u. **Sinyal üretmez**, yalnızca payload'a yazılır ki K4 "derin girişler daha mı iyi" sorusunu ölçebilsin. |
 | `pivot_sol` / `pivot_sag` | int | 3 / 3 | Salınım ucunun onaylanması için sağında/solunda gereken bar. Non-repaint'in temeli: bir uç sağındaki 3 bar kapanmadan BİLİNEMEZ. |
 | `yer_degistirme_atr` | float | 1.5 *(geçici)* | Bacağın asgari boyu, ATR katı. Gürültüyü yapı kırılımı sanmayı engeller. |
 | `atr_periyot` | int | 14 | Wilder ATR. TA'nın evrensel kısaltması; zaman dilimine göre ölçeklenmez. |
@@ -187,7 +187,7 @@ tabloda "geçici" diyen her satır K3 raporu yazılınca kapanır.
 | `zaman_bariyeri` | int | 40 *(geçici)* | K4'ün üç bariyerli ölçümünde zaman bariyeri. Takvimsel — ölçeklenir. |
 
 `__post_init__` üç şeyi reddeder: bölge sınırlarının ters ya da [0,1] dışı
-olması, tatlı noktanın bölgenin dışına düşmesi (ölçülemeyen bir sayı olurdu),
+olması, orta eşiknın bölgenin dışına düşmesi (ölçülemeyen bir sayı olurdu),
 pivot kolunun 1'den küçük olması.
 
 ### Durum makinesi
@@ -399,7 +399,7 @@ nasıl göründüğü yazılır.
 |---|---|
 | Referans görsellerin düzeni taklit edilmedi | İkisi de **anlamak için** verilmişti, kopyalamak için değil. Komposer K0'daki mekanik kuralı çiziyor. |
 | Çok zaman dilimli paneller ve el yazısı notlar üretilmedi | Referanslar eğitim amaçlı ekran görüntüleri; ürün yüzeyi değil. |
-| Merdivenin tamamı çizilmiyor | Bandın kenarları zaten 0.62 ve 0.79; ayrıca çizgi koymak dar bandın içinde üç çizgi = okunmaz yığın demekti. Çizilen: giriş, tatlı nokta, stop, hedef. |
+| Merdivenin tamamı çizilmiyor | Bandın kenarları zaten 0.62 ve 0.79; ayrıca çizgi koymak dar bandın içinde üç çizgi = okunmaz yığın demekti. Çizilen: giriş, orta eşik, stop, hedef. |
 
 ### Grafiğin taşıdığı verdikt
 

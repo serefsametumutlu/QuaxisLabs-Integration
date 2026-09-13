@@ -243,6 +243,20 @@ def test_toplu_r_ayni_barda_stopu_secer() -> None:
     assert r == pytest.approx(np.array([-1.0]))
 
 
+def test_is_penceresi_aramak_icin_acilabilir() -> None:
+    """Koşul taraması IS'te ARAR, OOS'ta doğrular. Arama penceresi açıkça
+    istenmedikçe kapalıdır: varsayılan `oos`."""
+    df = _rastgele_ohlc(tohum=9)
+    giris = float(df["close"].iloc[50])
+    kayit = [(_sinyal(df.index[50]), giris * 0.98, giris * 1.04)]
+    varsayilan = measure_r({"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1)
+    arama = measure_r(
+        {"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1, pencere="is"
+    )
+    assert varsayilan.n_trades == 0
+    assert arama.n_trades == 1
+
+
 def test_islemsiz_evren_olculmedi_doner() -> None:
     s = measure_r({}, {}, permutations=10)
     assert s.n_trades == 0

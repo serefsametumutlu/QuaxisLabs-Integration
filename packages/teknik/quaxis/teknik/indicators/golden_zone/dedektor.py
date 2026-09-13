@@ -70,6 +70,42 @@ def atr(df: pd.DataFrame, periyot: int) -> np.ndarray:
     return wilder.mean().to_numpy()
 
 
+def ema(kapanis: np.ndarray, periyot: int) -> np.ndarray:
+    """Üstel hareketli ortalama. Isınma dolmadan NaN."""
+    return pd.Series(kapanis).ewm(span=periyot, adjust=False, min_periods=periyot).mean().to_numpy()
+
+
+def rsi(kapanis: np.ndarray, periyot: int = 14) -> np.ndarray:
+    """Wilder RSI."""
+    fark = np.diff(kapanis, prepend=np.nan)
+    kazanc = pd.Series(np.where(fark > 0, fark, 0.0))
+    kayip = pd.Series(np.where(fark < 0, -fark, 0.0))
+    ag = kazanc.ewm(alpha=1.0 / periyot, adjust=False, min_periods=periyot).mean()
+    al_ = kayip.ewm(alpha=1.0 / periyot, adjust=False, min_periods=periyot).mean()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        rs = ag / al_
+    return (100.0 - 100.0 / (1.0 + rs)).to_numpy()
+
+
+@dataclass(frozen=True)
+class _Baglam:
+    """Sinyal barında ölçülen bağlam değerleri.
+
+    **Hiçbiri sinyali FİLTRELEMEZ.** Hepsi payload'a yazılır ve hangi
+    koşulun kenar EKLEDİĞİ `tools/kosul_taramasi.py` ile ölçülür. Koşulu
+    dedektöre gömmek, "hangi gösterge işe yarıyor" sorusunu ölçülemez hâle
+    getirirdi — bu stratejinin bütün mesele'si o soru.
+
+    Hepsi t barına kadarki veriden hesaplanır; ileriye bakış yok.
+    """
+
+    ema50: np.ndarray
+    ema200: np.ndarray
+    rsi14: np.ndarray
+    atr50: np.ndarray
+    hacim_ort: np.ndarray
+
+
 @dataclass(frozen=True)
 class _Pivot:
     i: int
@@ -171,6 +207,14 @@ class GoldenZone(BaseIndicator):
         yuksek, dusuk = df["high"].to_numpy(float), df["low"].to_numpy(float)
         kapanis = df["close"].to_numpy(float)
         a = atr(df, p.atr_periyot)
+        bag = _Baglam(
+            ema50=ema(kapanis, 50),
+            ema200=ema(kapanis, 200),
+            rsi14=rsi(kapanis, 14),
+            atr50=atr(df, 50),
+            hacim_ort=pd.Series(df["volume"].to_numpy(float))
+            .rolling(20, min_periods=20).mean().to_numpy(),
+        )
         tepeler = _pivotlar(yuksek, p.pivot_sol, p.pivot_sag, tepe=True)
         dipler = _pivotlar(dusuk, p.pivot_sol, p.pivot_sag, tepe=False)
 
@@ -184,7 +228,7 @@ class GoldenZone(BaseIndicator):
             for kur in list(canli):
                 sinyal = self._bolgeye_girdi_mi(kur, t, df, a)
                 if sinyal is not None:
-                    self._kaydet(sonuc, kur, sinyal, t, df, a)
+                    self._kaydet(sonuc, kur, sinyal, t, df, a, bag)
                     canli.remove(kur)
 
             yeni = self._kirilim_var_mi(t, tepeler, dipler, yuksek, dusuk, kapanis, a)
@@ -278,15 +322,74 @@ class GoldenZone(BaseIndicator):
             return sig
         return None
 
+    def _baglam(
+        self, kur: _Kurulum, t: int, df: pd.DataFrame, a: np.ndarray, bag: _Baglam
+    ) -> dict[str, Any]:
+        """Sinyal barında ölçülen bağlam. FİLTRE DEĞİL — ölçüm girdisi.
+
+        Her biri bir hipotez taşır ve hipotez adıyla birlikte yazılıdır:
+
+        * `ema50_uyum` / `ema200_uyum` — "trendle işlem yap". ICT'nin öznel
+          "daily bias"ının ölçülebilir karşılığı.
+        * `ema_egim_uyum` — seviye değil EĞİM: fiyat ortalamanın üstünde
+          olabilir ama ortalama düşüyor olabilir.
+        * `rsi14` — düzeltmenin tükenip tükenmediği.
+        * `hacim_orani` — yer değiştirme hacimle mi geldi? SMC'nin iddiası bu.
+        * `atr_rejim` — kısa vadeli oynaklık uzun vadeliye göre nerede.
+        * `bacak_atr` — bacağın ATR cinsinden boyu (eşik değil, DEĞER).
+        * `donus_bar` — kırılımdan bölgeye kaç barda dönüldü. Hızlı dönüş
+          güçlü sayılır; ölçelim.
+        * `derinlik` — bölgeye ne kadar derin girildi (0.62…1.0).
+        """
+        yon = 1.0 if kur.boga else -1.0
+        k = float(df["close"].iloc[t])
+        boy = abs(kur.capa0 - kur.capa100)
+        atr_t = float(a[t])
+
+        e50, e200 = bag.ema50[t], bag.ema200[t]
+        e50_onceki = bag.ema50[t - 5] if t >= 5 else np.nan
+        hacim = float(df["volume"].iloc[kur.bos_i])
+        hacim_ort = bag.hacim_ort[kur.bos_i]
+
+        # Fiyatın bölgeye ne kadar derin girdiği: barın uç noktası esas.
+        uc = float(df["low"].iloc[t]) if kur.boga else float(df["high"].iloc[t])
+        derinlik = abs(kur.capa0 - uc) / boy if boy > 0 else None
+
+        def uyum(deger: float) -> bool | None:
+            if np.isnan(deger):
+                return None
+            return bool((k - deger) * yon > 0)
+
+        return {
+            "ema50_uyum": uyum(e50),
+            "ema200_uyum": uyum(e200),
+            "ema_egim_uyum": (
+                None if np.isnan(e50) or np.isnan(e50_onceki)
+                else bool((e50 - e50_onceki) * yon > 0)
+            ),
+            "rsi14": _guvenli(bag.rsi14[t]),
+            "hacim_orani": (
+                None if hacim_ort is None or np.isnan(hacim_ort) or hacim_ort <= 0
+                else float(hacim / hacim_ort)
+            ),
+            "atr_rejim": (
+                None if np.isnan(bag.atr50[t]) or bag.atr50[t] <= 0
+                else float(atr_t / bag.atr50[t])
+            ),
+            "bacak_atr": None if atr_t <= 0 else float(boy / atr_t),
+            "donus_bar": int(t - kur.bos_i),
+            "derinlik": None if derinlik is None else float(derinlik),
+        }
+
     def _kaydet(
         self, sonuc: IndicatorResult, kur: _Kurulum, giris: float,
-        t: int, df: pd.DataFrame, a: np.ndarray,
+        t: int, df: pd.DataFrame, a: np.ndarray, bag: _Baglam,
     ) -> None:
         p = self.params
         boy = abs(kur.capa0 - kur.capa100)
         isaret = 1.0 if kur.boga else -1.0
         derin = kur.capa0 - boy * p.bolge_derin * isaret
-        tatli = kur.capa0 - boy * p.tatli_nokta * isaret
+        orta = kur.capa0 - boy * p.orta_esik * isaret
         stop = kur.capa100 - boy * p.stop_tamponu * isaret
         if p.hedef_modu == "yapisal":
             hedef = kur.capa0
@@ -319,7 +422,7 @@ class GoldenZone(BaseIndicator):
                     "capa0": float(kur.capa0),
                     "bolge_sig": float(giris),
                     "bolge_derin": float(derin),
-                    "tatli_nokta": float(tatli),
+                    "orta_esik": float(orta),
                     "zaman_bariyeri": int(p.zaman_bariyeri),
                     "bos_bar": df.index[kur.bos_i].isoformat(),
                     "kirilan_seviye": float(kur.kirilan),
@@ -333,6 +436,7 @@ class GoldenZone(BaseIndicator):
                         df, kur.bacak_bas_i, kur.bos_i, p.fvg_min_atr * float(a[t]), boga=kur.boga
                     ),
                     "order_block": _order_block(df, kur.bos_i, kur.bacak_bas_i, boga=kur.boga),
+                    **self._baglam(kur, t, df, a, bag),
                 },
             )
         )
@@ -350,7 +454,7 @@ class GoldenZone(BaseIndicator):
         # `start` boş bırakılırsa walk-forward karşılaştırması onları
         # "hep vardı" sayar ve sonradan doğan her seviye repaint görünür.
         sonuc.levels += [
-            Level(price=float(tatli), label=f"{p.tatli_nokta:.3f}", style="fib_sweet",
+            Level(price=float(orta), label=f"{p.orta_esik:.3f}", style="fib_orta",
                   start=tespit_t),
             Level(price=float(stop), label="stop", style="stop", start=tespit_t),
             Level(price=float(hedef), label="hedef", style="target", start=tespit_t),
@@ -371,6 +475,12 @@ META_R_KATI = IndicatorMeta(
     description="OTE bölgesi, hedef sabit 2R (derinlikten arındırılmış ölçüm)",
     supported_timeframes=META.supported_timeframes,
 )
+
+
+def _guvenli(x: float) -> float | None:
+    """NaN'ı None'a çevirir: ısınma dolmamış bir göstergeyi sayı gibi
+    raporlamak, olmayan bilgiyi varmış gibi göstermektir."""
+    return None if x is None or np.isnan(x) else float(x)
 
 
 def olustur(params: GoldenZoneParams | None = None) -> GoldenZone:

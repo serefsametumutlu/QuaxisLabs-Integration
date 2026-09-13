@@ -121,7 +121,7 @@ class OTESonucu:
     #: Yapı kırılımının olduğu bar ve kırılan salınım seviyesi.
     bos_t: int
     kirilan_seviye: float
-    #: Çizilecek fibo seviyeleri (giriş, tatlı nokta, stop, hedef).
+    #: Çizilecek fibo seviyeleri (giriş, orta eşik, stop, hedef).
     seviyeler: Sequence[FibSeviyesi]
     #: Bölgenin sığ ve derin ucu — oran olarak (0.62, 0.79).
     bolge: tuple[float, float]

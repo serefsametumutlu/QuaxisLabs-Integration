@@ -68,7 +68,7 @@ _CIKIS = {
 _SEVIYE_ADI = {
     0.0: "hedef",
     0.62: "giriş",
-    0.705: "tatlı nokta",
+    0.705: "orta eşik",
     1.0: "stop",
 }
 
@@ -123,7 +123,7 @@ def bestele(sonuc: OTESonucu, *, ornek_mi: bool = False) -> ChartSpec:
 
     # --- 4. karara değer seviyeler ---------------------------------------
     # Bandın kenarları ZATEN 0.62 ve 0.79; onları ayrıca çizgi yapmak dar
-    # bandın içine üç çizgi koymak olurdu. Çizilen: giriş, tatlı nokta,
+    # bandın içine üç çizgi koymak olurdu. Çizilen: giriş, orta eşik,
     # stop, hedef.
     for s in sonuc.seviyeler:
         if round(s.oran, 3) == round(bolge_derin, 3):
@@ -267,7 +267,7 @@ def _n(c: Capa) -> Nokta:
 
 
 def _seviye_etiketi(oran: float, fiyat: float, ad: str) -> str:
-    """`0.705 (tatlı nokta): 12.34` biçimi. Tam sayı oranlar tek ondalık
+    """`0.705 (orta eşik): 12.34` biçimi. Tam sayı oranlar tek ondalık
     (`0.0`, `1.0`), diğerleri üç — merdiven sütun gibi hizalansın."""
     bas = f"{oran:.1f}" if oran in (0.0, 1.0) else f"{oran:.3f}"
     etiket = ad or _SEVIYE_ADI.get(round(oran, 3), "")

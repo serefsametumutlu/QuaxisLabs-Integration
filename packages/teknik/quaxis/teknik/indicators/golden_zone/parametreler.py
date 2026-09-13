@@ -30,7 +30,7 @@ class GoldenZoneParams(BaseParams):
     bolge_derin: float = 0.79
     #: ICT'nin "sweet spot"u. Sinyal ÜRETMEZ; sadece payload'a yazılır ki
     #: K4 "derin girişler daha mı iyi" sorusunu ölçebilsin. GEÇİCİ.
-    tatli_nokta: float = 0.705
+    orta_esik: float = 0.705
 
     #: Pivot onayı: bir salınım ucunun sağında/solunda kaç bar. Bir pivot
     #: ancak sağındaki `pivot_sag` bar kapandığında BİLİNEBİLİR — sinyalin
@@ -88,9 +88,9 @@ class GoldenZoneParams(BaseParams):
                 f"bölge 0 ile 1 arasında ve sığ<derin olmalı: "
                 f"sig={self.bolge_sig}, derin={self.bolge_derin}"
             )
-        if not self.bolge_sig <= self.tatli_nokta <= self.bolge_derin:
+        if not self.bolge_sig <= self.orta_esik <= self.bolge_derin:
             raise ValueError(
-                f"tatlı nokta ({self.tatli_nokta}) bölgenin dışında "
+                f"orta eşik ({self.orta_esik}) bölgenin dışında "
                 f"[{self.bolge_sig}, {self.bolge_derin}] — ölçülemeyen bir sayı"
             )
         if self.pivot_sol < 1 or self.pivot_sag < 1:

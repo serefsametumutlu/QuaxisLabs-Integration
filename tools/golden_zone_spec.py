@@ -74,7 +74,7 @@ def sonuca_cevir(
         FibSeviyesi(oran=0.0, fiyat=capa0, ad="hedef"),
         FibSeviyesi(oran=p.bolge_sig, fiyat=capa0 - boy * p.bolge_sig * isaret, ad="giriş"),
         FibSeviyesi(
-            oran=p.tatli_nokta, fiyat=capa0 - boy * p.tatli_nokta * isaret, ad="tatlı nokta"
+            oran=p.orta_esik, fiyat=capa0 - boy * p.orta_esik * isaret, ad="orta eşik"
         ),
         FibSeviyesi(oran=p.bolge_derin, fiyat=capa0 - boy * p.bolge_derin * isaret, ad=""),
         FibSeviyesi(oran=1.0, fiyat=float(yuk["stop"]), ad="stop"),

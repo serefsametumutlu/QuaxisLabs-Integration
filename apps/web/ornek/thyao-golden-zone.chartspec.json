@@ -1045,7 +1045,7 @@
     {
       "rol": "fib_705",
       "fiyat": 302.39375,
-      "etiket": "0.705 (tatlı nokta): 302.39",
+      "etiket": "0.705 (orta eşik): 302.39",
       "panel": "fiyat",
       "baslangic": 1776373200,
       "bitis": 1779310800,

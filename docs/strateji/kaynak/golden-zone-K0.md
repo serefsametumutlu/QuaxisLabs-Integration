@@ -182,7 +182,7 @@ yanında **her zaman** işlem sayısı durur.
 |---|---|---|---|
 | Bölge sığ ucu | 0.62 | ICT OTE mekaniği | `K3:` ölçümünden türetilecek |
 | Bölge derin ucu | 0.79 | ICT OTE mekaniği | `K3:` ölçümünden türetilecek |
-| Sweet spot | 0.705 | ICT OTE mekaniği | `K3:` ölçümünden türetilecek |
+| Orta eşik (0.705) | 0.705 | ICT OTE mekaniği | `K3:` ölçümünden türetilecek |
 | Yer değiştirme eşiği (asgari bacak) | ölçülecek | — | `K3:` |
 | Süpürme toleransı | ölçülecek | — | `K3:` |
 | FVG asgari boşluğu | ölçülecek | — | `K3:` |
