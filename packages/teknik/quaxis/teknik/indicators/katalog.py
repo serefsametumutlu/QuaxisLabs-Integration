@@ -17,6 +17,10 @@ from quaxis.teknik.indicators.golden_zone import META as GOLDEN_ZONE_META
 from quaxis.teknik.indicators.golden_zone import olustur as golden_zone_olustur
 from quaxis.teknik.indicators.golden_zone import olustur_r_kati as golden_zone_r_kati
 from quaxis.teknik.indicators.golden_zone.dedektor import META_R_KATI
+from quaxis.teknik.indicators.kesitsel_momentum import META as KM_META
+from quaxis.teknik.indicators.kesitsel_momentum import META_ATLAMALI as KM_META_12_1
+from quaxis.teknik.indicators.kesitsel_momentum import olustur as km_olustur
+from quaxis.teknik.indicators.kesitsel_momentum import olustur_atlamali as km_olustur_12_1
 
 KATALOG = Catalog.of(
     [
@@ -34,6 +38,19 @@ KATALOG = Catalog.of(
             category=META_R_KATI.category,
             factory=golden_zone_r_kati,
             supported_timeframes=META_R_KATI.supported_timeframes,
+        ),
+        # Evren-geneli: motor sembol başına iş AÇMAZ, evrenin tamamını tek
+        # işte verir. Sıralama tanım gereği böyle çalışır.
+        IndicatorSpec(
+            name=KM_META.name, category=KM_META.category, factory=km_olustur,
+            needs_universe=True, supported_timeframes=KM_META.supported_timeframes,
+        ),
+        # "12-1" varyantı: son ay atlanir. Hangisinin dogru oldugu K3'te
+        # olculecek, o yuzden ikisi de AYRI kunye.
+        IndicatorSpec(
+            name=KM_META_12_1.name, category=KM_META_12_1.category,
+            factory=km_olustur_12_1, needs_universe=True,
+            supported_timeframes=KM_META_12_1.supported_timeframes,
         ),
     ]
 )

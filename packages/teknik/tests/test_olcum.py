@@ -187,3 +187,42 @@ def test_hatali_sembol_sifir_adaydan_ayri_sayilir() -> None:
     sonuc = calibrate("x", "1D", {"A": 3, "B": 0}, error_symbols=5)
     assert sonuc.error_symbols == 5
     assert sonuc.zero_candidate_symbols == 1
+
+
+# ------------------------------------------------------- işlem maliyeti
+
+
+def test_maliyet_getiriden_dusulur() -> None:
+    """`bariyer.py` ile AYNI ders: maliyetsiz ölçüm her kenarı olduğundan
+    büyük gösterir."""
+    from quaxis.teknik.olcum.ileri_getiri import maliyet_dus
+
+    assert maliyet_dus(0.10, 0.0, 0.0) == pytest.approx(0.10)
+    # %0.1 komisyon + %0.1 kayma => gidiş-dönüş yaklaşık %0.4
+    net = maliyet_dus(0.10, 0.001, 0.001)
+    assert net < 0.10
+    assert net == pytest.approx(1.10 * (1 - 0.002) / (1 + 0.002) - 1)
+
+
+def test_maliyet_baza_da_uygulanir() -> None:
+    """Maliyeti yalnız sinyale uygulayıp baza uygulamamak, ölçümü
+    stratejinin ALEYHİNE saptırırdı."""
+    seri, sinyaller = {}, {}
+    r = np.random.default_rng(11)
+    for i in range(20):
+        s = _seri(tohum=300 + i)
+        seri[f"S{i}"] = s
+        oos = int(len(s) * 0.7)
+        barlar = r.integers(oos, len(s) - UFUK, size=5)
+        sinyaller[f"S{i}"] = [_sinyal(s.index[int(b)]) for b in barlar]
+
+    bedava = measure(seri, sinyaller, horizon=UFUK, permutations=TUR, seed=4,
+                     komisyon=0.0, kayma=0.0)
+    pahali = measure(seri, sinyaller, horizon=UFUK, permutations=TUR, seed=4,
+                     komisyon=0.002, kayma=0.002)
+    ham_b = np.mean([m.signal_return for m in bedava.measurements])
+    ham_p = np.mean([m.signal_return for m in pahali.measurements])
+    baz_b = np.mean([m.baseline_return for m in bedava.measurements])
+    baz_p = np.mean([m.baseline_return for m in pahali.measurements])
+    assert ham_p < ham_b, "sinyal getirisi maliyetle düşmeli"
+    assert baz_p < baz_b, "BAZ da maliyetle düşmeli"

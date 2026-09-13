@@ -42,6 +42,27 @@ VARSAYILAN_TUR = 2000
 #: IS/OOS bölme noktası — serinin ilk %70'i içeride, son %30'u dışarıda.
 VARSAYILAN_OOS_ORANI = 0.30
 
+#: Taraf başına komisyon ve kayma (fiyatın oranı) — `bariyer.py` ile AYNI
+#: varsayım. İki ölçüm farklı maliyet kullanırsa sonuçları kıyaslanamaz.
+#:
+#: Bu alanın eklenmesinin sebebi ölçülmüş bir hata: maliyetsiz ölçüm
+#: Golden Zone'da bulunan kenarın TAMAMI kadar bir fark yaratıyordu.
+VARSAYILAN_KOMISYON = 0.0005
+VARSAYILAN_KAYMA = 0.0005
+
+
+def maliyet_dus(getiri: np.ndarray | float, komisyon: float, kayma: float):
+    """Brüt getiriden gidiş-dönüş maliyeti düşer.
+
+    Giriş de çıkış da piyasa emri sayılır (momentum kurulumunda giriş,
+    sıralama barının KAPANIŞINDADIR — limit emir değil), dolayısıyla iki
+    tarafta da komisyon + kayma vardır:
+
+        net = (1 + brüt) × (1 − c) / (1 + c) − 1
+    """
+    c = komisyon + kayma
+    return (1.0 + getiri) * (1.0 - c) / (1.0 + c) - 1.0
+
 
 @dataclass(frozen=True)
 class SymbolMeasurement:
@@ -121,6 +142,8 @@ def measure_symbol(
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
     permutations: int = VARSAYILAN_TUR,
     rng: np.random.Generator | None = None,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> SymbolMeasurement | None:
     """Bir sembolün sinyal getirisini ve adil bazını ölçer.
 
@@ -143,7 +166,7 @@ def measure_symbol(
         if g is None:
             continue
         yon = _direction_sign(s.direction)
-        getiriler.append(g * yon)
+        getiriler.append(maliyet_dus(g * yon, komisyon, kayma))
         yonler.append(yon)
 
     if not getiriler:
@@ -160,7 +183,11 @@ def measure_symbol(
     kapanis = close.to_numpy(dtype=float)
     ileri = kapanis[secilebilir + horizon] / kapanis[secilebilir] - 1.0
     yon_dizi = np.asarray(yonler)
-    ortalamalar = _permutasyon_ortalamalari(ileri, yon_dizi, permutations, r)
+    # Maliyet BAZA DA uygulanır; yalnız sinyale uygulamak ölçümü
+    # stratejinin aleyhine saptırırdı.
+    ortalamalar = _permutasyon_ortalamalari(
+        ileri, yon_dizi, permutations, r, komisyon, kayma
+    )
 
     return SymbolMeasurement(
         symbol=symbol,
@@ -178,6 +205,8 @@ def measure(
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> ForwardReturnResult:
     """Evren geneli K4 ölçümü.
 
@@ -195,11 +224,16 @@ def measure(
         olcum = measure_symbol(
             symbol, close, sig,
             horizon=horizon, oos_ratio=oos_ratio, permutations=permutations, rng=r,
+            komisyon=komisyon, kayma=kayma,
         )
         if olcum is None:
             continue
         olcumler.append(olcum)
-        bos_daginim.append(_null_distribution(close, sig, horizon, oos_ratio, permutations, r))
+        bos_daginim.append(
+            _null_distribution(
+                close, sig, horizon, oos_ratio, permutations, r, komisyon, kayma
+            )
+        )
 
     if not olcumler:
         return ForwardReturnResult(
@@ -235,6 +269,8 @@ def _null_distribution(
     oos_ratio: float,
     permutations: int,
     r: np.random.Generator,
+    komisyon: float = VARSAYILAN_KOMISYON,
+    kayma: float = VARSAYILAN_KAYMA,
 ) -> np.ndarray:
     """Bir sembolün boş dağılımı: rastgele barlardan sembol ortalamaları."""
     oos_bas = _oos_start(close, oos_ratio)
@@ -252,11 +288,14 @@ def _null_distribution(
 
     kapanis = close.to_numpy(dtype=float)
     ileri = kapanis[secilebilir + horizon] / kapanis[secilebilir] - 1.0
-    return _permutasyon_ortalamalari(ileri, np.asarray(yonler), permutations, r)
+    return _permutasyon_ortalamalari(
+        ileri, np.asarray(yonler), permutations, r, komisyon, kayma
+    )
 
 
 def _permutasyon_ortalamalari(
-    ileri: np.ndarray, yon: np.ndarray, permutations: int, r: np.random.Generator
+    ileri: np.ndarray, yon: np.ndarray, permutations: int, r: np.random.Generator,
+    komisyon: float = 0.0, kayma: float = 0.0,
 ) -> np.ndarray:
     """Tüm turları TEK seferde çeker: (tur, sinyal) matrisi → tur ortalamaları.
 
@@ -266,7 +305,7 @@ def _permutasyon_ortalamalari(
     toplu yapılıyor.
     """
     sec = r.integers(0, len(ileri), size=(permutations, len(yon)))
-    return (ileri[sec] * yon).mean(axis=1)
+    return maliyet_dus(ileri[sec] * yon, komisyon, kayma).mean(axis=1)
 
 
 def bh_fdr(p_values: dict[str, float], q: float = 0.05) -> dict[str, bool]:
