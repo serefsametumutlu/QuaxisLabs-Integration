@@ -24,6 +24,7 @@ export const SEVIYE_ROLLERI = [
   "fib_382",
   "fib_500",
   "fib_618",
+  "fib_705",
   "fib_786",
   "fib_1",
   "fib_1272",
@@ -39,7 +40,7 @@ export type AlanRol = (typeof ALAN_ROLLERI)[number];
 export const CIZGI_ROLLERI = ["projeksiyon", "trend", "baglanti"] as const;
 export type CizgiRol = (typeof CIZGI_ROLLERI)[number];
 
-export const ISARET_ROLLERI = ["kose", "temas"] as const;
+export const ISARET_ROLLERI = ["kose", "temas", "cikis_kazanc", "cikis_kayip"] as const;
 export type IsaretRol = (typeof ISARET_ROLLERI)[number];
 
 export const ETIKET_ROLLERI = ["swing_hh", "swing_hl", "swing_lh", "swing_ll", "not"] as const;
@@ -65,6 +66,8 @@ export type Kunye = {
   strateji_adi?: string;
   yon?: Yon;
   durum?: string;
+  /** K4 verdikti. "Kurulum oluştu" ile "kenar kanıtlandı" ayrı şeylerdir. */
+  verdikt?: string;
   /** Örnek veri mi? Arayüz bunu kullanıcıya AYNEN gösterir. */
   ornek_mi?: boolean;
 };
@@ -94,6 +97,7 @@ export type Seviye = {
   etiket: string;
   panel?: string;
   baslangic?: number;
+  bitis?: number;
 };
 export type Alan = { tur: "alan"; rol: AlanRol; noktalar: Nokta[]; panel?: string; etiket?: string };
 export type Bant = {
@@ -104,6 +108,7 @@ export type Bant = {
   panel?: string;
   etiket?: string;
   baslangic?: number;
+  bitis?: number;
 };
 export type Cizgi = { tur: "cizgi"; rol: CizgiRol; noktalar: Nokta[]; panel?: string };
 export type Isaret = {

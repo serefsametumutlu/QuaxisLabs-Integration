@@ -12,6 +12,19 @@
  */
 
 import ham from "@/ornek/thyao-swing-fib-abcd.chartspec.json";
+import hamGz from "@/ornek/thyao-golden-zone.chartspec.json";
 import { dogrula, type ChartSpec } from "./chartspec";
 
 export const THYAO_SWING_FIB_ABCD: ChartSpec = dogrula(ham as unknown);
+
+/**
+ * Golden Zone (ICT OTE) — **gerçek** veriden üretilmiş spec.
+ *
+ *   tools/golden_zone_spec.py  →  apps/web/ornek/thyao-golden-zone.chartspec.json
+ *
+ * `kunye.ornek_mi` FALSE: bu gerçek bir THYAO kurulumu, uydurulmuş bir
+ * fikstür değil. `kunye.verdikt` K4'ün çıktısını taşır ve arayüz onu
+ * kullanıcıya AYNEN gösterir — "kurulum oluştu" ile "kenar kanıtlandı"
+ * birbirine karışmasın.
+ */
+export const THYAO_GOLDEN_ZONE: ChartSpec = dogrula(hamGz as unknown);

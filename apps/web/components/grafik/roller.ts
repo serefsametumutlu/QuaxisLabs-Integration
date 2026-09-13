@@ -30,6 +30,10 @@ const SEVIYE: Record<SeviyeRol, SeviyeStil> = {
   fib_500: { token: "--fib-500", kalinlik: 1, kesik: "6 4", opaklik: 0.72, vurgulu: false },
   // 0.618 aksanın kendisidir: altın oran zaten "karara değer" seviye.
   fib_618: { token: "--accent", kalinlik: 1.4, kesik: "6 4", opaklik: 0.95, vurgulu: true },
+  // ICT "sweet spot"u. 0.618 zaten aksanın kendisi; bunu da kalın aksan
+  // yapmak dar bandın içinde iki kalın çizgi = leke demek olurdu. İnce
+  // noktalı: bandın İÇİNDE bir nişangâh gibi okunur.
+  fib_705: { token: "--accent", kalinlik: 1, kesik: "2 4", opaklik: 0.8, vurgulu: true },
   fib_786: { token: "--fib-786", kalinlik: 1.4, kesik: "6 4", opaklik: 0.95, vurgulu: true },
   fib_1: { token: "--fib-1", kalinlik: 1, kesik: "6 4", opaklik: 0.72, vurgulu: false },
   // D hedefi "karara değer" bir seviye: seyrek modda da gösterilir.
@@ -63,6 +67,9 @@ export type IsaretStil = { token: string; yaricap: number; hap: boolean };
 const ISARET: Record<IsaretRol, IsaretStil> = {
   kose: { token: "--accent", yaricap: 3.4, hap: true },
   temas: { token: "--accent", yaricap: 3, hap: false },
+  // Sonuç yön bilgisidir: hedefe ulaşma ile stop olma aynı renge boyanamaz.
+  cikis_kazanc: { token: "--up", yaricap: 3.6, hap: false },
+  cikis_kayip: { token: "--down", yaricap: 3.6, hap: false },
 };
 
 const ETIKET: Record<EtiketRol, string> = {

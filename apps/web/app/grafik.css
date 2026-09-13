@@ -14,19 +14,48 @@
    konumlu çocuk padding kutusunu değil kenarlık kutusunu doldurur, bu yüzden
    son barlar etiket oluğunun altında kalıp fibo etiketleriyle çakışıyordu
    (f4i3 bulgusu). Sağ kenar doğrudan oluk kadar içeri alınır. */
-.qgrafik-tuval { position: absolute; top: 0; bottom: 0; left: 0; right: var(--oluk, 0px); }
+/* `isolation: isolate` ZORUNLU. Lightweight Charts kendi tuvallerine
+   `z-index: 1` ve `2` veriyor; bu sarmal bir yığınlama bağlamı KURMAZSA o
+   sayılar dışarı taşar ve mumlar bizim SVG katmanımızın ÜSTÜNE çıkar.
+   Kusur Faz 4'ten beri vardı ama görünmüyordu: o güne kadar çizilen her şey
+   (fibo etiketleri, köşe rozetleri) mumların olmadığı boşluklara düşüyordu.
+   K5'te çıkış işareti mumun üstüne düşen ilk şey oldu ve "stop ✕ 288.75"
+   metnini mum gövdesi kesti. */
+.qgrafik-tuval {
+  position: absolute; top: 0; bottom: 0; left: 0; right: var(--oluk, 0px);
+  z-index: 0; isolation: isolate;
+}
 .qgrafik-tuval > div { width: 100%; height: 100%; }
 
 /* Overlay tıklamayı yutmaz: zoom/pan ve crosshair tuvalin işi. */
 .qgrafik-overlay {
   position: absolute; inset: 0; pointer-events: none;
   display: block; overflow: visible;
+  z-index: 1;
 }
 .qgrafik-overlay text { user-select: none; }
 
 .qgrafik-hud {
   position: absolute; left: 12px; top: 10px; pointer-events: none;
+  z-index: 2;
   font-size: 11.5px; line-height: 1.75; color: var(--text);
+}
+/* HUD satırları levhanın ÜSTÜNDE yüzer ve er geç bir fibo çizgisine denk
+   gelir: 0.0 seviyesinin noktalı çizgisi "…0.62–0.79 bölgesi…" yazısının
+   içinden geçiyordu (K5 i7 bulgusu). Metnin arkasına levhanın kendi zemini
+   konur — gölge değil, dolgu. Satır içi blok, çünkü zemin metin kadar
+   olmalı, satır kadar değil. */
+.qgrafik-hud .l1,
+.qgrafik-hud .l2 {
+  /* `fit-content`: zemin METİN kadar olur ama satır kendi satırında kalır.
+     `inline-block` denendi ve iki satırı yan yana getirip dar levhada sağ
+     oluğa taşırdı (K5 i8, 768 bulgusu). */
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 5px;
+  margin-left: -5px;
+  background: var(--surface);
 }
 .qgrafik-hud .l1 { color: var(--text); }
 .qgrafik-hud .l2 { color: var(--text-2); font-family: var(--f-mono); }

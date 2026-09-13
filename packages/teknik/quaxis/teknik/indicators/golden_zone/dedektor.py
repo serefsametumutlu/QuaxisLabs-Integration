@@ -137,6 +137,14 @@ class _Kurulum:
     capa0: float
     capa0_i: int
     supurme: bool
+    #: Kırılan salınım seviyesi. Grafikte "BOS" çizgisi BUNU gösterir;
+    #: kırılım barının kapanışını göstermek yanlış sayı yazmak olurdu.
+    kirilan: float
+    #: Süpürmenin gerçekleştiği bar ve wick ucu. Süpürme yoksa None —
+    #: %100 çıpasıyla aynı noktaya ikinci bir işaret koymak, grafikte
+    #: okunmaz bir yığın üretiyordu.
+    supurme_i: int | None
+    supurme_fiyat: float | None
 
 
 class GoldenZone(BaseIndicator):
@@ -244,7 +252,12 @@ class GoldenZone(BaseIndicator):
                     or (not boga and y[koken.i] > onceki_uc.fiyat and k[koken.i] < onceki_uc.fiyat)
                 )
             )
-            return _Kurulum(boga, t, koken.i, capa100, capa0, capa0_i, supurme)
+            return _Kurulum(
+                boga, t, koken.i, capa100, capa0, capa0_i, supurme,
+                kirilan=uc.fiyat,
+                supurme_i=koken.i if supurme else None,
+                supurme_fiyat=float(d[koken.i] if boga else y[koken.i]) if supurme else None,
+            )
         return None
 
     def _bolgeye_girdi_mi(
@@ -309,8 +322,13 @@ class GoldenZone(BaseIndicator):
                     "tatli_nokta": float(tatli),
                     "zaman_bariyeri": int(p.zaman_bariyeri),
                     "bos_bar": df.index[kur.bos_i].isoformat(),
+                    "kirilan_seviye": float(kur.kirilan),
                     # --- katman bayrakları: FİLTRE DEĞİL, ÖLÇÜM GİRDİSİ ---
                     "supurme": kur.supurme,
+                    "supurme_bar": (
+                        df.index[kur.supurme_i].isoformat() if kur.supurme_i is not None else None
+                    ),
+                    "supurme_fiyat": kur.supurme_fiyat,
                     "fvg": _fvg_var(
                         df, kur.bacak_bas_i, kur.bos_i, p.fvg_min_atr * float(a[t]), boga=kur.boga
                     ),

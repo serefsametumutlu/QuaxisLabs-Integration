@@ -127,6 +127,10 @@ class Seviye:
     panel: str = "fiyat"
     #: Seviyenin başladığı bar; None ise levhanın soluna kadar uzanır.
     baslangic: int | None = None
+    #: Seviyenin BİTTİĞİ bar; None ise levhanın sağına kadar uzanır.
+    #: Sonuçlanmış bir kurulumun seviyelerini sağa uzatmak, artık geçerli
+    #: olmayan bir bölgeyi hâlâ varmış gibi göstermektir (K5 i2'de görüldü).
+    bitis: int | None = None
     tur: Literal["seviye"] = "seviye"
 
 
@@ -151,6 +155,8 @@ class Bant:
     panel: str = "fiyat"
     etiket: str = ""
     baslangic: int | None = None
+    #: Bandın BİTTİĞİ bar; None ise levhanın sağına kadar uzanır.
+    bitis: int | None = None
     tur: Literal["bant"] = "bant"
 
 
@@ -209,6 +215,11 @@ class Kunye:
     strateji_adi: str
     yon: Yon | None = None
     durum: str = ""
+    #: K4'ün verdikti. Grafiğin üstünde DURUR çünkü "bu kurulum oluştu" ile
+    #: "bu stratejinin kenar ürettiği kanıtlandı" ayrı şeylerdir ve ikincisi
+    #: gösterilmezse birincisi ikincisi sanılır. Boş = henüz ölçülmedi.
+    #: SÜRÜM 1.0'da kalır: alan isteğe bağlı ve eklemeli, eski spec'ler geçerli.
+    verdikt: str = ""
     #: Veri gerçek mi örnek mi — arayüz bunu kullanıcıya AYNEN gösterir.
     ornek_mi: bool = False
 

@@ -62,14 +62,29 @@ function el<K extends keyof SVGElementTagNameMap>(
  * gerektiğinden rect sonradan metnin önüne eklenir.
  */
 function zeminEkle(svg: SVGSVGElement, t: SVGTextElement, c: Cerceve, pay = 3): void {
-  const b = t.getBBox();
-  if (!b.width) return;
+  let { x, y, width, height } = t.getBBox();
+  if (!width) {
+    // `getBBox()` yerleşim yapılmamış/gizli bir ağaçta 0 döner ve zemin
+    // SESSİZCE çizilmez — çıkış etiketi mumların üstünde okunmaz kalıyordu
+    // (K5 i4 bulgusu). Metin monospace olduğu için ölçüyü kestirmek
+    // yeterince kesin: karakter genişliği punto × 0.6.
+    const n = (t.textContent ?? "").length;
+    if (!n) return;
+    const punto = Number(t.getAttribute("font-size") ?? 11);
+    width = n * punto * 0.6;
+    height = punto * 1.25;
+    const ax = Number(t.getAttribute("x") ?? 0);
+    const ay = Number(t.getAttribute("y") ?? 0);
+    const hiza = t.getAttribute("text-anchor");
+    x = hiza === "middle" ? ax - width / 2 : hiza === "end" ? ax - width : ax;
+    y = ay - punto;
+  }
   svg.insertBefore(
     el("rect", {
-      x: b.x - pay,
-      y: b.y - 1,
-      width: b.width + pay * 2,
-      height: b.height + 2,
+      x: x - pay,
+      y: y - 1,
+      width: width + pay * 2,
+      height: height + 2,
       fill: c.renk("--surface"),
       opacity: 0.9,
     }),
@@ -112,11 +127,14 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
         const y2 = c.y(k.alt);
         if (y1 == null || y2 == null) break;
         const x0 = k.baslangic != null ? (c.x(k.baslangic) ?? 0) : 0;
+        // Sonuçlanmış kurulumun bandı sağa uzamaz: artık geçerli olmayan
+        // bir bölgeyi hâlâ varmış gibi göstermek olurdu.
+        const x1 = k.bitis != null ? (c.x(k.bitis) ?? sag) : sag;
         svg.appendChild(
           el("rect", {
             x: x0,
             y: Math.min(y1, y2),
-            width: Math.max(0, sag - x0),
+            width: Math.max(0, x1 - x0),
             height: Math.abs(y2 - y1),
             fill: c.renk(s.token),
             opacity: s.dolgu,
@@ -169,10 +187,29 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
         const y = c.y(k.fiyat);
         if (y == null) break;
         const x0 = k.baslangic != null ? (c.x(k.baslangic) ?? 0) : 0;
+        const xs = k.bitis != null ? (c.x(k.bitis) ?? sag + 4) : sag + 4;
+        // Seviye bittikten SONRA çok soluk devam eder. Tamamen kesilirse
+        // sağ oluktaki etiket neye ait olduğu belirsiz kalır; tam opak
+        // devam ederse artık geçerli olmayan bir seviye hâlâ aktif görünür
+        // (K5 i3 bulgusu). Hayalet uç ikisinin arasını tutar.
+        if (k.bitis != null && xs < sag) {
+          svg.appendChild(
+            el("line", {
+              x1: xs,
+              x2: sag + 4,
+              y1: y,
+              y2: y,
+              stroke: c.renk(s.token),
+              "stroke-width": s.kalinlik,
+              "stroke-dasharray": s.kesik,
+              opacity: s.opaklik * 0.22,
+            }),
+          );
+        }
         svg.appendChild(
           el("line", {
             x1: x0,
-            x2: sag + 4,
+            x2: xs,
             y1: y,
             y2: y,
             stroke: c.renk(s.token),
@@ -223,6 +260,28 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
             "stroke-width": 1.4,
           }),
         );
+        // Metni yalnız `hap` rollerinde çizmek, metin TAŞIYAN bir işaretin
+        // metnini sessizce düşürüyordu: çıkış işareti ("stop ✕") 3 piksellik
+        // görünmez bir noktaya iniyordu (K5 i3 bulgusu). Hapsız roller de
+        // yazar — zemini `zeminEkle` ile, mumların üstünde okunsun diye.
+        if (!s.hap && k.metin) {
+          const dy = k.yerlesim === "alt" ? 15 : -13;
+          const t = el(
+            "text",
+            {
+              x,
+              y: y + dy,
+              fill: token,
+              "font-family": mono,
+              "font-size": 11,
+              "font-weight": 500,
+              "text-anchor": "middle",
+            },
+            k.metin,
+          );
+          svg.appendChild(t);
+          zeminEkle(svg, t, c);
+        }
         if (s.hap && k.metin) {
           const dy = k.yerlesim === "alt" ? 16 : -16;
           svg.appendChild(

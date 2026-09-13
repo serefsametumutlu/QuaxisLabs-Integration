@@ -40,6 +40,9 @@ class SeviyeRol(_Rol):
     FIB_382 = "fib_382"
     FIB_500 = "fib_500"
     FIB_618 = "fib_618"
+    #: ICT'nin "sweet spot"u — 0.62 ile 0.79'un ortası (0.705). Golden Zone'da
+    #: karara değer seviye budur; klasik fibo merdiveninde karşılığı yok.
+    FIB_705 = "fib_705"
     FIB_786 = "fib_786"
     FIB_1 = "fib_1"
     FIB_1272 = "fib_1272"
@@ -71,6 +74,10 @@ class IsaretRol(_Rol):
 
     KOSE = "kose"
     TEMAS = "temas"
+    #: Kurulumun sonucu. Aksan-nötr çizmek, "hedefe ulaştı" ile "stop oldu"yu
+    #: aynı renge boyamak olurdu — sonuç YÖN bilgisidir.
+    CIKIS_KAZANC = "cikis_kazanc"
+    CIKIS_KAYIP = "cikis_kayip"
 
 
 class EtiketRol(_Rol):
@@ -106,7 +113,12 @@ FIB_ROL: dict[float, SeviyeRol] = {
     0.382: SeviyeRol.FIB_382,
     0.5: SeviyeRol.FIB_500,
     0.618: SeviyeRol.FIB_618,
+    # ICT 0.62 ve 0.79 yazar; bunlar klasik 0.618 ve 0.786'nın YUVARLANMIŞ
+    # hâlidir, ayrı seviyeler değil. Aynı görsel ağırlığı taşırlar.
+    0.62: SeviyeRol.FIB_618,
+    0.705: SeviyeRol.FIB_705,
     0.786: SeviyeRol.FIB_786,
+    0.79: SeviyeRol.FIB_786,
     1.0: SeviyeRol.FIB_1,
     1.272: SeviyeRol.FIB_1272,
     1.618: SeviyeRol.FIB_1618,

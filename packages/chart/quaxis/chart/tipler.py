@@ -14,8 +14,8 @@ komposerin sözleşmesini sabitler ve örnek/fikstür verisiyle çalışır.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Literal
 
 from .roller import Yon
@@ -81,5 +81,75 @@ class FibDuzeltmeSonucu:
                 return p
         raise ValueError(
             f"'{etiket}' pivotu sonuçta yok. Komposer eksik bir sonuçtan grafik "
+            f"uyduramaz — gösterge onu üretmediyse çizilmez."
+        )
+
+
+@dataclass(frozen=True)
+class Capa:
+    """OTE fibonacci çıpası.
+
+    `t` çıpanın kendi barı, `onay_t` çıpanın BİLİNEBİLİR olduğu bar. İkisi
+    farklıdır ve grafikte `onay_t` kullanılır — non-repaint sözleşmesinin
+    çizim tarafındaki karşılığı budur.
+    """
+
+    t: int
+    fiyat: float
+    onay_t: int
+    #: "%100" (bacağın dibi/stop tarafı) ya da "%0" (bacağın ucu/hedef tarafı).
+    etiket: str
+
+
+@dataclass(frozen=True)
+class OTESonucu:
+    """Golden Zone (ICT OTE) göstergesinin tipli sonucu.
+
+    Harmonik formasyondan farkı: beş köşe yok, **tek bir yer değiştirme
+    bacağı** ve onun düzeltme bölgesi var. Bu yüzden kendi tipi ve kendi
+    komposeri var — `FibDuzeltmeSonucu`'nu zorlamak iki ayrı stratejiyi aynı
+    torbaya koymak olurdu.
+    """
+
+    sembol: str
+    ad: str
+    zaman_dilimi: str
+    barlar: Sequence[Bar]
+    #: Bacağın iki ucu: %100 (dip/stop tarafı) ve %0 (uç/hedef tarafı).
+    capa100: Capa
+    capa0: Capa
+    #: Yapı kırılımının olduğu bar ve kırılan salınım seviyesi.
+    bos_t: int
+    kirilan_seviye: float
+    #: Çizilecek fibo seviyeleri (giriş, tatlı nokta, stop, hedef).
+    seviyeler: Sequence[FibSeviyesi]
+    #: Bölgenin sığ ve derin ucu — oran olarak (0.62, 0.79).
+    bolge: tuple[float, float]
+    #: Fiyatın bölgeye ilk girdiği bar: sinyalin `detected_at`'i.
+    giris_t: int
+    giris_fiyat: float
+    yon: Yon
+    durum: str
+    #: K4 verdikti. Grafiğin künyesine AYNEN geçer.
+    verdikt: str = ""
+    #: Katman bayrakları — FİLTRE değil, ölçüm girdisi (bkz. dedektör).
+    teyitler: Mapping[str, bool] = field(default_factory=dict)
+    #: Süpürme varsa onun çıpası; yoksa kurulum süpürmesiz demektir.
+    supurme: Capa | None = None
+    #: Kurulum sonuçlandıysa çıkışın barı, fiyatı ve hangi bariyerin
+    #: vurulduğu ("hedef" · "stop" · "zaman"). Sonuçlanmamışsa None.
+    #: Bölge ve seviyeler burada BİTER — sonuçlanmış bir kurulumun
+    #: seviyelerini sağa uzatmak, artık geçerli olmayan bir bölgeyi hâlâ
+    #: varmış gibi göstermektir.
+    cikis_t: int | None = None
+    cikis_fiyat: float | None = None
+    cikis_turu: str = ""
+
+    def seviye(self, oran: float) -> FibSeviyesi:
+        for s in self.seviyeler:
+            if round(s.oran, 3) == round(oran, 3):
+                return s
+        raise ValueError(
+            f"{oran} seviyesi sonuçta yok. Komposer eksik bir sonuçtan grafik "
             f"uyduramaz — gösterge onu üretmediyse çizilmez."
         )

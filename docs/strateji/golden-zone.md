@@ -365,9 +365,12 @@ değil: FX intraday yerine BIST günlük, kill zone filtresi yok, kademeli
 
 | | |
 |---|---|
-| Komposer | `packages/chart/quaxis/chart/komposer/<slug>.py` |
-| Referans | *(`references/…png`)* |
-| İterasyonlar | *(`docs/design/ui/<slug>-*.png` — en az 3)* |
+| Komposer | `packages/chart/quaxis/chart/komposer/golden_zone.py` |
+| Girdi tipi | `quaxis.chart.tipler.OTESonucu` |
+| Spec üreteci | `tools/golden_zone_spec.py` — **gerçek** THYAO verisi, fikstür değil |
+| Yüzey | `apps/web/app/(uygulama)/grafik/page.tsx` |
+| Referans | `references/G8es0m9W4AAiTAK.png` · `G8j_KYOX0AEb8l-.png` — **anlamak için**, kopyalamak için değil (kullanıcının kendi ifadesi) |
+| İterasyonlar | **11** (asgari 3) — `docs/design/ui/gz-{koyu,acik,sistem}-{1440,768}-i11.png`, tam kayıt: [`ui/README.md`](../design/ui/README.md) |
 | Onay | *(kullanıcı onayının tarihi — onay yoksa kapı KAPALI)* |
 
 ### İterasyon kaydı
@@ -377,14 +380,36 @@ nasıl göründüğü yazılır.
 
 | Tur | Görülen kusur | Yapılan düzeltme |
 |---|---|---|
-| i1 | | |
-| i2 | | |
-| i3 | | |
+| i1 | `süpürme` ve `%100` işaretleri TAM aynı noktada, etiketler üst üste binip okunmaz | Kök sebep dedektörde: payload süpürmenin kendi barını taşımıyordu. `supurme_bar`/`supurme_fiyat` eklendi; komposer çakışan çıpada süpürmeyi çizmiyor |
+| i1 | "BOS" çizgisi kırılan salınım seviyesi yerine **kırılım barının kapanışını** gösteriyordu — etiket doğru, sayı yanlış | `kirilan_seviye` payload'a eklendi |
+| i2 | Bant bacağın ucundan, seviyeler bacağın başından başlıyordu | İkisi de bacak TAMAMLANINCA doğar; `capa0.onay_t`'de birleştirildi |
+| i2 | Sonuçlanmış kurulumun bölgesi levhanın sonuna kadar uzuyordu | `Bant`/`Seviye`'ye `bitis` eklendi; çıkış `barrier_outcome` ile (K4'ün AYNI mantığı) hesaplanıyor. Seviyeler bitişten sonra %22 opaklıkla hayalet devam eder — tamamen kesilse sağ oluktaki etiket sahipsiz kalırdı |
+| i3 | Çıkış işareti **hiç görünmüyordu**: `hap: false` rollerde çizici metni sessizce düşürüyordu | Hapsız roller de yazıyor, zemini `zeminEkle` ile |
+| i3 | Bant etiketi giriş rozetiyle çakışıyordu | "OTE 0.62–0.79" zaten HUD'da ve sağ olukta yazıyor; bant etiketsiz bırakıldı |
+| i3 | Çıkış aksan renginde — "hedefe ulaştı" ile "stop oldu" aynı renkte | Sonuç YÖN bilgisidir: `CIKIS_KAZANC`/`CIKIS_KAYIP` rolleri (`--up`/`--down`) |
+| i4–i7 | **Mum tuvali SVG katmanının ÜSTÜNDEYDİ.** Faz 4'ten beri vardı, görünmüyordu: o güne kadar çizilen her şey mumların olmadığı boşluklara düşüyordu. "stop ✕ 288.75" mum gövdesiyle kesildi | Lightweight Charts tuvallerine `z-index: 1`/`2` veriyor, sarmal yığınlama bağlamı kurmuyordu. `isolation: isolate` + açık `z-index` katmanları. Teşhis göz kararıyla değil: overlay DOM'u playwright ile gerçek viewport'ta okundu |
+| i4 | `getBBox()` 0 dönünce metin zemini sessizce çizilmiyordu | Monospace ölçü kestirimi yedek yol olarak eklendi |
+| i7 | HUD metni 0.0 seviyesinin çizgisiyle kesişiyordu | Satır arkasına levhanın zemini (gölge değil, dolgu) |
+| i8 | Zemin `inline-block` verilince iki HUD satırı yan yana gelip 768'de sağ oluğa taştı | `display: block; width: fit-content` |
+| i10 | 768'de "hedef" ile sayısı ayrı satıra düşüp sayı sahipsiz kalıyordu | `white-space: nowrap` ile bölünmez |
 
 ### Referanstan bilinçli sapmalar
 
-*(Referansta olup üretmediğimiz ya da farklı yaptığımız her şey —
-gerekçesiyle. Yoksa "yok" yaz.)*
+| Sapma | Gerekçe |
+|---|---|
+| Referans görsellerin düzeni taklit edilmedi | İkisi de **anlamak için** verilmişti, kopyalamak için değil. Komposer K0'daki mekanik kuralı çiziyor. |
+| Çok zaman dilimli paneller ve el yazısı notlar üretilmedi | Referanslar eğitim amaçlı ekran görüntüleri; ürün yüzeyi değil. |
+| Merdivenin tamamı çizilmiyor | Bandın kenarları zaten 0.62 ve 0.79; ayrıca çizgi koymak dar bandın içinde üç çizgi = okunmaz yığın demekti. Çizilen: giriş, tatlı nokta, stop, hedef. |
+
+### Grafiğin taşıdığı verdikt
+
+Künye `verdikt: kanıtlanmadı` taşıyor ve yüzey bunu **hem çubukta hem
+altındaki K4 kutusunda** gösteriyor. "Bu kurulum oluştu" ile "bu stratejinin
+kenar ürettiği kanıtlandı" ayrı şeylerdir; ikincisi gösterilmezse birincisi
+ikincisi sanılır.
+
+Örnek kurulum **stop'la bitiyor** ve grafik bunu saklamıyor. Sinyali gösterip
+sonucunu göstermemek, grafiği reklam yapardı.
 
 ---
 

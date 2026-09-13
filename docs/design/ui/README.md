@@ -242,3 +242,95 @@ Referanstaki **kesik-noktalı mavi trend çizgisi** üretilmedi: o çizgi Altın
 Bölge stratejisine değil ayrı bir trendline göstergesine ait. Her komposer
 yalnız kendi stratejisinin çizimini üretir; aksi hâlde jenerik çiziciye geri
 dönülmüş olurdu. `CizgiRol.TREND` rolü sözleşmede hazır bekliyor.
+
+---
+
+# Faz 7.1 · K5 — Golden Zone komposeri (2026-09-13)
+
+Görüntüler: `gz-{koyu,acik,sistem}-{1440,768}-i11.png` (ara turlar: i1–i10).
+**11 iterasyon** yapıldı; asgari 3.
+
+Girdi **fikstür değil gerçek veri**: `tools/golden_zone_spec.py` gerçek THYAO
+serisini dedektörden geçirip spec üretiyor. Elle kurulmuş bir fikstür
+dedektörün gerçekte ne ürettiğini gizleyebilirdi — Faz 4'te tam olarak bu
+olmuştu (komposer güzel bir formasyon çiziyordu ama adı yanlıştı).
+
+## Görerek bulunan kusurlar
+
+1. **`süpürme` ile `%100` işaretleri TAM aynı noktaya çiziliyordu** (i1) —
+   iki etiket üst üste binip okunmaz bir yığın oluyordu. Kök sebep dedektörde:
+   payload süpürmenin kendi barını/fiyatını taşımıyordu, araç da çaresizce
+   `%100` çıpasının değerlerini kopyalıyordu. `supurme_bar` ve `supurme_fiyat`
+   payload'a eklendi; komposer ayrıca iki çıpa çakışıyorsa süpürmeyi çizmiyor.
+
+2. **"BOS" çizgisi yanlış sayıyı gösteriyordu** (i1) — kırılan salınım
+   seviyesi yerine kırılım barının KAPANIŞI. Etiket doğru, sayı yanlıştı;
+   bu en sinsi kusur türü. `kirilan_seviye` payload'a eklendi.
+
+3. **Bant ve seviyeler farklı barlardan başlıyordu** (i2) — seviyeler bacağın
+   başından, bant bacağın ucundan. İkisi de bacak TAMAMLANINCA doğar;
+   `capa0.onay_t`'de birleştirildi.
+
+4. **Sonuçlanmış kurulumun bölgesi levhanın sonuna kadar uzuyordu** (i2) —
+   artık geçerli olmayan bir bölgeyi hâlâ varmış gibi gösteriyordu. `Bant` ve
+   `Seviye`'ye `bitis` alanı eklendi; araç `barrier_outcome` ile (K4'ün
+   kullandığı AYNI mantık) çıkışı hesaplıyor. Seviyeler bitişten sonra **%22
+   opaklıkla hayalet** devam eder: tamamen kesilse sağ oluktaki etiket
+   sahipsiz kalırdı.
+
+5. **Çıkış işareti hiç görünmüyordu** (i3) — `IsaretRol.TEMAS` rolünde
+   `hap: false` olduğu için çizici metni **sessizce düşürüyordu**; geriye
+   3 piksellik bir nokta kalıyordu. Hapsız roller de artık yazıyor.
+
+6. **Bant etiketi giriş rozetiyle çakışıyordu** (i3) — "OTE 0.62–0.79" hem
+   HUD'da hem sağ olukta zaten yazıyordu. Üçüncü kez yazmak bilgi eklemiyor,
+   sadece çakışma üretiyordu; bant etiketsiz bırakıldı.
+
+7. **Çıkış aksan renginde çizilmişti** (i3) — "hedefe ulaştı" ile "stop oldu"
+   aynı renge boyanıyordu. Sonuç YÖN bilgisidir: `IsaretRol.CIKIS_KAZANC` /
+   `CIKIS_KAYIP` rolleri eklendi (`--up` / `--down`).
+
+8. **En ciddisi — mum tuvali SVG katmanının ÜSTÜNDEYDİ** (i4–i7).
+   Lightweight Charts kendi tuvallerine `z-index: 1` ve `2` veriyor;
+   `.qgrafik-tuval` bir yığınlama bağlamı KURMADIĞI için o sayılar dışarı
+   taşıyor ve mumlar bizim çizimlerimizin üstüne çıkıyordu. Kusur **Faz 4'ten
+   beri vardı ama görünmüyordu**: o güne kadar çizilen her şey mumların
+   olmadığı boşluklara düşüyordu. Çıkış işareti mumun üstüne düşen ilk şey
+   oldu ve "stop ✕ 288.75" metnini mum gövdesi kesti.
+   Çözüm: `.qgrafik-tuval { z-index: 0; isolation: isolate }` +
+   `.qgrafik-overlay { z-index: 1 }` + `.qgrafik-hud { z-index: 2 }`.
+   *Teşhis göz kararıyla yapılmadı:* overlay DOM'u gerçek 1440 viewport'ta
+   playwright ile okundu, zemin dikdörtgeninin VAR olduğu ama tuvalin üstte
+   olduğu ölçülerek görüldü.
+
+9. **`getBBox()` yerleşim yapılmamış ağaçta 0 dönünce zemin sessizce
+   çizilmiyordu** (i4) — metin monospace olduğu için ölçü kestirimi
+   (karakter genişliği = punto × 0.6) yedek yol olarak eklendi.
+
+10. **HUD metni 0.0 seviyesinin çizgisiyle kesişiyordu** (i7) — tasarım
+    dilinin kendi kuralının ihlali. Satırların arkasına levhanın zemini
+    kondu (gölge değil, dolgu).
+
+11. **Zemin `inline-block` ile verilince iki HUD satırı yan yana gelip dar
+    levhada sağ oluğa taşıdı** (i8, 768) → `display: block; width: fit-content`.
+
+12. **"hedef" ile sayısı ayrı satıra düşüp sayı sahipsiz kalıyordu** (i10,
+    768) → çift `white-space: nowrap` ile bölünmez yapıldı.
+
+### Doğrulanıp kusur bulunmayanlar
+- Üç tema × iki genişlik: bant, hayalet uzantı, çıpalar ve çıkış işareti
+  hepsinde okunuyor.
+- Çıpalar **onay barında** duruyor (non-repaint sözleşmesinin çizim karşılığı).
+- Ödül/risk sayfada iki seviyeden TÜRETİLİYOR, elle yazılmıyor.
+
+## Referanstan bilinçli sapma
+
+`references/G8es0m9W4AAiTAK.png` ve `G8j_KYOX0AEb8l-.png` **anlamak için**
+verilmişti, kopyalamak için değil — kullanıcının kendi ifadesiyle. Bu yüzden
+komposer o görsellerin düzenini taklit etmiyor; K0'daki mekanik kuralı
+çiziyor. Referanslardaki çok zaman dilimli paneller ve el yazısı notlar
+üretilmedi.
+
+**Merdivenin tamamı çizilmiyor:** bandın kenarları zaten 0.62 ve 0.79;
+ayrıca çizgi olarak koymak dar bandın içinde üç çizgi = okunmaz yığın
+demekti.
