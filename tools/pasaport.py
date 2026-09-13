@@ -194,7 +194,27 @@ def dogrula(p: Pasaport) -> list[Bulgu]:
         for ad, _deger, kaynak in esikler:
             if not _doldurulmus(kaynak):
                 b.append(Bulgu(p.slug, "K0", f"'{ad}' eşiğinin kaynağı boş — ezberden sayı yasak"))
-            elif not (re.search(r"s\.\s*\d+", kaynak) or kaynak.startswith("K3:")):
+            elif re.search(r"s\.\s*\d+", kaynak):
+                pass  # sayfa alıntısı
+            elif "K3:" in kaynak:
+                # "K3:" bir SÖZ değil, bir DOSYADIR. "K3'ten türetilecek"
+                # yazıp kapıyı geçmek, ezberden sayı yazmanın kibar hâlidir —
+                # K0'ın kapatmak için var olduğu şeyin ta kendisi.
+                yollar = re.findall(r"K3:\s*([^\s`,)]+\.md)", kaynak)
+                if not yollar:
+                    b.append(
+                        Bulgu(
+                            p.slug, "K0",
+                            f"'{ad}' kaynağı 'K3:' diyor ama ölçüm dosyası göstermiyor: "
+                            f"{kaynak!r} — söz kanıt değildir",
+                        )
+                    )
+                for y in yollar:
+                    if not (KOK / y).exists():
+                        b.append(
+                            Bulgu(p.slug, "K0", f"'{ad}' eşiğinin K3 ölçüm dosyası diskte yok: {y}")
+                        )
+            else:
                 b.append(
                     Bulgu(
                         p.slug, "K0",

@@ -147,12 +147,39 @@ def test_uydurma_kaynak_reddedilir(pasaport_koku: pathlib.Path) -> None:
 
 def test_k3_olcumu_gecerli_kaynaktir(pasaport_koku: pathlib.Path) -> None:
     (pasaport_koku.parent / "k.md").write_text("x", encoding="utf-8")
+    olcum = pasaport_koku.parent / "docs" / "olcum"
+    olcum.mkdir(parents=True)
+    (olcum / "x.md").write_text("ölçüm", encoding="utf-8")
     yol = _yaz(
         pasaport_koku, "x",
         {"K0": {"gecildi": "2026-01-01", "kanit": ["k.md"]}},
         govde=GOVDE_ESIK.format(ad="min_salinim_atr", deger="2.0", kaynak="K3: docs/olcum/x.md"),
     )
-    assert "ezberden" not in _mesajlar(pasaport.oku(yol))
+    assert _mesajlar(pasaport.oku(yol)) == ""
+
+
+def test_k3_sozu_olcum_yerine_gecmez(pasaport_koku: pathlib.Path) -> None:
+    """'K3'ten türetilecek' ezberden sayı yazmanın kibar hâlidir.
+
+    Dosya göstermeyen bir 'K3:' satırı kapıyı geçerse, K0'ın var olma
+    sebebi ortadan kalkar."""
+    (pasaport_koku.parent / "k.md").write_text("x", encoding="utf-8")
+    yol = _yaz(
+        pasaport_koku, "x",
+        {"K0": {"gecildi": "2026-01-01", "kanit": ["k.md"]}},
+        govde=GOVDE_ESIK.format(ad="bolge_alt", deger="0.618", kaynak="K3: türetilecek"),
+    )
+    assert "söz kanıt değildir" in _mesajlar(pasaport.oku(yol))
+
+
+def test_k3_dosyasi_diskte_yoksa_yakalanir(pasaport_koku: pathlib.Path) -> None:
+    (pasaport_koku.parent / "k.md").write_text("x", encoding="utf-8")
+    yol = _yaz(
+        pasaport_koku, "x",
+        {"K0": {"gecildi": "2026-01-01", "kanit": ["k.md"]}},
+        govde=GOVDE_ESIK.format(ad="bolge_alt", deger="0.618", kaynak="K3: docs/olcum/yok.md"),
+    )
+    assert "K3 ölçüm dosyası diskte yok" in _mesajlar(pasaport.oku(yol))
 
 
 def test_bos_esik_tablosu_yakalanir(pasaport_koku: pathlib.Path) -> None:

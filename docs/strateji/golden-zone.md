@@ -1,0 +1,322 @@
+---
+# ── Makine tarafından okunan künye ────────────────────────────────────────
+# `python tools/pasaport.py dogrula` bu bloğu denetler. Elle "geçti" yazmak
+# yetmez: her kapının kanıtı DİSKTE bulunmak zorundadır.
+slug: golden-zone            # dosya adıyla aynı, küçük harf, tireli
+ad: Golden Zone              # kullanıcıya görünen ad
+paket: yapi                     # yapi | formasyon | trend | arbitraj
+referans: "references/G8es0m9W4AAiTAK.png"   # ANLAMAK için, kopyalamak için değil
+
+# K4'ün çıktısı. Kapı AÇILMADAN "ölçülmedi" dışında bir değer yazılamaz.
+#   olculmedi     — K4 açılmadı, elimizde sayı yok
+#   kanitlanmadi  — ölçüldü, FDR sonrası kenar bulunamadı
+#   izlenen-aday  — ölçüldü, en az çürütülmüş grupta
+#   kenar-var     — ölçüldü, FDR eşiğini geçti
+verdikt: olculmedi
+
+kapilar:
+  K0: { gecildi: null, kanit: ["docs/strateji/kaynak/golden-zone-K0.md"] }
+  K1: { gecildi: null, kanit: [] }
+  K2: { gecildi: null, kanit: [] }
+  K3: { gecildi: null, kanit: [] }
+  K4: { gecildi: null, kanit: [] }
+  K5: { gecildi: null, kanit: [], onay: null }
+  K6: { gecildi: null, kanit: [] }
+---
+
+# Golden Zone — Strateji Pasaportu
+
+> **Bu dosya stratejinin kimliğidir.** Kod, ölçüm ve görsel onay buraya
+> bağlanır. Bir kapı geçilmeden sonraki açılmaz; yedisi geçilmeden **sıradaki
+> stratejiye geçilmez** (README madde 4).
+>
+> Neden bu kadar katı: önceki projede K5 (görsel kabul) **hiç yapılmadı** —
+> 115 test dosyasının hepsi veri yapısı testiydi, kimse çıktının resmine bakıp
+> referansla karşılaştırmadı. K4 (istatistik) ise en sona bırakıldı ve 27
+> gösterge kodlandıktan **sonra** hiçbirinin kenar kanıtlamadığı anlaşıldı.
+
+---
+
+## Bir bakışta
+
+| | |
+|---|---|
+| **Ne yapar** | Likidite süpürmesi ve yapı kırılımından sonra fiyatın 0.62–0.79 düzeltme bölgesine dönüşünü arar. |
+| **Zaman dilimleri** | 1G · 4S (K3 hangisinin makul aday ürettiğini söyleyecek) |
+| **Yön** | İki yönlü |
+| **Referans görsel** | `references/G8es0m9W4AAiTAK.png` — **anlamak için**, kopyalamak için değil |
+| **Verdikt** | ölçülmedi |
+
+---
+
+## K0 · Kaynak
+
+> **Bitti kriteri:** kuralın geldiği kitap/makale, **sayfa numarasıyla**; tüm
+> eşikler alıntılanmış. **Ezberden sayı yazmak yasak.**
+>
+> ADR-002: K0 bir formalite değil, **stratejinin doğduğu yer**. Eski koda
+> bakılabilir ama referans olarak değil, yalnızca karşılaştırma için — ve
+> farklılık çıkarsa **kitap kazanır**.
+
+**Tam kaynak dosyası: [`kaynak/golden-zone-K0.md`](kaynak/golden-zone-K0.md)**
+
+### Birincil kaynak
+
+Golden Zone / OTE bir **uygulayıcı geleneğidir**, akademik makale değil. K0 bu
+yüzden iki ayaklı: mekanik kural ICT literatüründen, **ölçüm yöntemi ve neye ne
+zaman inanılacağı kitaptan**. Eşikleri meşrulaştıran ayak ikincisidir.
+
+| | |
+|---|---|
+| Eser (yöntem) | López de Prado, *Advances in Financial Machine Learning* (2018) |
+| Yer | s.45 (üç bariyer), s.50–53 (meta-etiketleme) |
+| Dosya | `Quant Playbook/books/Group 1…/MD formatı/Advances In Financial Machine Learning.md` |
+| Eser (örneklem) | Pardo, *The Evaluation and Optimization of Trading Strategies* (2008) |
+| Yer | s.291–293 (serbestlik derecesi), s.295 (asgari işlem sayısı) |
+| Dosya | `Quant Playbook/books/Group 4…/MD formatı/The Evaluation And Optimization Of Trading Strategies.md` |
+| Eser (mekanik kural) | ICT/SMC uygulayıcı literatürü — ictkillzone.com/ict-ote, innercircletrader.net, forexbee.co |
+| Yer | erişim 2026-09-13; bağlantılar kaynak dosyasında |
+
+### Kuralın kendi cümleleriyle alıntısı
+
+Mekanik kural — çıpanın nereye konacağı:
+
+> "anchor must be the sweep wick extreme — not a candle body, not an arbitrary
+> preceding swing"
+
+Yöntem — nasıl etiketlenecek:
+
+> "I call it the triple-barrier method because it labels an observation
+> according to the first barrier touched out of three barriers." (LdP s.45)
+
+Katmanlamanın kitaptaki adı ve reçetesi:
+
+> "First, we build a model that achieves high recall, even if the precision is
+> not particularly high. Second, we correct for the low precision by applying
+> meta-labeling to the positives predicted by the primary model." (LdP s.51–53)
+
+Ne zaman sayıya inanılır:
+
+> "Thirty to 50 trades is an adequate minimum." (Pardo s.295)
+
+### Eşikler
+
+Her satırın **kaynağı** dolu olmalı. İki geçerli kaynak türü var:
+kitaptan **alıntı** (sayfa numarasıyla) ya da **K3 ölçümü** (o zaman K3'ün
+ölçüm dosyası gösterilir). Üçüncü bir tür yok.
+
+**Kullanıcı kararı (2026-09-13): "Eşiklerin tamamı K3 ölçümünden türetilsin."**
+ICT'nin sayıları aramanın başlangıç noktasıdır, gerekçesi değil.
+
+> **K0 bu strateji için BİLEREK AÇIK.** Karar "eşiklerin tamamı K3 ölçümünden
+> türetilsin" olduğu için, aşağıdaki sayıların hiçbirinin henüz gerekçesi yok —
+> sadece arama noktası var. `pasaport.py dogrula` her eşik için `K3:` ölçüm
+> dosyasını diskte arar ve bulamadıkça bulgu yazar. **Bu bir hata değil,
+> kapının kendisidir:** K0 ancak K3 raporu yazılınca kapanır.
+>
+> Sıra bu stratejide özeldir: K1/K2 **açıkça geçici** varsayılanlarla kodlanır,
+> K3 ölçülür, K0 kapanır, sonra K4. Kapı atlanmıyor — geciktiriliyor ve nedeni
+> burada yazılı.
+
+| Eşik | Değer | Kaynak |
+|---|---|---|
+| bolge_sig | 0.62 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
+| bolge_derin | 0.79 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
+| sweet_spot | 0.705 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
+| yer_degistirme_min | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+| supurme_toleransi | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+| fvg_min_bosluk | geçici | `K3: docs/olcum/golden-zone-K3-B.md` |
+| donus_max_bar | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+| stop_tamponu | 0 (wick ucu) | `K3: docs/olcum/golden-zone-K3-A.md` |
+| zaman_bariyeri | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+
+**`hedef` bir eşik değildir**, kurulumun tanımıdır: ICT'de hedef yer
+değiştirmenin ucudur (%0 seviyesi — iç aralık likiditesi). Ayarlanabilir bir
+sayı olmadığı için eşik tablosunda yeri yok; kuralı `kaynak/golden-zone-K0.md`
+§1.1'de.
+
+### Kitaptan sapmalar
+
+| Sapma | Gerekçe |
+|---|---|
+| Kill zone (seans) filtresi yok | ICT'nin seans penceresi FX intraday'e özgü; biz BIST/NASDAQ 1G-4S tarıyoruz. Eklenirse ayrı bir katman olarak ÖLÇÜLÜR, sessizce varsayılmaz. |
+| "Daily bias" adımı yok | Öznel, kodlanabilir kural değil. Yerine BOS yönü — ölçülebilir ve non-repaint. |
+| Kademeli kâr alma yok | Tek stop, tek hedef. Kademeli çıkış R dağılımını iyimser gösterir. |
+| Aynı barda stop+hedef → stop | Bar içi sıralama bilinmiyor; belirsizlikte stratejinin lehine varsaymıyoruz. |
+
+### Katmanlı ölçüm planı (kullanıcı kararı: "Golden Zone, katmanlı ölçümle")
+
+Soru katman başına "kenar var mı" değil, **"kenar EKLİYOR mu"**.
+
+| Katman | İçerik | LdP karşılığı |
+|---|---|---|
+| A | BOS + OTE bölgesi | birincil model (yön) |
+| B | A + (FVG veya Order Block) | ikincil model (precision filtresi) |
+| C | B + likidite süpürmesi | ikinci precision filtresi |
+
+Her katman hem ileri getiri hem **R-katsayısı** ile ölçülür; her satırda işlem
+sayısı görünür (Pardo s.295 — 30'un altında sayı yazılır, verdikt üretilmez).
+
+---
+
+## K1 · Sözleşme
+
+> **Bitti kriteri:** tipli sonuç dataclass'ı, parametreler (frozen), durum
+> makinesi, non-repaint gerekçesi yazılı.
+
+### Parametreler
+
+`packages/teknik/quaxis/teknik/indicators/<…>/params.py` — `frozen dataclass`,
+sonuç kaydı `params_hash` taşır. Aynı veri + aynı parametre = bit bit aynı
+sonuç.
+
+| Alan | Tip | Varsayılan | Düz Türkçe açıklama |
+|---|---|---|---|
+| | | | |
+
+### Durum makinesi
+
+*(pending → confirmed → invalidated … Hangi olay hangi geçişi tetikler?)*
+
+### Non-repaint gerekçesi
+
+*(Sinyal neden **onaylandığı barın** tarihini taşır? Pivot kaç bar sonra
+kesinleşir? Açık bar neden sinyal üretemez? Bu bölüm, K2'deki walk-forward
+testinin neyi kanıtlaması gerektiğini tarif eder.)*
+
+---
+
+## K2 · Dedektör
+
+> **Bitti kriteri:** kod + birim testler + **walk-forward repaint testi** +
+> lookahead lint temiz.
+
+| | |
+|---|---|
+| Kod | *(dosya yolu)* |
+| Testler | *(test dosyası yolu)* |
+| Repaint testi | *(`repaint_test` ile mi, `register_verified_elsewhere` ile mi? İkincisiyse **neden** generic teste giremediği burada yazılı olmak zorunda.)* |
+| Lookahead lint | *(temiz / bulgular)* |
+
+---
+
+## K3 · Kalibrasyon
+
+> **Bitti kriteri:** tam **648 sembollük** evrende aday sayısı ölçülmüş.
+> Sıfıra yakınsa bozuk, on binlerse çok gevşek. Ölçüm dosyası `docs/olcum/`
+> altında.
+
+| | |
+|---|---|
+| Ölçüm dosyası | `docs/olcum/<slug>-K3-<tarih>.md` |
+| Evren | *(kaç sembol)* |
+| Aday sayısı | *(sembol başına ortalama + toplam)* |
+| Aday üretmeyen sembol | *(kaç tanesi sıfır aday verdi — hepsi sıfırsa gösterge bozuktur)* |
+| Sonuç | *(eşikler oturdu mu, hangi parametre değiştirildi)* |
+
+> Önceki projede `breakout_fvg` ve `flag_pennant` 4S'te **648/648 sembolde
+> sıfır aday** veriyordu ve bu ancak çok sonra fark edildi. K3 bunun içindir.
+
+---
+
+## K4 · İstatistik
+
+> **Bitti kriteri:** **sembol-kümelenmiş** ileri getiri testi, IS/OOS ayrımı,
+> permütasyon + BH-FDR. Sonuç dürüstçe yazılır: *kenar var / yok / belirsiz*.
+> **Elenmez — etiketlenir.**
+
+| | |
+|---|---|
+| Ölçüm dosyası | `docs/olcum/<slug>-K4-<tarih>.md` |
+| Evren | *(kaç sembol)* |
+| Bağımsız gözlem | *(kaç sembol — bar değil, SEMBOL)* |
+| Pencere | *(IS/OOS oranı)* |
+| Ufuk | *(kaç bar ileri)* |
+| Adil baza karşı fark | *(%)* |
+| Permütasyon p değeri | |
+| BH-FDR (q=0.05) | *(geçti / geçemedi)* |
+| **Verdikt** | *(künyedeki `verdikt` alanıyla AYNI olmalı)* |
+
+### R-katsayısı (üç bariyer)
+
+> **Strateji bir stop ve hedef bildiriyorsa bu tablo ZORUNLUDUR.** İleri getiri
+> asimetriyi göremez: %35 isabetle 3R kazandıran bir sistem 20 barlık ileri
+> getiride sıfır görünür. ICT/SMC kavramlarını "kenar yok" diye bulan en geniş
+> çalışma (648 backtest) tam olarak bu hatayı yaptı — zaman bazlı çıkış kullandı,
+> stop/hedef koymadı. Aynı barda iki bariyer de vurulduysa **stop** sayılır.
+
+| | |
+|---|---|
+| İşlem sayısı | *(kaç işlem / kaç sembol)* |
+| İsabet | *(%)* |
+| **İşlem başına beklenen R** | |
+| Adil baz (aynı risk, rastgele bar) | |
+| Stop / hedef / zaman çıkış oranı | |
+| Permütasyon p değeri | |
+| **Verdikt (R)** | |
+
+### Ne çıkarsa o
+
+*(Sonuç olumsuzsa da burada aynı açıklıkla yazılır. "Zarar ettiriyor" ile
+"işe yaradığına dair kanıt yok" farklı şeylerdir — hangisi olduğunu yaz.)*
+
+---
+
+## K5 · Görsel
+
+> **Bitti kriteri:** komposer yazılır, gerçek veriyle ekran görüntüsü alınır,
+> **referans görselle yan yana konur**, **en az 3 iterasyon**, **kullanıcı
+> onayı**.
+
+| | |
+|---|---|
+| Komposer | `packages/chart/quaxis/chart/komposer/<slug>.py` |
+| Referans | *(`references/…png`)* |
+| İterasyonlar | *(`docs/design/ui/<slug>-*.png` — en az 3)* |
+| Onay | *(kullanıcı onayının tarihi — onay yoksa kapı KAPALI)* |
+
+### İterasyon kaydı
+
+Her turda **ne görüldü, ne düzeltildi**. "Düzeltildi" demek yetmez; neyin
+nasıl göründüğü yazılır.
+
+| Tur | Görülen kusur | Yapılan düzeltme |
+|---|---|---|
+| i1 | | |
+| i2 | | |
+| i3 | | |
+
+### Referanstan bilinçli sapmalar
+
+*(Referansta olup üretmediğimiz ya da farklı yaptığımız her şey —
+gerekçesiyle. Yoksa "yok" yaz.)*
+
+---
+
+## K6 · Ürün
+
+> **Bitti kriteri:** tarama tablosunda satır + grafik sayfasında sekme +
+> "Nasıl Okunur" metni + alarm kuralı.
+
+| | |
+|---|---|
+| Kütüphane kartı | *(hangi dosyada)* |
+| Strateji sayfası | `/stratejiler/<slug>` |
+| Tarama kolonu | *(tarihsel isabet rozeti hangi verdikti gösteriyor)* |
+| Alarm kuralı | *(sinyal ne zaman bildirilir)* |
+
+### Nasıl okunur — dört soru
+
+Grafik levhasının altında duran dört not. Düz Türkçe, jargon yok.
+
+| Soru | Cevap |
+|---|---|
+| Nereye bak | |
+| Ne ölçer | |
+| Sinyal ne zaman doğar | |
+| Değerler ne demek | |
+
+### Sık sorulanlar
+
+*(En az bir soru: "sinyal sonradan kaybolur mu?" — cevabı non-repaint
+gerekçesine bağlanır.)*
