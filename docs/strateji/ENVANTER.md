@@ -19,7 +19,11 @@ Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 | **Harmonik · Three Drives** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | **Salınım Fibo ABCD** | ❌ **YOK** | ✅ | ❌ | ❌ | — |
 
-**Yayınlanmış (K6) strateji: 0.**
+**Yayınlanmış (K6) strateji: 0.** Harmonikler K5'i geçti (kullanıcı onayı
+2026-09-14) ve ürün yüzeylerinin üçü hazır — grafik, kütüphane kartı,
+strateji sayfası. K6 **tarama kolonu** yüzünden açık: tarama yüzeyi hâlâ
+maket veriyle çalışıyor ve oraya sahte harmonik satır eklemek kapıyı
+kapatırdı ama yalan olurdu.
 
 Dört harmonik formasyon tek pasaport altında
 ([`harmonik-pesavento.md`](harmonik-pesavento.md)) ama **dört ayrı künye**

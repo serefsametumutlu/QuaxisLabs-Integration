@@ -463,25 +463,49 @@ onaylandığında **hesaplanan** bir fiyattır.
 |---|---|
 | Grafik yüzeyi | ✅ `/grafik` — strateji seçicide dört formasyon; `?f=harmonik-<ad>` derin bağlantısı |
 | Kütüphane kartı | ✅ `lib/ornek-veri.ts` — dört kart, gerçek kaynak ve verdiktle |
-| Strateji sayfası | *(bekliyor)* — `/stratejiler/harmonik-pesavento` |
-| Tarama kolonu | *(bekliyor)* |
-| Alarm kuralı | *(bekliyor)* — verdikt `kanıtlanmadı` olduğu için alarm **önerilmiyor** |
+| Strateji sayfası | ✅ [`/stratejiler/harmonik-pesavento`](../../apps/web/lib/ornek-strateji.ts) — gerçek levha, parametreler, kaynak kutuları, K4 ölçümü, SSS |
+| Tarama kolonu | ⏳ **tarama yüzeyi hâlâ maket veriyle çalışıyor** |
+| Alarm kuralı | ✅ **alarm YOK** — gerekçe aşağıda |
+| Durum | **kapı KAPANMADI** (tarama kolonu) |
+
+### Neden alarm yok — ve bu bir eksik değil
+
+Verdikt `kanıtlanmadı`. Alarm kurmak, sistemin kullanıcıya **"burada işlem
+var"** demesidir; ölçüm tam olarak bunun tersini söylüyor. Formasyon
+grafikte görünür, künyesinde `tarihsel isabet: kanıtlanmadı` yazar, ama
+sistem kimseyi uyandırmaz.
+
+Alarm kuralı `abcd·teyit` ileriye dönük izlemede eşiği geçerse yeniden
+düşünülür — o zamana kadar **alarmın olmaması kuralın kendisidir.**
+
+### Tarama kolonu neden açık
+
+Tarama yüzeyi (`/tarama`) hâlâ `lib/ornek-veri.ts`'ten maket satır
+üretiyor ve bu **bütün stratejiler için** böyle — harmoniklere özgü bir
+eksik değil, ürünün kendi açığı (bkz. `docs/strateji/ENVANTER.md` §1).
+
+Buraya sahte harmonik satırlar eklemek kapıyı kapatırdı ama yalan olurdu:
+kullanıcı gerçek bir tarama sonucu sandığı şeye bakardı. **Kapı açık
+kalıyor**; gerçek tarama motoru evrende koştuğunda kapanacak.
 
 ### Nasıl okunur — dört soru
 
 | Soru | Cevap |
 |---|---|
-| Nereye bak | Birbirini izleyen salınım uçlarını birleştiren zikzağa ve en sağdaki `D` seviyesine. |
-| Ne ölçer | Zikzağın bacakları arasındaki oranların Fibonacci sayılarına uyup uymadığını. |
-| Sinyal ne zaman doğar | Fiyat `D` seviyesine **dokunduğu anda**. `D` daha önceden hesaplanmıştır; dokunuş beklenen andır. |
-| Değerler ne demek | `X/A/B/C` formasyonun köşeleri, `D` giriş seviyesi. Stop ve hedef formasyonun kendi geometrisinden çıkar. |
+| Nereye bak | Köşeleri birleştiren zikzağa ve en sağdaki `D` seviyesine. Son bacak **kesik** çizilir. |
+| Ne ölçer | Bacaklar arasındaki oranların Fibonacci sayılarına uyup uymadığını. Her bacağın üstündeki sayı ölçülen orandır. |
+| Sinyal ne zaman doğar | Fiyat `D` seviyesine **dokunduğu anda**. `D` bir pivot değil, `C` onaylandığında hesaplanan bir fiyattır. |
+| Değerler ne demek | `X/A/B/C` formasyonun köşeleri, `D` giriş. Stop ve hedef formasyonun kendi geometrisinden çıkar. |
 
 ### Sık sorulanlar
 
-**Sinyal sonradan kaybolur mu?** Hayır. `D` son pivot onaylandığında
-hesaplanır ve bir daha değişmez; fiyat ona dokunduğunda sinyal doğar ve
-geriye dönük hiçbir nokta kaydırılmaz. Formasyon **oluşmadan önce** de
-grafikte görünmez — bekleyen kurulum çizilmez, yalnız tamamlanan çizilir.
+**Sinyal sonradan kaybolur mu?** Hayır. Köşeler kendi barlarından birkaç
+bar sonra kesinleşir ve bir daha değişmez; `D` onlardan hesaplanır.
+Bekleyen kurulum grafikte **çizilmez** — yalnız tamamlanan çizilir.
 
-**C onaylanmadan fiyat D'ye dokunursa ne olur?** Sinyal **üretilmez**. O
-anda formasyonun varlığını bilmiyorduk; kaçan kaçmıştır.
+**C onaylanmadan fiyat D'ye inerse ne olur?** Sinyal **üretilmez**. O anda
+formasyonun varlığını bilmiyorduk; kaçan kaçmıştır.
+
+**Kenar bulunamadıysa neden hâlâ gösteriyorsunuz?** Çünkü eleme değil
+**etiketleme** yapıyoruz (README madde 6). Formasyon gerçekten oluşuyor ve
+kullanıcı onu görmek isteyebilir; ama sistem ona "al" demiyor.

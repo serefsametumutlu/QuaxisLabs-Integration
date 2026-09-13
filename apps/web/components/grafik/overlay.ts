@@ -145,7 +145,11 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
         // bar ediyordu ve "DÖNÜŞ BÖLGESİ" metni bandın dışına taşıp D köşe
         // rozetinin İÇİNDEN geçiyordu (K5 i3 bulgusu). Sığmayan etiket
         // bilgi değil, gürültüdür.
-        const genis = x1 - x0 >= (k.etiket?.length ?? 0) * 6.2 + 18;
+        // Dar levhada bant etiketi HİÇ yazılmaz: strateji sayfasındaki
+        // küçük levhada "DÖNÜŞ BÖLGESİ" metni köşe rozetinin ve oran
+        // etiketinin üstüne biniyordu. Bandın sınırları zaten sağ olukta
+        // adlarıyla yazılı (giriş · stop); etiket orada bilgi eklemiyor.
+        const genis = !c.dar && x1 - x0 >= (k.etiket?.length ?? 0) * 6.2 + 18;
         if (k.etiket && genis) {
           // Bant inceyse etiket içine sığmaz ve alt çizginin üstüne biner
           // (f4i6 bulgusu); o zaman bandın ÜSTÜNE yazılır.
