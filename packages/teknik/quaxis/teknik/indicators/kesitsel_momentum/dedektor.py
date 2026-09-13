@@ -100,6 +100,14 @@ class KesitselMomentum(UniverseIndicator):
         if ciro is not None:
             yuzdelik = yuzdelik.where(ciro >= p.asgari_ciro)
 
+        # Kesit YETERİNCE GENİŞ değilse o barda sıralama yapılmaz.
+        # Bir barda yalnız birkaç sembol işlem görüyorsa (yarım günler,
+        # veri artıkları) "üst %10" ifadesi anlamsızdır.
+        genislik = yuzdelik.notna().sum(axis=1)
+        dar = genislik < p.asgari_evren
+        if dar.any():
+            yuzdelik = yuzdelik.mask(dar, axis=0)
+
         esik = 1.0 - p.ust_dilim
         sonuclar: dict[str, IndicatorResult] = {}
         tarihler = kapanis.index
@@ -114,11 +122,15 @@ class KesitselMomentum(UniverseIndicator):
             y = yuzdelik[sembol].to_numpy(dtype=float)
             g = getiri[sembol].to_numpy(dtype=float)
             k = kapanis[sembol].to_numpy(dtype=float)
-            evren_n = yuzdelik.notna().sum(axis=1).to_numpy()
+            evren_n = genislik.to_numpy()
 
             sonraki_uygun = 0
             for i in range(len(tarihler)):
                 if i < sonraki_uygun or np.isnan(y[i]) or y[i] < esik:
+                    continue
+                # Birleşik takvimde var ama BU sembolde olmayan bir tarihe
+                # sinyal yazmak, var olmayan bir fiyattan alım demektir.
+                if tarihler[i] not in df.index:
                     continue
                 # Örtüşmeyen sinyal: bu sembol tutuş bitene kadar susar.
                 sonraki_uygun = i + p.tutus

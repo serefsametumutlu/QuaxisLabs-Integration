@@ -160,3 +160,49 @@ def test_ust_dilim_orandir() -> None:
 
 def test_bos_evren_cokmez(dedektor: KesitselMomentum) -> None:
     assert dedektor.compute_universe({}, _seri(BAR, 1, 0.0)) == {}
+
+
+# -------------------------------------------------- kesit genişliği
+
+
+def test_dar_kesitte_siralama_yapilmaz() -> None:
+    """**Ölçülmüş hata.** Yalnız 1 sembolün işlem gördüğü bir tarihte o
+    sembolün yüzdelik sırası 1.0 çıkıyor ve OTOMATİK "üst %10"a giriyordu.
+    Tek sembollü bir kesitte sıralama diye bir şey yoktur."""
+    evren = _evren(20)
+    garip = evren["S00"].index[-1] + pd.Timedelta(days=1)
+    ek = evren["S00"].iloc[[-1]].copy()
+    ek.index = [garip]
+    evren["S00"] = pd.concat([evren["S00"], ek])
+    evren["S00"].attrs["timeframe"] = Timeframe.D1
+
+    d = KesitselMomentum(
+        KesitselMomentumParams(geriye_bakis=60, tutus=10, asgari_evren=5)
+    )
+    sonuc = d(evren, _seri(BAR, 99, 0.0002))
+    for r in sonuc.values():
+        assert all(s.detected_at != garip for s in r.signals), (
+            "tek sembollü barda sinyal üretildi"
+        )
+
+
+def test_sembolde_olmayan_tarihe_sinyal_yazilmaz() -> None:
+    """Birleşik takvimde var ama o sembolde olmayan bir tarihe sinyal
+    yazmak, var olmayan bir fiyattan alım demektir. `UniverseIndicator`
+    sözleşmesi bunu zaten reddeder — burada üretilmediğini kilitliyoruz."""
+    evren = _evren(20)
+    # S05'ten ortadaki barları düşür: birleşik takvimde o tarihler kalır.
+    evren["S05"] = evren["S05"].drop(evren["S05"].index[200:230])
+    evren["S05"].attrs["timeframe"] = Timeframe.D1
+    d = KesitselMomentum(
+        KesitselMomentumParams(geriye_bakis=60, tutus=10, asgari_evren=5)
+    )
+    sonuc = d(evren, _seri(BAR, 99, 0.0002))  # sözleşme doğrulaması burada çalışır
+    if "S05" in sonuc:
+        for s in sonuc["S05"].signals:
+            assert s.detected_at in evren["S05"].index
+
+
+def test_asgari_evren_ikiden_kucuk_olamaz() -> None:
+    with pytest.raises(ValueError, match="tek sembollü bir kesitte sıralama yoktur"):
+        KesitselMomentumParams(asgari_evren=1)

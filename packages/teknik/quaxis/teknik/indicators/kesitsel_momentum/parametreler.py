@@ -46,6 +46,15 @@ class KesitselMomentumParams(BaseParams):
     #: Ciro ortalamasının penceresi.
     ciro_penceresi: int = 20
 
+    #: Sıralamanın yapılabilmesi için o barda veri veren asgari sembol sayısı.
+    #:
+    #: **Ölçülmüş hata (2026-09-13).** Bu eşik yokken, yalnız 1 sembolün
+    #: işlem gördüğü bir tarihte o sembolün yüzdelik sırası 1.0 çıkıyor ve
+    #: OTOMATİK olarak "üst %10"a giriyordu. Tek sembollü bir kesitte
+    #: sıralama diye bir şey yoktur; strateji o gün seçim YAPMAMALIDIR.
+    #: Böyle tarihler BIST verisinde var (yarım günler, veri artıkları).
+    asgari_evren: int = 20
+
     _BAR_FIELDS: ClassVar[frozenset[str]] = frozenset(
         {"geriye_bakis", "tutus", "atlama_gun", "ciro_penceresi"}
     )
@@ -66,3 +75,7 @@ class KesitselMomentumParams(BaseParams):
             )
         if self.asgari_ciro < 0:
             raise ValueError("asgari ciro negatif olamaz")
+        if self.asgari_evren < 2:
+            raise ValueError(
+                "asgari evren en az 2 olmalı — tek sembollü bir kesitte sıralama yoktur"
+            )
