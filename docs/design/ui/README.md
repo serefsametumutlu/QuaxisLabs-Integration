@@ -446,28 +446,89 @@ Her formasyon `?f=harmonik-<ad>` bağlantısıyla ayrı ayrı yakalandı.
 | i6–i7 | `?f=` derin bağlantısı sayfaya ulaşmıyordu | `useSyncExternalStore` hidrasyonda sunucu anlık görüntüsünü kullanır ve mağaza haber vermezse istemci değerini HİÇ okumaz. Abone artık bir kez bildiriyor |
 | i12 | Three Drives'ın `O` köşesi HUD metninin içine düşüyordu | HUD bir HTML katmanı, SVG onu göremez. Çizici sol üst köşeyi dışlama bölgesi sayıyor; ayrıca spec penceresi 22 bar sol pay bırakıyor |
 
-### Kapanmayan kusur — açık iş
+### Ölçek hatası — ÇÖZÜLDÜ (i13)
 
-**Fiyat aralığının UCUNDAKİ köşe, mumlarından ~43 piksel uzağa düşüyor.**
+**Belirti:** fiyat aralığının UCUNDAKİ köşe, mumlarından ~43 piksel uzağa
+düşüyordu (Kelebek'te `A`, serinin en yüksek fiyatı). Ortadaki köşeler
+doğru görünüyordu, çünkü iki ölçek arasındaki fark DOĞRUSAL: ortada
+neredeyse sıfır, uçta en büyük.
 
-`Grafik.tsx`'teki `autoscaleInfoProvider` mumların çizildiği ölçeği
-ChartSpec'in panel aralığına göre genişletiyor (stop mum aralığının dışında
-kalabildiği için gerekli), ama `priceToCoordinate` mum verisinin KENDİ
-aralığını kullanmaya devam ediyor. Fark doğrusal: aralığın ortasındaki
-noktalar neredeyse yerinde kalıyor, yalnız uçtaki kayıyor.
+**Nasıl bulundu.** Gözle değil. Önce `autoscaleInfoProvider` açık/kapalı
+iki ekran görüntüsü alınıp piksel taramasıyla karşılaştırıldı; sonra
+kesin ölçüm için spec'e **kalibrasyon çizgileri** enjekte edildi — mum
+verisinin tam en yüksek ve en düşük değerine oturan iki `Seviye`. Sonuç:
 
-Piksel taramasıyla ölçüldü — Kelebek'te `A` köşesi serinin en yüksek
-fiyatı ve mumların 43 piksel üstünde duruyor; sağlayıcı kapatılınca fark
-5 piksele iniyor. **Bu kusur Golden Zone ve Salınım Fibo ABCD
-grafiklerinde de vardı**, oradaki köşeler uçta olmadığı için görünmüyordu.
+| | |
+|---|---|
+| Overlay, `0.0719`'u (serinin en yükseği) | y = **342** |
+| Mumlar aynı fiyatı | y ≈ **390** |
 
-İki düzeltme denendi ve **ikisi de geri alındı**: görünmez bir çıpa serisi
-hiç etki etmedi; elle koordinat hesabı Kelebek'i düzeltirken AB=CD'de
-işareti levhanın tamamen dışına çıkardı. Kütüphanenin ölçek anlamını
-tahmin ederek yazılan bir düzeltme, düzelttiğinden fazlasını bozuyor.
+Yani overlay ile çizici AYRI aralıklar kullanıyordu.
 
-Doğru çözüm Lightweight Charts'ın kaynağından bu davranışın okunmasını
-gerektiriyor. **K5 kapısı bu yüzden KAPANMADI.**
+**Sebep.** `autoscaleInfoProvider` ile fiyat ölçeği ChartSpec'in panel
+aralığına göre genişletiliyordu (mum aralığının dışında kalan stop/hedef
+çizgileri sığsın diye). Sağlayıcı devredeyken mumlar genişletilmiş
+aralıkla çiziliyor ama `priceToCoordinate` mum verisinin kendi aralığını
+kullanmaya devam ediyor.
+
+**Denenip GERİ ALINAN iki çözüm:**
+
+1. Görünmez bir çıpa serisiyle ölçeği genişletmek — hiç etki etmedi
+   (piksel ölçümü sağlayıcılı hâlle birebir aynı çıktı).
+2. Overlay'in y'sini elle hesaplamak — Kelebek'i düzeltirken AB=CD'de
+   işareti levhanın tamamen DIŞINA çıkardı.
+
+Kütüphanenin ölçek anlamını tahmin ederek yazılan düzeltme, düzelttiğinden
+fazlasını bozdu.
+
+**Uygulanan çözüm: sağlayıcı kaldırıldı.** Levha artık mumların kendi
+aralığına ölçekleniyor; overlay ile çizici aynı aralığı kullanıyor.
+Ölçülen fark **43 piksel → 2 piksel**.
+
+Takas açık ve bilinçli: aralık dışında kalan bir seviye artık levhanın
+kenarına **sabitleniyor**, daha soluk ve seyrek kesikli çiziliyor,
+etiketine yönünü gösteren bir ok (`↑` / `↓`) ekleniyor. **Köşeleri
+mumlarına oturmayan bir formasyon, kenara sabitlenmiş bir çizgiden daha
+kötüdür:** birincisi yanlış bilgi verir, ikincisi eksik bilgiyi açıkça
+söyler.
+
+Pratikte sabitleme nadir: `scaleMargins` zaten mumların altında/üstünde
+pay bırakıyor ve Kelebek'in stop'u (mum aralığının altında) o payın içine
+sığdı.
+
+**Bu kusur Golden Zone ve Salınım Fibo ABCD grafiklerinde DE vardı**;
+oradaki köşeler fiyat aralığının ucunda olmadığı için görünmüyordu.
+
+### Doğrulama
+
+| formasyon | köşe kümesi (piksel sayımı) | beklenen |
+|---|---|---|
+| `abcd` | 4 | ≥4 (A·B·C·D) |
+| `gartley` | 5 | ≥5 (X·A·B·C·D) |
+| `kelebek` | 10 | ≥5 |
+| `uc_surus` | 7 | ≥6 (O·S1·A·S2·C·D) |
+
+Kelebek'te `A` köşesi ile mumunun tepesi arasındaki fark: **2 piksel.**
+
+### Veri kusuru — Three Drives örneği neden mum grafiği gibi görünmüyordu
+
+Kullanıcı sordu ve ölçüldü: örnek (BURVA **2011**) 106 barın **106'sında**
+`açılış == kapanış` taşıyor. Gövdesi olmayan mum çizgi gibi görünür.
+
+Sebep çizici değil **veri**: kaynak BIST için 2014 öncesinde gerçek açılış
+fiyatı vermiyor, `open` alanını `close` ile dolduruyor. THYAO'da
+`açılış == kapanış` oranı 2011'de %99, 2012'de %99, 2013'te %66; 2015
+sonrasında %2–5.
+
+Vitrin örnekleri artık **2014 sonrasından** seçiliyor (`EN_ERKEN`). Yeni
+Three Drives örneğinde (EMKEL 2026) doji oranı %5.
+
+**Ölçüme dokunan tarafı ayrıca kontrol edildi:** KURAL-30 teyit kuralı
+`close > open` şartı arıyor ve bozuk dönemde bu neredeyse hiç sağlanamaz.
+Ama K4'ün verdikti OOS penceresine dayanıyor ve **507 sembolün OOS
+pencereleri en erken 2020-08-31'de başlıyor** — hiçbiri bozuk döneme
+değmiyor. Verdikt etkilenmedi; etkilenen IS penceresi, yani zaten
+güvenilmez bulunan +0.582R.
 
 ### Doğrulanıp kusur bulunmayanlar
 

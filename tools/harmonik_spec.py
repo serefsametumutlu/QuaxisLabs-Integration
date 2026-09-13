@@ -47,6 +47,20 @@ from quaxis.teknik.olcum.bariyer import barrier_outcome  # noqa: E402
 #: K4'ün çıktısı. Grafiğin künyesine AYNEN geçer.
 VERDIKT = "kanıtlanmadı"
 
+#: Vitrin örnekleri bu tarihten SONRA başlamalı.
+#:
+#: **Ölçülmüş veri kusuru.** Kaynak (yfinance) BIST için 2014 öncesinde
+#: gerçek açılış fiyatı vermiyor; `open` alanını `close` ile dolduruyor.
+#: THYAO'da `açılış == kapanış` oranı 2011'de %99, 2012'de %99, 2013'te
+#: %66 — 2015 sonrasında %2-5. Gövdesi olmayan mum çizgi gibi görünür:
+#: Three Drives örneği (BURVA 2011) seçilince levhada 106 barın 106'sı
+#: doji çıkıyor ve grafik mum grafiği gibi durmuyordu.
+#:
+#: Vitrin örneğinin bu dönemden seçilmesi yalnız çirkin değil YANILTICI:
+#: kullanıcı "bizim çizicimiz bozuk" sanır. Sınır burada, çünkü
+#: düzeltilecek yer VERİ KAYNAĞI, çizici değil.
+EN_ERKEN = "2014-01-01"
+
 DEDEKTOR = {
     "abcd": Abcd,
     "gartley": Gartley,
@@ -211,7 +225,11 @@ def main() -> int:
         df = pd.read_parquet(yol)
         df.attrs["timeframe"] = Timeframe(a.zaman_dilimi)
         df.attrs["symbol"] = sembol
-        sinyaller = [s for s in ded(df).signals if s.direction == "long"]
+        sinyaller = [
+            s
+            for s in ded(df).signals
+            if s.direction == "long" and s.detected_at >= pd.Timestamp(EN_ERKEN, tz="UTC")
+        ]
         if not sinyaller:
             continue
         if not a.en_iyi:

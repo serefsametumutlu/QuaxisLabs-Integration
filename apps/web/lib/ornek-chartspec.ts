@@ -39,11 +39,18 @@ export const THYAO_GOLDEN_ZONE: ChartSpec = dogrula(hamGz as unknown);
  * `_okunaklilik` fonksiyonu). Sonuç kendiliğinden karışık çıktı — biri
  * hedefe ulaştı, ikisi stop oldu, biri süre doldu. Kârlı örnek seçmek,
  * verdikti gizlemenin görsel hâli olurdu.
+ *
+ * **Örnekler 2014 SONRASINDAN seçiliyor** ve bunun sebebi ölçülmüş bir
+ * veri kusuru: kaynak, BIST için 2014 öncesinde gerçek açılış fiyatı
+ * vermiyor, `open` alanını `close` ile dolduruyor. Three Drives örneği
+ * önce BURVA 2011'den seçilmişti ve 106 barın **106'sı** gövdesiz
+ * çıkıyordu — levha mum grafiği gibi görünmüyordu. Yeni örnekte
+ * (EMKEL 2026) bu oran %5.
  */
 import hamAbcd from "@/ornek/rtalb-abcd.chartspec.json";
 import hamGartley from "@/ornek/dogub-gartley.chartspec.json";
 import hamKelebek from "@/ornek/srvgy-kelebek.chartspec.json";
-import hamUcSurus from "@/ornek/burva-uc_surus.chartspec.json";
+import hamUcSurus from "@/ornek/emkel-uc_surus.chartspec.json";
 
 export const HARMONIK_ABCD: ChartSpec = dogrula(hamAbcd as unknown);
 export const HARMONIK_GARTLEY: ChartSpec = dogrula(hamGartley as unknown);

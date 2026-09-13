@@ -423,32 +423,33 @@ Kitabın Gartley için ~%70 isabet iddiası **doğrulanmadı**: ölçülen %41.4
 | Komposer | [`komposer/harmonik.py`](../../packages/chart/quaxis/chart/komposer/harmonik.py) |
 | Spec üretici | [`tools/harmonik_spec.py`](../../tools/harmonik_spec.py) — gerçek BIST verisi |
 | Örnekler | `rtalb-abcd` · `dogub-gartley` · `srvgy-kelebek` · `burva-uc_surus` |
-| İterasyonlar | **12** (`docs/design/ui/harmonik-*-koyu-1440-son.png`) |
+| İterasyonlar | **13** (`docs/design/ui/harmonik-*-koyu-1440-son.png`) |
 | İterasyon kaydı | [`docs/design/ui/README.md`](../design/ui/README.md) |
 | Onay | ❌ **KAPI KAPALI** |
 
 ### Kapının neden kapalı olduğu
 
-İki sebep var ve ikisi de yazılı:
+**Tek sebep kaldı: kullanıcı onayı alınmadı.** K5'in bitti kriteri bunu
+şart koşuyor.
 
-1. **Kullanıcı onayı alınmadı.** K5'in bitti kriteri bunu şart koşuyor.
-2. **Kapanmayan bir kusur var.** Fiyat aralığının UCUNDAKİ köşe, mumlarından
-   ~43 piksel uzağa düşüyor (Kelebek'te `A`). Sebebi ölçüldü:
-   `autoscaleInfoProvider` mumların ölçeğini genişletiyor ama
-   `priceToCoordinate` mum verisinin kendi aralığını kullanıyor. İki
-   düzeltme denendi, **ikisi de geri alındı** — biri hiç etki etmedi,
-   diğeri AB=CD'de işareti levhanın dışına çıkardı. Tahminle yazılan
-   düzeltme, düzelttiğinden fazlasını bozuyor.
-
-Bu kusur **Golden Zone ve Salınım Fibo ABCD'de de vardı**; oradaki köşeler
-fiyat aralığının ucunda olmadığı için görünmüyordu. Yani harmoniklerin
-getirdiği bir hata değil, harmoniklerin **ortaya çıkardığı** bir hata.
+i12'de açık bırakılan ölçek hatası **i13'te çözüldü**: fiyat aralığının
+ucundaki köşe mumlarından 43 piksel uzağa düşüyordu; kalibrasyon çizgisi
+enjekte edilip piksel taramasıyla sebep bulundu (`autoscaleInfoProvider`
+mumlar ile `priceToCoordinate` arasında ölçek ayrışması yaratıyordu).
+Sağlayıcı kaldırıldı, fark **2 piksele** indi. Ayrıntı ve geri alınan iki
+deneme: [`docs/design/ui/README.md`](../design/ui/README.md).
 
 ### Örnekler nasıl seçildi
 
 Seçim ölçütü **getiri değil okunaklılık**. Sonuç kendiliğinden karışık
 çıktı: biri hedefe ulaştı, ikisi stop oldu, biri süre doldurdu. Kârlı
 örnek seçmek, verdikti gizlemenin görsel hâli olurdu.
+
+Örnekler ayrıca **2014 sonrasından** seçiliyor: kaynak, BIST için 2014
+öncesinde gerçek açılış fiyatı vermiyor (`open` = `close`). İlk Three
+Drives örneğinde (BURVA 2011) 106 barın 106'sı gövdesizdi ve levha mum
+grafiği gibi görünmüyordu. K4 verdikti bundan etkilenmedi — OOS
+pencereleri en erken 2020-08-31'de başlıyor.
 
 ### Grafiğin taşıdığı en önemli ayrım
 

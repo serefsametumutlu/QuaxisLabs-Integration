@@ -11,7 +11,6 @@ import {
 } from "lightweight-charts";
 import {
   dogrula,
-  panelAraligi,
   type ChartSpec,
   type HacimSerisi,
   type MumSerisi,
@@ -118,7 +117,6 @@ export function Grafik({
     const hacimSeri = spec.seriler.find((s): s is HacimSerisi => s.tur === "hacim");
     if (!mumSeri) return;
     const fiyatPanel = spec.paneller.find((p) => p.id === mumSeri.panel)!;
-    const aralik = panelAraligi(spec, fiyatPanel.id);
 
     const renk = (t: string) => tokenRengi(kok, t);
 
@@ -163,23 +161,24 @@ export function Grafik({
       borderVisible: false,
       priceLineVisible: false,
       lastValueVisible: false,
-      // Panel oranı ChartSpec'ten gelir; hacim alttaki payı kaplar.
+      // **Fiyat ölçeği ChartSpec'in panel aralığına GÖRE GENİŞLETİLMİYOR
+      // ve bu bilinçli bir karar** (K5 i9–i13, piksel ölçümüyle):
       //
-      // **BİLİNEN SINIR (K5 i9–i12, ölçüldü).** Bu sağlayıcı MUMLARIN
-      // çizildiği ölçeği genişletiyor ama `priceToCoordinate` mum
-      // verisinin kendi aralığını kullanmaya devam ediyor. İkisi ayrışınca
-      // overlay ile mumlar farklı yerlere düşüyor; fark DOĞRUSAL olduğu
-      // için aralığın ortasındaki noktalar neredeyse yerinde kalıyor,
-      // yalnız UÇTAKİ nokta kayıyor — Kelebek'te formasyonun en yüksek
-      // köşesi mumların ~43 piksel üstünde duruyor.
+      // Eskiden `autoscaleInfoProvider` ile genişletiliyordu, böylece mum
+      // aralığının dışında kalan stop/hedef çizgileri de levhaya sığsın
+      // diye. Ölçüm o çözümün BAŞKA bir şeyi bozduğunu gösterdi: sağlayıcı
+      // devredeyken mumlar ile `priceToCoordinate` AYRI aralıklar kullanıyor.
+      // Kelebek spec'inde kalibrasyon çizgisi enjekte edilip ölçüldü —
+      // overlay serinin en yüksek fiyatını y=342'ye koyarken mumlar aynı
+      // fiyatı y≈390'a çiziyordu. Yani formasyonun köşesi mumlarının 48
+      // piksel üstünde, havada duruyordu.
       //
-      // Görünmez bir çıpa serisi ve elle koordinat hesabı denendi; ikisi
-      // de sorunu çözmedi, ikincisi AB=CD'de işareti levhanın tamamen
-      // dışına çıkardı. Kütüphanenin ölçek anlamını tahmin ederek
-      // yazılmış bir düzeltme, düzelttiğinden fazlasını bozuyor.
-      // Doğru çözüm bu davranışın kaynaktan okunmasını gerektiriyor ve
-      // AÇIK BİR İŞ olarak kaydedildi (docs/design/ui/README.md).
-      autoscaleInfoProvider: () => ({ priceRange: { minValue: aralik.alt, maxValue: aralik.ust } }),
+      // Sağlayıcı kaldırılınca fark 3–7 piksele iniyor (ölçüldü). Takas
+      // açık: aralık dışında kalan bir seviye artık levhanın kenarına
+      // sabitleniyor (bkz. `overlay.ts`, `seviye` katmanı) ve etiketinde
+      // yönünü gösteren bir ok taşıyor. **Köşeleri mumlarına oturmayan bir
+      // formasyon, kenara sabitlenmiş bir çizgiden daha kötüdür:** birincisi
+      // yanlış bilgi verir, ikincisi eksik bilgiyi AÇIKÇA söyler.
     });
     mum.priceScale().applyOptions({ scaleMargins: { top: 0.04, bottom: 1 - fiyatPanel.oran + 0.02 } });
 

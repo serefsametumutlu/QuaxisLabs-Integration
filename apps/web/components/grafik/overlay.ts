@@ -190,8 +190,16 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
       case "seviye": {
         const s = seviyeStili(k.rol);
         if (c.seviyeler === "vurgulu" && !s.vurgulu) break;
-        const y = c.y(k.fiyat);
-        if (y == null) break;
+        const ham = c.y(k.fiyat);
+        if (ham == null) break;
+        // Seviye levhanın DIŞINDA kalabilir: Kelebek'te stop her zaman mum
+        // aralığının altındadır. Fiyat ölçeği artık genişletilmiyor (bkz.
+        // `Grafik.tsx`), bu yüzden böyle bir çizgi kenara SABİTLENİR ve
+        // etiketi bir okla "burada değil, şu yönde" der. Sessizce kırpmak,
+        // riskin ne kadar olduğunu grafikten silmek olurdu.
+        const tasti = ham < 2 || ham > c.yukseklik - 2;
+        const y = Math.min(Math.max(ham, 2), c.yukseklik - 2);
+        const ok = !tasti ? "" : ham < 2 ? " ↑" : " ↓";
         const x0 = k.baslangic != null ? (c.x(k.baslangic) ?? 0) : 0;
         const xs = k.bitis != null ? (c.x(k.bitis) ?? sag + 4) : sag + 4;
         // Seviye bittikten SONRA çok soluk devam eder. Tamamen kesilirse
@@ -220,13 +228,15 @@ export function ciz(svg: SVGSVGElement, spec: ChartSpec, c: Cerceve): void {
             y2: y,
             stroke: c.renk(s.token),
             "stroke-width": s.kalinlik,
-            "stroke-dasharray": s.kesik,
-            opacity: s.opaklik,
+            // Kenara sabitlenmiş çizgi, gerçek yerinde duran bir çizgiyle
+            // aynı görünmemeli: daha soluk ve seyrek kesikli çizilir.
+            "stroke-dasharray": tasti ? "2 5" : s.kesik,
+            opacity: tasti ? s.opaklik * 0.5 : s.opaklik,
           }),
         );
         olukEtiketleri.push({
           y,
-          metin: c.dar ? kisalt(k.etiket) : k.etiket,
+          metin: (c.dar ? kisalt(k.etiket) : k.etiket) + ok,
           token: s.token,
         });
         break;
