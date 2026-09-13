@@ -184,6 +184,11 @@ KOSULLAR: dict[str, tuple[str, Callable[[dict], bool]]] = {
                         _dogru("endeks_yukselen")),
     "endeks_dusen": ("XU100 EMA50'sinin altında",
                      lambda p: p.get("endeks_yukselen") is False),
+    "macd_ve_oynaklik": (
+        "MACD uyumu VE sakin oynaklık rejimi birlikte",
+        lambda p: p.get("macd_uyum") is True
+        and _var(p, "atr_rejim") and float(p["atr_rejim"]) < 1.0,
+    ),
     "rejim_ve_yon": (
         "Piyasa rejimi sinyal yönüyle uyumlu (yükselen piyasada AL)",
         lambda p: (
