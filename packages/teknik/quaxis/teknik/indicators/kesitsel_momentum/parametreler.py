@@ -9,7 +9,7 @@ hiç yok ve BIST'e özgü bir gereklilik.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from quaxis.teknik.core.params import BaseParams
 
@@ -25,9 +25,18 @@ class KesitselMomentumParams(BaseParams):
     #: **Ölçümde sinyal örtüşmesini de bu belirler** — bkz. dedektör.
     tutus: int = 25
 
-    #: Evrenin üst dilimi. Kaynak: `topN=50`, S&P 500'de %10.
+    #: Evrenin dilimi. Kaynak: `topN=50`, S&P 500'de %10.
     #: BIST evreni farklı büyüklükte olduğu için SAYI değil ORAN korunur.
     ust_dilim: float = 0.10
+
+    #: Hangi uç seçilir: `"ust"` (momentum — en çok kazananlar) ya da
+    #: `"alt"` (ortalamaya dönüş — en çok kaybedenler).
+    #:
+    #: `"alt"` kaynağın **kısa** bacağının yalnız-alış karşılığıdır. Chan
+    #: uzun/kısa kuruyor; BIST'te açığa satış kısıtlı olduğu için kısa
+    #: bacağı satmak yerine ALMAK ayrı bir hipotezdir ve ayrı bir künye
+    #: olarak durur — ön kayıt: `docs/olcum/onkayit-kesitsel-donus.md`.
+    secim: Literal["ust", "alt"] = "ust"
 
     #: Sıralamadan önce atlanan son ay (21 gün).
     #:
@@ -75,6 +84,8 @@ class KesitselMomentumParams(BaseParams):
             )
         if self.asgari_ciro < 0:
             raise ValueError("asgari ciro negatif olamaz")
+        if self.secim not in ("ust", "alt"):
+            raise ValueError(f"seçim 'ust' ya da 'alt' olmalı, alınan: {self.secim!r}")
         if self.asgari_evren < 2:
             raise ValueError(
                 "asgari evren en az 2 olmalı — tek sembollü bir kesitte sıralama yoktur"

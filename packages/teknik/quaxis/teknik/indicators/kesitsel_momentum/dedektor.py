@@ -108,7 +108,9 @@ class KesitselMomentum(UniverseIndicator):
         if dar.any():
             yuzdelik = yuzdelik.mask(dar, axis=0)
 
-        esik = 1.0 - p.ust_dilim
+        # `ust`: yüzdelik ≥ 1−dilim · `alt`: yüzdelik ≤ dilim
+        ust_secim = p.secim == "ust"
+        esik = (1.0 - p.ust_dilim) if ust_secim else p.ust_dilim
         sonuclar: dict[str, IndicatorResult] = {}
         tarihler = kapanis.index
 
@@ -126,7 +128,9 @@ class KesitselMomentum(UniverseIndicator):
 
             sonraki_uygun = 0
             for i in range(len(tarihler)):
-                if i < sonraki_uygun or np.isnan(y[i]) or y[i] < esik:
+                if i < sonraki_uygun or np.isnan(y[i]):
+                    continue
+                if (y[i] < esik) if ust_secim else (y[i] > esik):
                     continue
                 # Birleşik takvimde var ama BU sembolde olmayan bir tarihe
                 # sinyal yazmak, var olmayan bir fiyattan alım demektir.
@@ -143,7 +147,8 @@ class KesitselMomentum(UniverseIndicator):
                         state="confirmed",
                         score=float(y[i]),
                         payload={
-                            "event": "kesitsel_momentum_ust_dilim",
+                            "event": f"kesitsel_momentum_{p.secim}_dilim",
+                            "secim": p.secim,
                             "momentum_getiri": float(g[i]),
                             "yuzdelik": float(y[i]),
                             "evren": int(evren_n[i]),
@@ -184,4 +189,23 @@ META_ATLAMALI = IndicatorMeta(
 def olustur_atlamali() -> KesitselMomentum:
     d = KesitselMomentum(KesitselMomentumParams(atlama_gun=21))
     d.meta = META_ATLAMALI
+    return d
+
+
+#: Ortalamaya dönüş varyantı: EN ÇOK KAYBEDENLERİ alır.
+#: Ayrı künye, çünkü ayrı bir HİPOTEZ — bkz. docs/olcum/onkayit-kesitsel-donus.md
+DONUS_AD = "kesitsel_donus"
+
+META_DONUS = IndicatorMeta(
+    name=DONUS_AD,
+    version=META.version,
+    category=META.category,
+    description="Evrenin ALT %10'unu 252 günlük getiriye göre seçer (ortalamaya dönüş)",
+    supported_timeframes=META.supported_timeframes,
+)
+
+
+def olustur_donus() -> KesitselMomentum:
+    d = KesitselMomentum(KesitselMomentumParams(secim="alt"))
+    d.meta = META_DONUS
     return d

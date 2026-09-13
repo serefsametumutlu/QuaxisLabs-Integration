@@ -21,6 +21,8 @@ from quaxis.teknik.indicators.kesitsel_momentum import META as KM_META
 from quaxis.teknik.indicators.kesitsel_momentum import META_ATLAMALI as KM_META_12_1
 from quaxis.teknik.indicators.kesitsel_momentum import olustur as km_olustur
 from quaxis.teknik.indicators.kesitsel_momentum import olustur_atlamali as km_olustur_12_1
+from quaxis.teknik.indicators.kesitsel_momentum.dedektor import META_DONUS
+from quaxis.teknik.indicators.kesitsel_momentum.dedektor import olustur_donus as km_olustur_donus
 
 KATALOG = Catalog.of(
     [
@@ -51,6 +53,13 @@ KATALOG = Catalog.of(
             name=KM_META_12_1.name, category=KM_META_12_1.category,
             factory=km_olustur_12_1, needs_universe=True,
             supported_timeframes=KM_META_12_1.supported_timeframes,
+        ),
+        # Ortalamaya dönüş: AYRI bir hipotez, ayrı künye. Momentum'un
+        # "tersi" değil — kendi ön kaydı ve kendi karar kuralı var.
+        IndicatorSpec(
+            name=META_DONUS.name, category=META_DONUS.category,
+            factory=km_olustur_donus, needs_universe=True,
+            supported_timeframes=META_DONUS.supported_timeframes,
         ),
     ]
 )

@@ -140,6 +140,7 @@ def measure_symbol(
     *,
     horizon: int,
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
+    pencere: str = "oos",
     permutations: int = VARSAYILAN_TUR,
     rng: np.random.Generator | None = None,
     komisyon: float = VARSAYILAN_KOMISYON,
@@ -154,14 +155,16 @@ def measure_symbol(
     Sinyal üretmeyen sembol `None` döner ve gözlem sayılmaz.
     """
     r = rng if rng is not None else np.random.default_rng(0)
-    oos_bas = _oos_start(close, oos_ratio)
+    kesim_t = _oos_start(close, oos_ratio)
 
     getiriler: list[float] = []
     yonler: list[float] = []
     for s in signals:
         t = s.detected_at
-        if t < oos_bas:
-            continue  # IS penceresi: iddia burada ölçülmez
+        if pencere == "oos" and t < kesim_t:
+            continue  # iddia GÖRÜLMEMİŞ dönemde ölçülür
+        if pencere == "is" and t >= kesim_t:
+            continue  # arama penceresi
         g = forward_return(close, t, horizon)
         if g is None:
             continue
@@ -173,10 +176,13 @@ def measure_symbol(
         return None
 
     # Adil baz: AYNI pencerede, AYNI sayıda, AYNI yön karışımıyla rastgele bar.
-    oos_i = close.index.get_loc(oos_bas)
-    if not isinstance(oos_i, int):
-        oos_i = int(np.asarray(oos_i).min())
-    secilebilir = np.arange(oos_i, len(close) - horizon)
+    kesim_i = close.index.get_loc(kesim_t)
+    if not isinstance(kesim_i, int):
+        kesim_i = int(np.asarray(kesim_i).min())
+    if pencere == "is":
+        secilebilir = np.arange(0, max(0, kesim_i - horizon))
+    else:
+        secilebilir = np.arange(kesim_i, len(close) - horizon)
     if len(secilebilir) == 0:
         return None
 
@@ -203,6 +209,7 @@ def measure(
     *,
     horizon: int = 20,
     oos_ratio: float = VARSAYILAN_OOS_ORANI,
+    pencere: str = "oos",
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
     komisyon: float = VARSAYILAN_KOMISYON,
@@ -223,15 +230,15 @@ def measure(
         sig = sinyaller.get(symbol, ())
         olcum = measure_symbol(
             symbol, close, sig,
-            horizon=horizon, oos_ratio=oos_ratio, permutations=permutations, rng=r,
-            komisyon=komisyon, kayma=kayma,
+            horizon=horizon, oos_ratio=oos_ratio, pencere=pencere,
+            permutations=permutations, rng=r, komisyon=komisyon, kayma=kayma,
         )
         if olcum is None:
             continue
         olcumler.append(olcum)
         bos_daginim.append(
             _null_distribution(
-                close, sig, horizon, oos_ratio, permutations, r, komisyon, kayma
+                close, sig, horizon, oos_ratio, permutations, r, komisyon, kayma, pencere
             )
         )
 
@@ -271,18 +278,27 @@ def _null_distribution(
     r: np.random.Generator,
     komisyon: float = VARSAYILAN_KOMISYON,
     kayma: float = VARSAYILAN_KAYMA,
+    pencere: str = "oos",
 ) -> np.ndarray:
     """Bir sembolün boş dağılımı: rastgele barlardan sembol ortalamaları."""
-    oos_bas = _oos_start(close, oos_ratio)
+    kesim_t = _oos_start(close, oos_ratio)
+
+    def _pencerede(t) -> bool:
+        return t >= kesim_t if pencere == "oos" else t < kesim_t
+
     yonler = [
         _direction_sign(s.direction)
         for s in signals
-        if s.detected_at >= oos_bas and forward_return(close, s.detected_at, horizon) is not None
+        if _pencerede(s.detected_at)
+        and forward_return(close, s.detected_at, horizon) is not None
     ]
-    oos_i = close.index.get_loc(oos_bas)
-    if not isinstance(oos_i, int):
-        oos_i = int(np.asarray(oos_i).min())
-    secilebilir = np.arange(oos_i, len(close) - horizon)
+    kesim_i = close.index.get_loc(kesim_t)
+    if not isinstance(kesim_i, int):
+        kesim_i = int(np.asarray(kesim_i).min())
+    secilebilir = (
+        np.arange(0, max(0, kesim_i - horizon)) if pencere == "is"
+        else np.arange(kesim_i, len(close) - horizon)
+    )
     if not yonler or len(secilebilir) == 0:
         return np.zeros(permutations)
 

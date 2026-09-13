@@ -206,3 +206,35 @@ def test_sembolde_olmayan_tarihe_sinyal_yazilmaz() -> None:
 def test_asgari_evren_ikiden_kucuk_olamaz() -> None:
     with pytest.raises(ValueError, match="tek sembollü bir kesitte sıralama yoktur"):
         KesitselMomentumParams(asgari_evren=1)
+
+
+# -------------------------------------------------------- alt dilim
+
+
+def test_alt_dilim_en_zayiflari_secer() -> None:
+    """Ortalamaya dönüş varyantı: en çok KAYBEDENLERİ alır."""
+    d = KesitselMomentum(
+        KesitselMomentumParams(geriye_bakis=60, tutus=10, ust_dilim=0.20, secim="alt")
+    )
+    secilen = set(d(_evren(20), _seri(BAR, 99, 0.0002)))
+    assert "S00" in secilen, "en zayıf sembol seçilmeliydi"
+    assert "S19" not in secilen, "en güçlü sembol seçilmemeliydi"
+
+
+def test_ust_ve_alt_ortusmez() -> None:
+    """İki varyant zıt uçları seçer; aynı sembol ikisinde de çıkarsa
+    sıralama mantığı bozuk demektir."""
+    evren, endeks = _evren(20), _seri(BAR, 99, 0.0002)
+    ust = set(KesitselMomentum(
+        KesitselMomentumParams(geriye_bakis=60, tutus=10, ust_dilim=0.15)
+    )(evren, endeks))
+    alt = set(KesitselMomentum(
+        KesitselMomentumParams(geriye_bakis=60, tutus=10, ust_dilim=0.15, secim="alt")
+    )(evren, endeks))
+    assert ust and alt
+    assert not (ust & alt)
+
+
+def test_gecersiz_secim_reddedilir() -> None:
+    with pytest.raises(ValueError, match="seçim"):
+        KesitselMomentumParams(secim="orta")
