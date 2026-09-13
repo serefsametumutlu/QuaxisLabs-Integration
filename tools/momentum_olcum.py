@@ -70,7 +70,7 @@ def kosu(katalog: str, gosterge: str, evren: list[str], tf: Timeframe, market: M
 
 def rapor(
     s: ForwardReturnResult, kalib, slug: str, gosterge: str, tf: Timeframe,
-    ufuk: int, ham: int, donem: str,
+    ufuk: int, ham: int, donem: str, pencere: str,
 ) -> str:
     ham_getiri = (
         float(np.mean([m.signal_return for m in s.measurements])) if s.measurements else 0.0
@@ -79,6 +79,7 @@ def rapor(
         float(np.mean([m.baseline_return for m in s.measurements])) if s.measurements else 0.0
     )
     kazanan = sum(1 for m in s.measurements if m.signal_return > 0)
+    bolme = f"ilk %{(1 - s.oos_ratio) * 100:.0f} / son %{s.oos_ratio * 100:.0f}"
     return f"""# {slug} — K3 + K4 · {tf.value}
 
 **Tarih:** {dt.date.today().isoformat()} · **Gösterge:** `{gosterge}`
@@ -106,7 +107,7 @@ def rapor(
 |---|---|
 | **Bağımsız gözlem (sembol)** | **{s.independent_observations}** |
 | Ölçülen sinyal | {s.total_signals} |
-| Pencere | ilk %{(1 - s.oos_ratio) * 100:.0f} IS / son %{s.oos_ratio * 100:.0f} OOS |
+| Pencere | **{pencere.upper()}** (bölme: {bolme}) |
 | Ufuk | {s.horizon} bar (stratejinin kendi tutuş süresi) |
 | **Sinyal getirisi** | **%{ham_getiri * 100:+.2f}** |
 | **Adil baz** (rastgele sembol) | **%{baz * 100:+.2f}** |
@@ -144,6 +145,7 @@ def main() -> int:
     ap.add_argument("--market", default="bist")
     ap.add_argument("--tur", type=int, default=2000)
     ap.add_argument("--evren", default=None)
+    ap.add_argument("--pencere", default="oos", choices=["is", "oos"])
     a = ap.parse_args()
 
     market, tf = Market(a.market), Timeframe(a.zaman_dilimi)
@@ -174,7 +176,7 @@ def main() -> int:
     )
     print(kalib.diagnosis, flush=True)
 
-    sonuc = measure(seri, sinyaller, horizon=ufuk, permutations=a.tur)
+    sonuc = measure(seri, sinyaller, horizon=ufuk, pencere=a.pencere, permutations=a.tur)
     print(f"n={sonuc.independent_observations} sembol · fark "
           f"%{sonuc.mean_difference * 100:+.2f} · p={sonuc.p_value:.4f} "
           f"· {sonuc.verdict}", flush=True)
@@ -184,9 +186,12 @@ def main() -> int:
     donem = f"{ilk.date()} – {son.date()}"
 
     OLCUM_KOK.mkdir(parents=True, exist_ok=True)
-    hedef = OLCUM_KOK / f"{a.slug}-K3K4-{tf.value}-{dt.date.today().isoformat()}.md"
+    hedef = OLCUM_KOK / (
+        f"{a.slug}-K3K4-{tf.value}-{a.pencere}-{dt.date.today().isoformat()}.md"
+    )
     hedef.write_text(
-        rapor(sonuc, kalib, a.slug, a.gosterge, tf, ufuk, ham, donem), encoding="utf-8"
+        rapor(sonuc, kalib, a.slug, a.gosterge, tf, ufuk, ham, donem, a.pencere),
+        encoding="utf-8",
     )
     print(f"\n{hedef.relative_to(KOK)} yazıldı.")
     return 0

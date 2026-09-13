@@ -14,6 +14,16 @@ referans: ""                    # references/ altındaki hedef görsel (K5 için
 #   kenar-var     — ölçüldü, FDR eşiğini geçti
 verdikt: kanitlanmadi
 
+durum: durduruldu
+durdurma_gerekcesi: >
+  Momentum ust %10, rastgele hisseye gore -%9.98 geride (p=1.0000, 163
+  sembol). 12-1 varyanti da ayni yonde (-%7.96). Ters hipotez (alt %10)
+  ON KAYITLA sinandi ve REDDEDILDI: IS -%0.95 (p=0.57), OOS -%0.25
+  (p=0.51). Etki simetrik degil -- kaybedenler rastgeleden ayirt
+  edilemiyor, kazananlar geride. Sonuc bir strateji degil bir FILTRE
+  hipotezi uretti ve o kendi on kaydini bekliyor.
+  Ozet: docs/olcum/onkayit-kesitsel-donus.md
+
 kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/kesitsel-momentum-K0.md", "docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md"] }
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/kesitsel_momentum/parametreler.py"] }
@@ -46,6 +56,8 @@ kapilar:
 | **Yön** | **Yalnız alış** — BIST'te açığa satış kısıtlı (kullanıcı kararı, 2026-09-13) |
 | **Referans görsel** | yok — bu bir grafik kurulumu değil, kesitsel sıralama |
 | **Verdikt** | **kanıtlanmadı** — ve güçlü biçimde TERS yönde (−%9.98) |
+| **Durum** | ⏸ durduruldu (2026-09-13) — ters hipotez de ön kayıtla reddedildi |
+| **Ters varyant** | `kesitsel_donus` — [`onkayit-kesitsel-donus.md`](../olcum/onkayit-kesitsel-donus.md): REDDEDİLDİ |
 
 ---
 

@@ -1,8 +1,8 @@
 # Ön kayıt — Kesitsel Ortalamaya Dönüş (`kesitsel_donus`)
 
 **Yazıldığı tarih:** 2026-09-13
-**Durum:** ⏳ **TEST HENÜZ KOŞULMADI.** Bu belge sonuç görülmeden yazıldı ve
-sonucu görmeden commit edildi.
+**Durum:** ✅ **KOŞULDU** (2026-09-13). Belge sonuç görülmeden yazıldı ve
+`944bb5a` ile commit edildi; sonuç bölümü sonradan, olduğu gibi eklendi.
 
 > Bu belgenin varlık sebebi: **sonucu gördükten sonra kuralı değiştirme
 > imkânını ortadan kaldırmak.** Hipotez, pencere, karar kuralı ve neyin
@@ -98,4 +98,54 @@ gelir.
 
 ## 8. Sonuç
 
-*(Koşu sonrası doldurulacak — ne çıkarsa.)*
+| Pencere | Sembol | Sinyal | Strateji | Adil baz | **Fark** | p |
+|---|---|---|---|---|---|---|
+| **IS** (birincil) | 39 | 87 | %+1.12 | %+2.06 | **−%0.95** | 0.5697 |
+| **OOS** (doğrulama) | 213 | 832 | %+3.49 | %+3.74 | **−%0.25** | 0.5142 |
+
+### Karar kuralı
+
+| Madde | Sonuç |
+|---|---|
+| 1 · IS'te fark pozitif ve p ≤ 0.05 | ✘ (fark **negatif**) |
+| 2 · OOS'ta fark pozitif ve p ≤ 0.05 | ✘ (fark **negatif**) |
+| 3 · Her iki pencerede ≥ 30 sembol | ✔ |
+| 4 · İşlem maliyeti dahil | ✔ |
+
+### Verdikt
+
+**HİPOTEZ REDDEDİLDİ.** Kural açıktı: "herhangi bir pencerede fark
+negatif çıkarsa hipotez reddedilir." İki pencerede de negatif.
+
+### Asıl bulgu: etki SİMETRİK DEĞİL
+
+Momentum ölçümüyle yan yana koyunca tablo netleşiyor:
+
+| Kimi alırsan | Rastgeleye karşı fark |
+|---|---|
+| Üst %10 (geçen yılın kazananları) | **−%9.98** |
+| Alt %10 (geçen yılın kaybedenleri) | **−%0.25** |
+
+Kaybedenler rastgeleden **ayırt edilemiyor** (p=0.51). Kazananlar ise
+belirgin biçimde **geride**. Yani bu "ortalamaya dönüş var" değil,
+**"geçmişin kazananlarından uzak dur"** demek.
+
+Ön kayıttaki 5. maddenin son şıkkı tam bunu öngörmüştü: fark
+momentumun negatifinin belirgin altındaysa "momentumun aynası" diye
+sunulmaz. Sunmuyorum — ayna değil.
+
+### Bunun pratik karşılığı
+
+Kendi başına bir strateji değil ama **bir filtre**: hangi kurulum olursa
+olsun, son 12 ayın en çok kazanan %10'undaki hisselerde uygulamamak
+ölçülebilir bir fark yaratıyor gibi görünüyor. Bu bir hipotez ve **kendi
+ön kaydını hak ediyor** — bu belgede ölçülmedi.
+
+### IS penceresinin küçüklüğü
+
+IS'te yalnız 39 sembol/87 sinyal var; OOS'ta 213/832. Sebep yapısal:
+252 günlük geriye bakış + BIST'te sembollerin çoğunun son yıllarda
+listelenmesi, erken dönemde sıralanacak sembol bırakmıyor. Kural
+"≥30 sembol" eşiğini geçiyor ama IS sonucunun güven aralığı geniştir;
+karar zaten iki pencerenin **ikisinde de** negatif olmasına dayanıyor.
+
