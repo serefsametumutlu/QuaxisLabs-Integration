@@ -12,14 +12,14 @@ referans: "references/G8es0m9W4AAiTAK.png"   # ANLAMAK için, kopyalamak için d
 #   kanitlanmadi  — ölçüldü, FDR sonrası kenar bulunamadı
 #   izlenen-aday  — ölçüldü, en az çürütülmüş grupta
 #   kenar-var     — ölçüldü, FDR eşiğini geçti
-verdikt: olculmedi
+verdikt: kanitlanmadi
 
 kapilar:
-  K0: { gecildi: null, kanit: ["docs/strateji/kaynak/golden-zone-K0.md"] }
-  K1: { gecildi: null, kanit: [] }
-  K2: { gecildi: null, kanit: [] }
-  K3: { gecildi: null, kanit: [] }
-  K4: { gecildi: null, kanit: [] }
+  K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/golden-zone-K0.md", "docs/olcum/golden-zone-K3-A.md"] }
+  K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/golden_zone/parametreler.py"] }
+  K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/golden_zone/dedektor.py", "packages/teknik/tests/test_golden_zone.py"] }
+  K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/golden-zone-K3-A.md", "docs/olcum/golden-zone-K3-B.md", "docs/olcum/golden-zone-K3-C.md", "docs/olcum/veri-bist-1D-2026-09-13.md"] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/golden-zone-K4-katmanli-2026-09-13.md", "docs/olcum/golden-zone-r2-K4-katmanli-2026-09-13.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -45,7 +45,7 @@ kapilar:
 | **Zaman dilimleri** | 1G · 4S (K3 hangisinin makul aday ürettiğini söyleyecek) |
 | **Yön** | İki yönlü |
 | **Referans görsel** | `references/G8es0m9W4AAiTAK.png` — **anlamak için**, kopyalamak için değil |
-| **Verdikt** | ölçülmedi |
+| **Verdikt** | **kanıtlanmadı** — 543 sembol, 8432 işlem, kenar bulunamadı |
 
 ---
 
@@ -108,27 +108,27 @@ kitaptan **alıntı** (sayfa numarasıyla) ya da **K3 ölçümü** (o zaman K3'�
 **Kullanıcı kararı (2026-09-13): "Eşiklerin tamamı K3 ölçümünden türetilsin."**
 ICT'nin sayıları aramanın başlangıç noktasıdır, gerekçesi değil.
 
-> **K0 bu strateji için BİLEREK AÇIK.** Karar "eşiklerin tamamı K3 ölçümünden
-> türetilsin" olduğu için, aşağıdaki sayıların hiçbirinin henüz gerekçesi yok —
-> sadece arama noktası var. `pasaport.py dogrula` her eşik için `K3:` ölçüm
-> dosyasını diskte arar ve bulamadıkça bulgu yazar. **Bu bir hata değil,
-> kapının kendisidir:** K0 ancak K3 raporu yazılınca kapanır.
+> **K0, K3 ölçüldükten SONRA kapandı** — planlandığı gibi. Karar "eşiklerin
+> tamamı K3'ten türetilsin"di; K1/K2 açıkça geçici varsayılanlarla kodlandı,
+> K3 koşuldu, K0 kapandı.
 >
-> Sıra bu stratejide özeldir: K1/K2 **açıkça geçici** varsayılanlarla kodlanır,
-> K3 ölçülür, K0 kapanır, sonra K4. Kapı atlanmıyor — geciktiriliyor ve nedeni
-> burada yazılı.
+> **Ama türetme gerçekleşmedi ve bu tabloda öyle duruyor.** Türetme, ölçümün
+> bir yön göstermesini gerektirir — göstermedi (bkz. K4). Kenarın olmadığı
+> yerde eşik "optimize etmek" gürültüye eğri uydurmak olurdu (Pardo
+> s.291–293). Eşikler kaynaktaki hâliyle kaldı ve sonuç **onlarla**
+> raporlandı; her satırın `K3:` dosyası bu kararı ayrıca yazıyor.
 
 | Eşik | Değer | Kaynak |
 |---|---|---|
-| bolge_sig | 0.62 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
-| bolge_derin | 0.79 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
-| sweet_spot | 0.705 (geçici) | `K3: docs/olcum/golden-zone-K3-A.md` |
-| yer_degistirme_min | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
-| supurme_toleransi | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
-| fvg_min_bosluk | geçici | `K3: docs/olcum/golden-zone-K3-B.md` |
-| donus_max_bar | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+| bolge_sig | 0.62 | `K3: docs/olcum/golden-zone-K3-A.md` |
+| bolge_derin | 0.79 | `K3: docs/olcum/golden-zone-K3-A.md` |
+| sweet_spot | 0.705 | `K3: docs/olcum/golden-zone-K3-A.md` |
+| yer_degistirme_atr | 1.5 | `K3: docs/olcum/golden-zone-K3-A.md` |
+| supurme (bayrak) | — | `K3: docs/olcum/golden-zone-K3-A.md` |
+| fvg_min_atr | 0.1 | `K3: docs/olcum/golden-zone-K3-B.md` |
+| donus_max_bar | 20 | `K3: docs/olcum/golden-zone-K3-A.md` |
 | stop_tamponu | 0 (wick ucu) | `K3: docs/olcum/golden-zone-K3-A.md` |
-| zaman_bariyeri | geçici | `K3: docs/olcum/golden-zone-K3-A.md` |
+| zaman_bariyeri | 40 | `K3: docs/olcum/golden-zone-K3-A.md` |
 
 **`hedef` bir eşik değildir**, kurulumun tanımıdır: ICT'de hedef yer
 değiştirmenin ucudur (%0 seviyesi — iç aralık likiditesi). Ayarlanabilir bir
@@ -277,11 +277,14 @@ geçmişi kaydıran birine bölgeyi daha bilinemezken çizilmiş gösterirdi.
 
 | | |
 |---|---|
-| Ölçüm dosyası | `docs/olcum/<slug>-K3-<tarih>.md` |
-| Evren | *(kaç sembol)* |
-| Aday sayısı | *(sembol başına ortalama + toplam)* |
-| Aday üretmeyen sembol | *(kaç tanesi sıfır aday verdi — hepsi sıfırsa gösterge bozuktur)* |
-| Sonuç | *(eşikler oturdu mu, hangi parametre değiştirildi)* |
+| Ölçüm dosyaları | [`golden-zone-K3-A.md`](../olcum/golden-zone-K3-A.md) · [`-B`](../olcum/golden-zone-K3-B.md) · [`-C`](../olcum/golden-zone-K3-C.md) |
+| Veri kalitesi | [`veri-bist-1D-2026-09-13.md`](../olcum/veri-bist-1D-2026-09-13.md) — 648 listeden **543 sembol** ölçüldü |
+| Aday sayısı (A) | sembol başına ortalama **19.2** · toplam 10 417 |
+| Aday sayısı (B) | 13.7 · (FVG/OB koşulu %29 eliyor) |
+| Aday sayısı (C) | 2.4 · (süpürme koşulu sert eliyor) |
+| Aday üretmeyen sembol | A: %2 · B: %2 · C: %13 |
+| Teşhis | **MAKUL** (üç katmanda da) — eşik ne evreni boğuyor ne susturuyor |
+| Sonuç | **Hiçbir eşik değiştirilmedi.** Ölçüm bir yön göstermediği için türetme yapılamadı; kenarın olmadığı yerde eşik optimize etmek gürültüye eğri uydurmak olurdu (Pardo s.291–293). |
 
 > Önceki projede `breakout_fvg` ve `flag_pennant` 4S'te **648/648 sembolde
 > sıfır aday** veriyordu ve bu ancak çok sonra fark edildi. K3 bunun içindir.
@@ -296,15 +299,15 @@ geçmişi kaydıran birine bölgeyi daha bilinemezken çizilmiş gösterirdi.
 
 | | |
 |---|---|
-| Ölçüm dosyası | `docs/olcum/<slug>-K4-<tarih>.md` |
-| Evren | *(kaç sembol)* |
-| Bağımsız gözlem | *(kaç sembol — bar değil, SEMBOL)* |
-| Pencere | *(IS/OOS oranı)* |
-| Ufuk | *(kaç bar ileri)* |
-| Adil baza karşı fark | *(%)* |
-| Permütasyon p değeri | |
-| BH-FDR (q=0.05) | *(geçti / geçemedi)* |
-| **Verdikt** | *(künyedeki `verdikt` alanıyla AYNI olmalı)* |
+| Ölçüm dosyaları | [`golden-zone-K4-katmanli`](../olcum/golden-zone-K4-katmanli-2026-09-13.md) (yapısal hedef) · [`golden-zone-r2-K4-katmanli`](../olcum/golden-zone-r2-K4-katmanli-2026-09-13.md) (sabit 2R) |
+| Evren | 543 BIST sembolü, 1G |
+| Bağımsız gözlem | **518 sembol** (A katmanı) — bar değil, SEMBOL |
+| Pencere | ilk %70 IS / son %30 OOS (~4 yıl) |
+| Ufuk | 20 bar (ileri getiri) · 40 bar (zaman bariyeri) |
+| Adil baza karşı fark | **%−0.34** (A) — negatif |
+| Permütasyon p değeri | 0.7981 (ileri getiri) · 0.9530 (R) |
+| BH-FDR (q=0.05) | uygulanmadı — aile tek strateji; hiçbir ham p eşiğin yanından geçmedi |
+| **Verdikt** | **kanitlanmadi** |
 
 ### R-katsayısı (üç bariyer)
 
@@ -314,20 +317,43 @@ geçmişi kaydıran birine bölgeyi daha bilinemezken çizilmiş gösterirdi.
 > çalışma (648 backtest) tam olarak bu hatayı yaptı — zaman bazlı çıkış kullandı,
 > stop/hedef koymadı. Aynı barda iki bariyer de vurulduysa **stop** sayılır.
 
+Katmanlı ölçüm — soru "kenar var mı" değil, **"kenar EKLİYOR mu"**:
+
+| Katman | İşlem | Sembol | İsabet | Ort. R | Adil baz | ΔR | p |
+|---|---|---|---|---|---|---|---|
+| A · BOS + OTE | 8432 | 518 | %40.5 | **+0.045R** | +0.071R | — | 0.9530 |
+| B · + FVG/OB | 6004 | 515 | %39.7 | +0.020R | +0.073R | −0.025R | 0.9960 |
+| C · + süpürme | 1056 | 424 | %39.2 | +0.001R | +0.048R | −0.019R | 0.6442 |
+
+Çıkış kırılımı (A): **%37 hedef · %57 stop · %6 zaman.**
+
+Sabit 2R hedefle (`golden_zone_r2`) aynı tablo: A +0.058R (baz +0.080R,
+p=0.9270). Sonuç değişmiyor.
+
 | | |
 |---|---|
-| İşlem sayısı | *(kaç işlem / kaç sembol)* |
-| İsabet | *(%)* |
-| **İşlem başına beklenen R** | |
-| Adil baz (aynı risk, rastgele bar) | |
-| Stop / hedef / zaman çıkış oranı | |
-| Permütasyon p değeri | |
-| **Verdikt (R)** | |
+| **Verdikt (R)** | **kanitlanmadi** — üç katmanda da |
 
 ### Ne çıkarsa o
 
-*(Sonuç olumsuzsa da burada aynı açıklıkla yazılır. "Zarar ettiriyor" ile
-"işe yaradığına dair kanıt yok" farklı şeylerdir — hangisi olduğunu yaz.)*
+**Kenar bulunamadı, üstelik teyit katmanları değer EKSİLTTİ.**
+
+- Sinyaller, aynı risk yapısıyla rastgele barlardan girmekten daha iyi değil.
+- FVG/Order Block katmanı işlemlerin %29'unu eledi; **elediği kısım kalandan
+  daha kötü değildi.** Meta-etiketleme hipotezi (LdP s.51–53) doğrulanmadı.
+- Örneklem mazeret değil: en dar katman bile 1056 işlem / 424 sembol.
+
+**"Kenar yok" ≠ "zarar ettirir".** İşlem başına ortalama R pozitif (+0.045R);
+strateji para kaybettirmiyor, **piyasanın kendi verdiğinin altında kalıyor**.
+Kurulumun geometrisi gerçekten lehte (0.62 girişte 1.63:1, 0.705'te 2.39:1)
+ama isabet oranı tam o avantajı silecek kadar düşük: %37 hedef × ~1.7R eksi
+%57 stop × 1R ≈ sıfır. **Asimetri gerçek, ama fiyatlanmış.**
+
+**Bu "ICT işe yaramaz" demek değil.** Ölçtüğümüz, ICT'nin uyguladığı şey
+değil: FX intraday yerine BIST günlük, kill zone filtresi yok, kademeli
+çıkış yok. Sapmaların her biri K0'da gerekçeli. Çürütülen iddia şu:
+**"OTE bölgesi, BIST günlükte tek başına swing kurulumu olarak kenar
+üretir."**
 
 ---
 

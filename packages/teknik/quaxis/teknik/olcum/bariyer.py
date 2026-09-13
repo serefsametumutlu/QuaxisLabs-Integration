@@ -99,14 +99,23 @@ def barrier_outcome(
     direction: Direction = "long",
     max_bars: int = 60,
     symbol: str = "",
+    entry: float | None = None,
 ) -> BarrierOutcome | None:
     """Girişten sonraki barları tek tek yürüyüp hangi bariyerin vurulduğunu bulur.
 
-    `stop` ve `target` FİYAT seviyeleridir, mesafe değil. Giriş, sinyal barının
-    KAPANIŞIDIR — bar içinden giriş varsaymak geçmişi yeniden yazmaktır.
+    `stop` ve `target` FİYAT seviyeleridir, mesafe değil.
 
-    Yeterli ileri bar yoksa ya da risk sıfırsa `None` döner; eksik veriyi
-    "başabaş" saymak stratejiyi kayırır.
+    `entry` verilmezse sinyal barının KAPANIŞI kullanılır. **Limit emirle
+    çalışan stratejilerde bu yanlıştır ve ölçülmüş bir hataya yol açtı:**
+    Golden Zone girişi 0.62 seviyesindedir, sinyal zaten fiyat o seviyeye
+    DOKUNDUĞU için üretilir. Kapanışı giriş saymak, riski (giriş − stop)
+    barın nerede kapandığına bağlı kılıyordu; 689 sinyalin bir kısmında
+    kapanış stop'un dibindeydi ve risk SIFIRA inip R'yi patlatıyordu —
+    rastgele baz +12R gibi imkânsız değerler veriyordu. Bölgeden ölçülen
+    riskin en düşüğü %0.8 iken kapanıştan ölçülenin en düşüğü %0.0'dı.
+
+    Yeterli ileri bar yoksa ya da risk sıfır/negatifse `None` döner; eksik
+    veriyi "başabaş" saymak stratejiyi kayırır.
     """
     try:
         i = ohlc.index.get_loc(entry_t)
@@ -116,7 +125,7 @@ def barrier_outcome(
         return None
 
     yon = _sign(direction)
-    giris = float(ohlc["close"].iloc[i])
+    giris = float(ohlc["close"].iloc[i]) if entry is None else float(entry)
     risk = (giris - stop) * yon
     if risk <= 0:
         return None  # stop yanlış tarafta: sinyal geçersiz, ölçüme girmez
@@ -301,14 +310,22 @@ def measure_r(
         for sinyal, stop, hedef in kayitlar:
             if sinyal.detected_at < oos_bas:
                 continue  # IS penceresi: iddia burada ölçülmez
+            # Strateji kendi giriş seviyesini bildiriyorsa O kullanılır:
+            # limit emirle çalışan bir kurulumda giriş, barın kapanışı değil
+            # emrin konduğu seviyedir (bkz. `barrier_outcome` docstring'i).
+            giris_seviyesi = sinyal.payload.get("giris")
             s = barrier_outcome(
                 df, sinyal.detected_at, stop=stop, target=hedef,
                 direction=sinyal.direction, max_bars=max_bars, symbol=sembol,
+                entry=giris_seviyesi,
             )
             if s is None:
                 continue
             kendi.append(s)
-            giris = float(df["close"].loc[sinyal.detected_at])
+            giris = (
+                float(giris_seviyesi) if giris_seviyesi is not None
+                else float(df["close"].loc[sinyal.detected_at])
+            )
             y = _sign(sinyal.direction)
             risk_o.append(abs(giris - stop) / giris)
             hedef_o.append(abs(hedef - giris) / giris)

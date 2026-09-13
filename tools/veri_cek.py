@@ -72,7 +72,81 @@ def main() -> int:
         print("Hata alanlar (ilk 20) — K3 raporunda 'veri hatası' olarak SAYILMALI:")
         for sembol, mesaj in hatali[:20]:
             print(f"  {sembol}: {mesaj[:110]}")
+    if a.rapor:
+        hedef = _rapor_yaz(market, tf, evren, tamam, hatali)
+        print(f"\n{hedef.relative_to(KOK)} yazıldı.")
     return 0
+
+
+def _sinifla(mesaj: str) -> str:
+    """Hatayı K3'ün ayırt etmesi gereken türlere böler.
+
+    "Sembol borsada yok" ile "veride bozuk tick var" aynı şey değildir:
+    birincisi evren listesinin güncelliğiyle, ikincisi sağlayıcının
+    kalitesiyle ilgilidir ve farklı şeyler yapmayı gerektirir.
+    """
+    if "veri dönmedi" in mesaj or "delisted" in mesaj or "Not Found" in mesaj:
+        return "borsada yok / veri dönmedi"
+    if "high >= max" in mesaj:
+        return "high < gövde (bozuk tick)"
+    if "low <= min" in mesaj:
+        return "low > gövde (bozuk tick)"
+    if "NaN" in mesaj:
+        return "NaN değer"
+    return "diğer"
+
+
+def _rapor_yaz(
+    market: Market, tf: Timeframe, evren: list[str], tamam: int, hatali: list
+) -> pathlib.Path:
+    from collections import Counter
+
+    sayim = Counter(_sinifla(m) for _, m in hatali)
+    kok = KOK / "docs" / "olcum"
+    kok.mkdir(parents=True, exist_ok=True)
+    hedef = kok / f"veri-{market.value}-{tf.value}-{dt.date.today().isoformat()}.md"
+
+    tur_satir = "\n".join(
+        f"| {tur} | {n} | %{n / len(evren) * 100:.1f} |" for tur, n in sayim.most_common()
+    )
+    liste = "\n".join(
+        f"| `{sembol}` | {_sinifla(mesaj)} | {mesaj[:150]} |" for sembol, mesaj in sorted(hatali)
+    )
+    hedef.write_text(
+        f"""# Veri kalitesi — {market.value.upper()} · {tf.value}
+
+**Tarih:** {dt.date.today().isoformat()}
+
+| | |
+|---|---|
+| Evren | {len(evren)} sembol |
+| **Verisi hazır** | **{tamam}** (%{tamam / len(evren) * 100:.1f}) |
+| Hata veren | {len(hatali)} (%{len(hatali) / len(evren) * 100:.1f}) |
+
+## Hata türleri
+
+| Tür | Sembol | Evrenin yüzdesi |
+|---|---|---|
+{tur_satir}
+
+> "Borsada yok" ile "bozuk tick" AYRI sayılır. Birincisi evren listesinin
+> güncelliğiyle ilgilidir, ikincisi sağlayıcının kalitesiyle — ve farklı
+> şeyler yapmayı gerektirir.
+>
+> Bozuk tick'li semboller **onarılmadı, elendi.** Veriyi sessizce düzeltmek,
+> ölçümün dayandığı zemini görünmez biçimde değiştirmek olurdu. Bedeli
+> yukarıda yazılı ve K3/K4 raporlarının "ölçümün sınırları" bölümüne girmek
+> zorunda: elenen semboller rastgele bir alt küme DEĞİL.
+
+## Tam döküm
+
+| Sembol | Tür | Mesaj |
+|---|---|---|
+{liste}
+""",
+        encoding="utf-8",
+    )
+    return hedef
 
 
 if __name__ == "__main__":

@@ -54,8 +54,10 @@ OLCUM_KOK = KOK / "docs" / "olcum"
 
 BASLIK = (
     "| Katman | İçerik | İşlem | Sembol | İsabet | Ort. R | Adil baz | ΔR "
-    "| p (R) | İleri getiri | p | Verdikt |"
+    "| p (R) | Hedef/Stop/Zaman | İleri getiri | p | Verdikt |"
 )
+#: Başlıktaki sütun sayısı kadar ayraç.
+AYRAC = "|" + "---|" * 13
 
 #: Pardo s.295. Altına düşen katman sayı üretir, VERDİKT üretmez.
 ASGARI_ISLEM = 30
@@ -156,7 +158,9 @@ def rapor(katmanlar: list[KatmanSonucu], slug: str, gosterge: str, tf: Timeframe
         satir.append(
             f"| **{k.ad}** | {k.aciklama} | {k.r.n_trades} | {k.r.n_symbols} | "
             f"%{k.r.win_rate * 100:.1f} | {k.r.mean_r:+.3f}R | {k.r.baseline_mean_r:+.3f}R | "
-            f"{delta} | {k.r.p_value:.4f} | %{k.ileri.mean_difference * 100:+.2f} | "
+            f"{delta} | {k.r.p_value:.4f} | "
+            f"%{k.r.target_rate * 100:.0f} / %{k.r.stop_rate * 100:.0f} / "
+            f"%{k.r.time_rate * 100:.0f} | %{k.ileri.mean_difference * 100:+.2f} | "
             f"{k.ileri.p_value:.4f} | {k.verdikt} |"
         )
         onceki = k
@@ -181,7 +185,7 @@ bir önceki katmana göre işlem başına beklenen R değişimidir.
 %{oos:.0f}'i). İki sütun aynı dönemden konuşmazsa tablo sessizce yanıltır.
 
 {BASLIK}
-|---|---|---|---|---|---|---|---|---|---|---|---|
+{AYRAC}
 {tablo}
 {uyari}
 ## Katman başına aday sayımı (K3)

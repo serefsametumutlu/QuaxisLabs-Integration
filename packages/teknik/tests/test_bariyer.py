@@ -209,6 +209,30 @@ def test_toplu_r_tek_tek_hesapla_ayni_sonucu_verir() -> None:
         assert toplu == pytest.approx(np.array(tek_tek))
 
 
+def test_giris_seviyesi_kapanisin_yerine_gecer() -> None:
+    """**Ölçülmüş hatanın regresyonu.**
+
+    Golden Zone limit emirle çalışır: giriş 0.62 seviyesidir, sinyal zaten
+    fiyat oraya DOKUNDUĞU için üretilir. Kapanışı giriş saymak riski
+    (giriş − stop) barın nerede kapandığına bağlı kılıyordu; kapanış
+    stop'un dibindeyse risk sıfıra iniyor ve R patlıyordu — rastgele baz
+    +12R gibi imkânsız değerler veriyordu."""
+    df = _ohlc([100, 96, 104, 110], yuksek=[100, 100, 105, 112], dusuk=[100, 95.5, 96, 103])
+    # Kapanış 96, stop 95 → kapanıştan risk 1 birim; bölgeden (98) risk 3 birim.
+    kapanistan = barrier_outcome(df, df.index[1], stop=95.0, target=104.0)
+    bolgeden = barrier_outcome(df, df.index[1], stop=95.0, target=104.0, entry=98.0)
+    assert kapanistan is not None and bolgeden is not None
+    assert kapanistan.r_multiple == pytest.approx(8.0)   # (104-96)/1
+    assert bolgeden.r_multiple == pytest.approx(2.0)     # (104-98)/3
+
+
+def test_sifir_riskli_giris_olculmez() -> None:
+    """Giriş stop'un üstündeyse risk sıfırdır; sonsuz R üretmek yerine
+    işlem hiç sayılmaz."""
+    df = _ohlc([100, 101, 102])
+    assert barrier_outcome(df, df.index[0], stop=100.0, target=110.0) is None
+
+
 def test_toplu_r_ayni_barda_stopu_secer() -> None:
     """Vektörel yol da iyimserliğe karşı aynı kararı vermeli."""
     df = _ohlc([100, 100], yuksek=[100, 120], dusuk=[100, 90])
