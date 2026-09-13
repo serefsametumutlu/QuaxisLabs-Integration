@@ -293,6 +293,19 @@ export function Grafik({
     });
   }, [aralik, spec]);
 
+  // Seride kaç takvim günü var? Bundan geniş aralıklar "Kurulum" ile
+  // AYNI görüntüyü verir — yani düğme HİÇBİR ŞEY YAPMAZ.
+  //
+  // Hiçbir şey yapmayan bir düğme göstermek, düğmeyi hiç göstermemekten
+  // kötüdür: kullanıcı tıklar, bir şey olmaz, arayüzün bozuk olduğunu
+  // düşünür. (Gerçek bulgu: 79 barlık bir levhada 6A ve 1Y ölüydü.)
+  const serideGun = useMemo(() => {
+    const mumSeri = spec?.seriler.find((x): x is MumSerisi => x.tur === "mum");
+    if (!mumSeri || mumSeri.veri.length < 2) return 0;
+    const v = mumSeri.veri;
+    return (v[v.length - 1].t - v[0].t) / 86400;
+  }, [spec]);
+
   const indir = async () => {
     const chart = chartRef.current;
     const svg = svgRef.current;
@@ -332,17 +345,26 @@ export function Grafik({
           görüntüde arayüz düğmesi işi yok. */}
       <div className="qgrafik-araclar">
         <div className="qgrafik-aralik" role="group" aria-label="Görünür aralık">
-          {ARALIKLAR.map((x) => (
-            <button
-              key={x.value}
-              type="button"
-              className={x.value === aralik ? "etkin" : undefined}
-              aria-pressed={x.value === aralik}
-              onClick={() => setAralik(x.value)}
-            >
-              {x.label}
-            </button>
-          ))}
+          {ARALIKLAR.map((x) => {
+            const olu = x.gun > 0 && x.gun >= serideGun;
+            return (
+              <button
+                key={x.value}
+                type="button"
+                className={x.value === aralik ? "etkin" : undefined}
+                aria-pressed={x.value === aralik}
+                disabled={olu}
+                title={
+                  olu
+                    ? `Bu levhada ${Math.round(serideGun)} günlük veri var; ${x.label} tümünü kapsıyor.`
+                    : undefined
+                }
+                onClick={() => setAralik(x.value)}
+              >
+                {x.label}
+              </button>
+            );
+          })}
         </div>
         <button
           type="button"
