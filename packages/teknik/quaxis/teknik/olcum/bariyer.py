@@ -37,6 +37,11 @@ from quaxis.teknik.core.types import Direction, Signal
 
 VARSAYILAN_TUR = 2000
 
+#: IS/OOS bölme noktası — `ileri_getiri.VARSAYILAN_OOS_ORANI` ile AYNI olmalı.
+#: İki ölçüm farklı pencerelerden sayı üretirse aynı tabloda yan yana duran
+#: iki sütun farklı şeyleri anlatır ve rapor sessizce yanıltır.
+VARSAYILAN_OOS_ORANI = 0.30
+
 
 @dataclass(frozen=True)
 class BarrierOutcome:
@@ -67,6 +72,7 @@ class RResult:
     p_value: float
     permutations: int
     outcomes: tuple[BarrierOutcome, ...]
+    oos_ratio: float = VARSAYILAN_OOS_ORANI
 
     @property
     def expectancy(self) -> float:
@@ -148,14 +154,18 @@ def _rastgele_baz(
     yon: Sequence[float],
     max_bars: int,
     r: np.random.Generator,
+    oos_i: int = 0,
 ) -> float:
     """Aynı sembolde, AYNI risk/hedef mesafeleriyle rastgele barlardan giriş.
 
     Adil baz budur: "bu sinyalde girmek, aynı risk yapısıyla rastgele bir
     barda girmekten daha iyi mi?" Piyasanın genel yönü böylece ayıklanır.
+
+    Rastgele barlar da sinyallerle AYNI pencereden seçilir (`oos_i`); farklı
+    pencereden seçilirse baz, ölçtüğü şeyden başka bir dönemi anlatır.
     """
     n = len(ohlc)
-    secilebilir = np.arange(0, n - max_bars - 1)
+    secilebilir = np.arange(oos_i, n - max_bars - 1)
     if len(secilebilir) == 0 or not sonuclar:
         return 0.0
     toplam = []
@@ -179,6 +189,7 @@ def measure_r(
     islemler: dict[str, Sequence[tuple[Signal, float, float]]],
     *,
     max_bars: int = 60,
+    oos_ratio: float = VARSAYILAN_OOS_ORANI,
     permutations: int = VARSAYILAN_TUR,
     seed: int = 20260913,
 ) -> RResult:
@@ -186,6 +197,10 @@ def measure_r(
 
     `islemler`: {sembol: [(sinyal, stop_fiyati, hedef_fiyati), …]}. Stop ve
     hedef STRATEJİNİN kendi kuralından gelir — ölçüm onları uydurmaz.
+
+    **Yalnız OOS penceresindeki sinyaller sayılır** — `ileri_getiri.measure`
+    ile aynı kesim. İddia görülmemiş dönemde ölçülür; iki ölçüm farklı
+    pencere kullanırsa katman tablosundaki iki sütun farklı şeyleri anlatır.
 
     p değeri, `ileri_getiri.measure` ile aynı mantıkta: sembol düzeyinde,
     aynı risk yapısıyla rastgele girişlere karşı permütasyon.
@@ -199,9 +214,13 @@ def measure_r(
         df = ohlc.get(sembol)
         if df is None or not kayitlar:
             continue
+        oos_i = int(len(df) * (1.0 - oos_ratio))
+        oos_bas = df.index[min(oos_i, len(df) - 1)]
         kendi: list[BarrierOutcome] = []
         risk_o, hedef_o, yonler = [], [], []
         for sinyal, stop, hedef in kayitlar:
+            if sinyal.detected_at < oos_bas:
+                continue  # IS penceresi: iddia burada ölçülmez
             s = barrier_outcome(
                 df, sinyal.detected_at, stop=stop, target=hedef,
                 direction=sinyal.direction, max_bars=max_bars, symbol=sembol,
@@ -222,7 +241,7 @@ def measure_r(
 
         bos = np.array(
             [
-                _rastgele_baz(df, kendi, risk_o, hedef_o, yonler, max_bars, r)
+                _rastgele_baz(df, kendi, risk_o, hedef_o, yonler, max_bars, r, oos_i)
                 for _ in range(permutations)
             ]
         )
@@ -230,7 +249,9 @@ def measure_r(
         sembol_bos.append(bos)
 
     if not sonuclar:
-        return RResult(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, permutations, ())
+        return RResult(
+            0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, permutations, (), oos_ratio
+        )
 
     rler = np.array([s.r_multiple for s in sonuclar])
     gozlenen = float(np.mean(sembol_farklari))
@@ -252,4 +273,5 @@ def measure_r(
         p_value=p,
         permutations=permutations,
         outcomes=tuple(sonuclar),
+        oos_ratio=oos_ratio,
     )

@@ -169,12 +169,16 @@ def rapor(katmanlar: list[KatmanSonucu], slug: str, gosterge: str, tf: Timeframe
         f"(Pardo s.295).\n" if zayif else ""
     )
 
+    oos = (katmanlar[0].r.oos_ratio if katmanlar else 0.30) * 100
     return f"""# {slug} — K4 Katmanlı Ölçüm
 
 **Tarih:** {dt.date.today().isoformat()} · **Gösterge:** `{gosterge}` · **Zaman dilimi:** {tf.value}
 
 Soru katman başına "kenar var mı" değil, **"kenar EKLİYOR mu"**. `ΔR` sütunu
 bir önceki katmana göre işlem başına beklenen R değişimidir.
+
+**Pencere:** her iki ölçüm de yalnız **OOS** penceresini sayar (serinin son
+%{oos:.0f}'i). İki sütun aynı dönemden konuşmazsa tablo sessizce yanıltır.
 
 {BASLIK}
 |---|---|---|---|---|---|---|---|---|---|---|---|

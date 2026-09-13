@@ -119,8 +119,10 @@ def test_gercek_asimetrik_kenari_bulur() -> None:
         df = _rastgele_ohlc(tohum=i)
         ohlc[f"S{i}"] = df
         k = df["close"].to_numpy()
-        ileri = k[30:] / k[:-30] - 1.0
-        en_iyi = np.argsort(ileri)[-5:]
+        # Sinyaller OOS penceresine konur; measure_r yalnız orayı sayar.
+        oos = int(len(df) * 0.7)
+        ileri = k[oos + 30 :] / k[oos:-30] - 1.0
+        en_iyi = np.argsort(ileri)[-5:] + oos
         kayit = []
         for b in en_iyi:
             t = df.index[int(b)]
@@ -142,7 +144,7 @@ def test_kenar_yokken_kenar_uydurmaz() -> None:
         df = _rastgele_ohlc(tohum=100 + i)
         ohlc[f"S{i}"] = df
         kayit = []
-        for b in r.integers(50, 340, size=5):
+        for b in r.integers(285, 360, size=5):
             t = df.index[int(b)]
             giris = float(df["close"].iloc[int(b)])
             kayit.append((_sinyal(t), giris * 0.98, giris * 1.04))
@@ -157,12 +159,24 @@ def test_cikis_oranlari_toplami_bire_esittir() -> None:
     """Her işlem üç bariyerden BİRİNDEN çıkar; kaçak işlem olmamalı."""
     df = _rastgele_ohlc(tohum=3)
     kayit = []
-    for b in (50, 120, 200):
+    for b in (300, 320, 340):
         giris = float(df["close"].iloc[b])
         kayit.append((_sinyal(df.index[b]), giris * 0.98, giris * 1.04))
     s = measure_r({"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1)
     assert s.target_rate + s.stop_rate + s.time_rate == 1.0
     assert s.n_trades == 3
+
+
+def test_is_penceresindeki_islemler_sayilmaz() -> None:
+    """İddia GÖRÜLMEMİŞ dönemde ölçülür. İleri getiri ölçümü zaten böyle
+    çalışıyordu; R'nin tüm seriyi sayması, katman tablosunda iki sütunun
+    farklı pencerelerden konuşması demekti."""
+    df = _rastgele_ohlc(tohum=9)
+    giris = float(df["close"].iloc[50])  # IS penceresi
+    kayit = [(_sinyal(df.index[50]), giris * 0.98, giris * 1.04)]
+    s = measure_r({"S": df}, {"S": kayit}, max_bars=20, permutations=20, seed=1)
+    assert s.n_trades == 0
+    assert s.verdict == "olculmedi"
 
 
 def test_islemsiz_evren_olculmedi_doner() -> None:

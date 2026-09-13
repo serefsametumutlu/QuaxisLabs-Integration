@@ -101,6 +101,7 @@ def r_bolumu(r: RResult | None) -> str:
 
 > Aynı barda hem stop hem hedef vurulduysa **stop** sayıldı. Bar içi sıralamayı
 > bilmiyoruz; emin olmadığımız yerde stratejinin lehine varsaymıyoruz.
+> Pencere ileri getiri ölçümüyle AYNI: son %{r.oos_ratio * 100:.0f} (OOS).
 """
 
 
