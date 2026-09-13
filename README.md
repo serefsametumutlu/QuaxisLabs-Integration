@@ -82,9 +82,19 @@ Her strateji kendi fazıdır ve **7 kapının tamamından geçmeden sıradakine
 geçilmez**. Kodu kitaptan yeniden türetilir; eski koda referans olarak değil,
 yalnızca karşılaştırma için bakılır.
 
-| Faz | Strateji | Durum |
-|---|---|---|
-| 7.1 | *(sıra birlikte belirlenecek)* | **sırada** |
+| Faz | Strateji | Kapı | Verdikt | Durum |
+|---|---|---|---|---|
+| 7.1 | **Golden Zone** (ICT OTE) | K0–K4 | `kanıtlanmadı` | ⏸ durduruldu |
+| 7.2 | **Kesitsel Momentum** (Chan s.145) | K0–K4 | `kanıtlanmadı` | ⏸ durduruldu |
+| 7.3 | *(seçilmedi)* | — | — | **sırada** |
+
+**Yayınlanmış strateji: 0.** İkisi de ölçümden geçemedi ve K5 (görsel) /
+K6 (ürün) kapılarına ulaşmadı. Kodları duruyor; ileride başka bir
+stratejinin **ek koşulu** olarak değerlendirilebilirler.
+
+> Arayüzdeki "Yapı 4 · Formasyon 3 · Trend & Momentum 2" sayıları
+> **maket verisidir** (`apps/web/lib/ornek-veri.ts`), karşılığı olan kod
+> yoktur. Gerçek sayı yukarıdaki tablodur.
 
 ## Web uygulaması
 
