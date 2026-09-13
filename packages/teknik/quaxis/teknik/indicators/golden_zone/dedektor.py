@@ -275,7 +275,14 @@ class GoldenZone(BaseIndicator):
         derin = kur.capa0 - boy * p.bolge_derin * isaret
         tatli = kur.capa0 - boy * p.tatli_nokta * isaret
         stop = kur.capa100 - boy * p.stop_tamponu * isaret
-        hedef = kur.capa0
+        if p.hedef_modu == "yapisal":
+            hedef = kur.capa0
+        else:
+            # Hedef girişten `hedef_r_kati` × risk kadar ötede. Yapısal modda
+            # hedef mesafesi giriş derinliğiyle değişir (0.62'de 1.63R,
+            # 0.79'da 3.76R); bu mod hepsini aynı risk profiline sabitler.
+            risk = abs(giris - stop)
+            hedef = giris + risk * p.hedef_r_kati * isaret
 
         bar_t = df.index[kur.capa0_i]
         tespit_t = df.index[t]
@@ -294,6 +301,7 @@ class GoldenZone(BaseIndicator):
                     "stop": float(stop),
                     "hedef": float(hedef),
                     "giris": float(giris),
+                    "hedef_modu": p.hedef_modu,
                     "capa100": float(kur.capa100),
                     "capa0": float(kur.capa0),
                     "bolge_sig": float(giris),

@@ -76,6 +76,18 @@ demek sinyal sayısını sessizce yarıya indirir.
 
 Hedef: yer değiştirmenin tepesi (%0 seviyesi — iç aralık likiditesi).
 
+**Asimetri kurulumun kendi geometrisinden gelir.** Düzeltme TEPEDEN
+ölçüldüğü için derine girmek stop'u küçültür, hedefi uzaklaştırmaz:
+
+| Giriş | Risk (bacak oranı) | Ödül | Ödül/Risk | Başabaş isabet |
+|---|---|---|---|---|
+| 0.62 | 0.38 | 0.62 | **1.63** | %38 |
+| 0.705 | 0.30 | 0.70 | **2.39** | %30 |
+| 0.79 | 0.21 | 0.79 | **3.76** | %21 |
+
+ICT'nin 0.705'e "sweet spot", derin girişe "optimal" demesinin sebebi bu
+aritmetiktir — mistik bir oran değil.
+
 **Bu kurulum kendi stop'unu ve hedefini KENDİ üretir.** Ölçüm bunları
 uydurmaz — Faz 7.1'de K4'e eklenen üç bariyerli R ölçümünün çalışması için
 gereken tam olarak buydu.
@@ -192,7 +204,8 @@ tablosundaki `K3:` devirleri K3 raporu yazılınca kapanır.
 |---|---|
 | Kill zone (seans) filtresi **yok** | BIST ve NASDAQ günlük/4S taranıyor; ICT'nin seans penceresi FX intraday'e özgü. Filtre eklenirse ayrı bir katman olarak ölçülür, sessizce varsayılmaz. |
 | "Daily bias" adımı **yok** | Öznel; kodlanabilir bir kural değil. Yerine BOS yönü kullanılıyor — ölçülebilir ve non-repaint. |
-| Kademeli kâr alma / breakeven'a çekme **yok** | Ölçümde tek hedef, tek stop. Kademeli çıkış R dağılımını iyimser gösterir ve önceki projenin motorunda düzeltilen kusurlardan biriydi. |
+| Kademeli kâr alma / breakeven'a çekme **yok** | Ölçümde tek hedef, tek stop. Kademeli çıkış R dağılımını iyimser gösterir ve önceki projenin motorunda düzeltilen kusurlardan biriydi. Kaynakta displacement tepesi **T1**'dir ve koşucu ötedeki likiditeye gider; biz koşucuyu ölçmüyoruz, yani bu mod stratejinin LEHİNE değil aleyhine muhafazakârdır. |
+| Hedef ayrıca sabit R katıyla da ölçülecek | Yapısal modda hedef mesafesi giriş derinliğiyle değişir (0.62'de 1.63R, 0.79'da 3.76R), yani farklı derinlikteki işlemler farklı risk profili taşır. `hedef_modu="r_kati"` hepsini aynı profile sabitler ve "bölgenin kendisi öngörü taşıyor mu" sorusunu derinlikten arındırır. İkisi AYRI sorular. |
 | Aynı barda stop ve hedef → **stop** | Bar içi sıralama bilinmiyor. Emin olunmayan yerde stratejinin lehine varsaymak backtest'i yalancı yapar. |
 
 ---

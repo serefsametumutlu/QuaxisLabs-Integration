@@ -14,7 +14,7 @@ etmemişti çünkü hiçbir yerde "bu sayı nereden geldi" yazmıyordu.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from quaxis.teknik.core.params import BaseParams
 
@@ -58,6 +58,25 @@ class GoldenZoneParams(BaseParams):
     #: FVG sayılması için asgari boşluk, ATR katı. GEÇİCİ.
     fvg_min_atr: float = 0.1
 
+    #: Hedefin nereye konacağı.
+    #:
+    #: `"yapisal"` (varsayılan) — hedef yer değiştirmenin ucu (%0 çıpası),
+    #: stop %100 çıpası. Kaynağa birebir sadık ve asimetrisi kendiliğinden
+    #: lehte: düzeltme TEPEDEN ölçüldüğü için 0.62 girişte risk 0.38 bacak,
+    #: ödül 0.62 bacak — yani **1.63:1**. Derine girildikçe iyileşir:
+    #: 0.705'te 2.39:1, 0.79'da 3.76:1. ICT'nin 0.705'e "sweet spot" demesinin
+    #: ve derin girişi "optimal" saymasının sebebi bu aritmetik.
+    #:
+    #: `"r_kati"` — hedef girişten `hedef_r_kati` × risk kadar öteye konur.
+    #: Yapısal modda hedef mesafesi giriş derinliğine göre DEĞİŞTİĞİ için
+    #: (0.62'de 1.63R, 0.79'da 3.76R), farklı derinlikteki işlemler farklı
+    #: risk profilleri taşır. Bu mod hepsini aynı profile sabitler ve
+    #: "bölgenin kendisi öngörü taşıyor mu" sorusunu derinlikten arındırır.
+    #: İkisi AYRI sorular; K4 ikisini de ölçecek.
+    hedef_modu: Literal["yapisal", "r_kati"] = "yapisal"
+    #: `hedef_modu="r_kati"` için hedef R katı. GEÇİCİ.
+    hedef_r_kati: float = 2.0
+
     #: Üç bariyerli ölçümde zaman bariyeri (bar). GEÇİCİ.
     zaman_bariyeri: int = 40
 
@@ -78,3 +97,9 @@ class GoldenZoneParams(BaseParams):
             raise ValueError("pivot kolları en az 1 bar olmalı")
         if self.yer_degistirme_atr <= 0:
             raise ValueError("yer değiştirme eşiği pozitif olmalı")
+        if self.hedef_modu not in ("yapisal", "r_kati"):
+            raise ValueError(
+                f"hedef_modu 'yapisal' ya da 'r_kati' olmalı, alınan: {self.hedef_modu!r}"
+            )
+        if self.hedef_r_kati <= 0:
+            raise ValueError("hedef R katı pozitif olmalı")

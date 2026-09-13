@@ -36,12 +36,13 @@ def _kurulum_serisi() -> pd.DataFrame:
         · 0-29    ısınma (ATR dolsun)
         · 30-36   salınım dibi (köken)
         · 37-46   yer değiştirme: güçlü yükseliş, salınım tepesi aşılır
-        · 47-56   0.62-0.79 bölgesine düzeltme
+        · 47-58   0.62'den 0.79'a kadar düzeltme
     """
     k = [100.0] * 30
     k += [100, 99, 98, 97, 96, 95, 94]          # dip: 94
     k += [96, 99, 103, 108, 112, 117, 121, 126, 130, 134]  # yükseliş: 134
     k += [131, 128, 124, 120, 116, 112, 109, 106, 104, 103]  # 0.62 bölgesine düzeltme
+    k += [101, 100]                                          # 0.79'a kadar derinleşir
     k = [float(x) for x in k]
     y = [x + 1.0 for x in k]
     d = [x - 1.0 for x in k]
@@ -102,7 +103,57 @@ def test_stop_ve_hedef_payloadda(dedektor: GoldenZone) -> None:
     s = _uzun(dedektor(_kurulum_serisi()))
     assert s.payload["stop"] < s.payload["giris"] < s.payload["hedef"]
     assert s.payload["stop"] == pytest.approx(s.payload["capa100"])
+
+
+def test_yapisal_hedef_bacagin_ucudur() -> None:
+    """Kaynağa birebir sadık mod: hedef = %0 çıpası."""
+    d = GoldenZone(GoldenZoneParams(yer_degistirme_atr=1.0, hedef_modu="yapisal"))
+    s = _uzun(d(_kurulum_serisi()))
     assert s.payload["hedef"] == pytest.approx(s.payload["capa0"])
+
+
+def test_yapisal_hedefin_asimetrisi_lehte() -> None:
+    """Kurulumun kendi aritmetiği: düzeltme TEPEDEN ölçüldüğü için 0.62
+    girişte risk 0.38 bacak, ödül 0.62 bacak — 1.63:1.
+
+    ICT'nin 0.705'e "sweet spot" demesinin sebebi bu: derine girildikçe
+    stop küçülür, hedef uzaklaşır. Bu test o ilişkiyi kilitler; biri
+    çıpaları ters çevirirse (risk ile ödülü yer değiştirirse) burada
+    yakalanır."""
+    d = GoldenZone(GoldenZoneParams(yer_degistirme_atr=1.0, hedef_modu="yapisal"))
+    s = _uzun(d(_kurulum_serisi()))
+    risk = s.payload["giris"] - s.payload["stop"]
+    odul = s.payload["hedef"] - s.payload["giris"]
+    assert odul / risk == pytest.approx(0.62 / 0.38, rel=1e-6)
+
+
+def test_derin_giris_asimetriyi_iyilestirir() -> None:
+    """0.79'dan girmek 3.76:1, 0.62'den girmek 1.63:1 verir."""
+    for sig, beklenen in ((0.62, 0.62 / 0.38), (0.79, 0.79 / 0.21)):
+        d = GoldenZone(
+            GoldenZoneParams(
+                yer_degistirme_atr=1.0, hedef_modu="yapisal",
+                bolge_sig=sig, bolge_derin=max(sig + 0.01, 0.79), tatli_nokta=sig,
+            )
+        )
+        s = _uzun(d(_kurulum_serisi()))
+        risk = s.payload["giris"] - s.payload["stop"]
+        odul = s.payload["hedef"] - s.payload["giris"]
+        assert odul / risk == pytest.approx(beklenen, rel=1e-6)
+
+
+def test_r_kati_hedefi_risk_katidir() -> None:
+    d = GoldenZone(
+        GoldenZoneParams(yer_degistirme_atr=1.0, hedef_modu="r_kati", hedef_r_kati=3.0)
+    )
+    s = _uzun(d(_kurulum_serisi()))
+    risk = s.payload["giris"] - s.payload["stop"]
+    assert s.payload["hedef"] == pytest.approx(s.payload["giris"] + 3.0 * risk)
+
+
+def test_gecersiz_hedef_modu_reddedilir() -> None:
+    with pytest.raises(ValueError, match="hedef_modu"):
+        GoldenZoneParams(hedef_modu="ne_olsa")
 
 
 def test_giris_bolgenin_sig_ucunda(dedektor: GoldenZone) -> None:
