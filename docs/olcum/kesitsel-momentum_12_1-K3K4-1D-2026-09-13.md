@@ -1,20 +1,20 @@
-# kesitsel-momentum — K3 + K4 · 1D
+# kesitsel-momentum_12_1 — K3 + K4 · 1D
 
-**Tarih:** 2026-09-13 · **Gösterge:** `kesitsel_momentum`
+**Tarih:** 2026-09-13 · **Gösterge:** `kesitsel_momentum_12_1`
 **Dönem:** 2010-01-01 – 2026-09-11 · **Yön:** yalnız alış
 
 ## K3 · Kalibrasyon
 
 | | |
 |---|---|
-| Evren | 186 sembol |
-| Toplam sinyal | 922 |
+| Evren | 196 sembol |
+| Toplam sinyal | 947 |
 | Sıfır sinyal veren sembol | 0 (%0.0) |
 | Veri hatası | 0 |
-| Sembol başına ortalama | 5.0 |
+| Sembol başına ortalama | 4.8 |
 | Sembol başına ortanca | 4 |
 
-MAKUL: sembol başına ortalama 5.0 aday, sembollerin %0'i sıfır.
+MAKUL: sembol başına ortalama 4.8 aday, sembollerin %0'i sıfır.
 
 > Sinyaller **örtüşmüyor**: bir sembol için yeni sinyal, öncekinin
 > 25 barlık tutuşu bitmeden üretilmiyor (Chan s.151).
@@ -23,14 +23,14 @@ MAKUL: sembol başına ortalama 5.0 aday, sembollerin %0'i sıfır.
 
 | | |
 |---|---|
-| **Bağımsız gözlem (sembol)** | **163** |
-| Ölçülen sinyal | 737 |
+| **Bağımsız gözlem (sembol)** | **177** |
+| Ölçülen sinyal | 759 |
 | Pencere | ilk %70 IS / son %30 OOS |
 | Ufuk | 25 bar (stratejinin kendi tutuş süresi) |
-| **Sinyal getirisi** | **%+0.02** |
-| **Adil baz** (rastgele sembol) | **%+10.00** |
-| **Fark** | **%-9.98** |
-| Kazanan sembol | 86/163 |
+| **Sinyal getirisi** | **%+1.66** |
+| **Adil baz** (rastgele sembol) | **%+9.62** |
+| **Fark** | **%-7.96** |
+| Kazanan sembol | 97/177 |
 | Permütasyon p değeri | 1.0000 (2000 tur) |
 | **Verdikt** | **kanitlanmadi** |
 
@@ -43,15 +43,15 @@ alınıyor, tutuş bitince kapanışta satılıyor.
 **Momentum kenar üretmedi — üstelik güçlü biçimde TERS yönde.**
 
 Son 12 ayın en çok kazanan %10'unu alıp 25 gün tutmak, aynı dönemde
-**rastgele** bir hisse almaya göre −%9.98 puan geride bıraktı. p=1.0000,
+**rastgele** bir hisse almaya göre −%7.96 puan geride bıraktı. p=1.0000,
 yani gözlenen fark boş dağılımın en alt ucunda: bu "fark bulunamadı"
 değil, **ters yönde net bir fark var** demek.
 
 | | Momentum üst %10 | Rastgele hisse |
 |---|---|---|
-| 25 barlık getiri | **%+0.02** | **%+10.00** |
+| 25 barlık getiri | **%+1.66** | **%+9.62** |
 
-Adil bazın %+10.00 olması ayrıca önemli bir bilgi: ölçüm penceresinde
+Adil bazın %+9.62 olması ayrıca önemli bir bilgi: ölçüm penceresinde
 (son %30, kabaca 2021 sonrası) BIST'te **rastgele bir hisse almak** 25
 barda ortalama bu kadar kazandırmış. Yüksek enflasyon dönemi ve 2021–2024
 ralisi bu sayının içinde. Momentum hisseleri o ralinin dışında kalmış.
@@ -69,7 +69,7 @@ Geçen yılın kazananları sonraki ayda geri veriyor.
 ### Son ayı atlamak (12-1) düzeltmiyor
 
 Akademik literatürün standardı olan "son ayı atla" varyantı farkı
-−%9.98 yerine −%7.96'ya çekiyor — yönü değiştirmiyor, sadece biraz
+−%7.96 yerine −%7.96'ya çekiyor — yönü değiştirmiyor, sadece biraz
 yumuşatıyor. İki varyant da aynı şeyi söylüyor.
 
 ### Ne YAPILMADI

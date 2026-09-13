@@ -12,14 +12,14 @@ referans: ""                    # references/ altındaki hedef görsel (K5 için
 #   kanitlanmadi  — ölçüldü, FDR sonrası kenar bulunamadı
 #   izlenen-aday  — ölçüldü, en az çürütülmüş grupta
 #   kenar-var     — ölçüldü, FDR eşiğini geçti
-verdikt: olculmedi
+verdikt: kanitlanmadi
 
 kapilar:
-  K0: { gecildi: null, kanit: ["docs/strateji/kaynak/kesitsel-momentum-K0.md"] }
-  K1: { gecildi: null, kanit: [] }
-  K2: { gecildi: null, kanit: [] }
-  K3: { gecildi: null, kanit: [] }
-  K4: { gecildi: null, kanit: [] }
+  K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/kesitsel-momentum-K0.md", "docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md"] }
+  K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/kesitsel_momentum/parametreler.py"] }
+  K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/kesitsel_momentum/dedektor.py", "packages/teknik/tests/test_kesitsel_momentum.py"] }
+  K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md"] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md", "docs/olcum/kesitsel-momentum_12_1-K3K4-1D-2026-09-13.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -45,7 +45,7 @@ kapilar:
 | **Zaman dilimleri** | 1G |
 | **Yön** | **Yalnız alış** — BIST'te açığa satış kısıtlı (kullanıcı kararı, 2026-09-13) |
 | **Referans görsel** | yok — bu bir grafik kurulumu değil, kesitsel sıralama |
-| **Verdikt** | ölçülmedi |
+| **Verdikt** | **kanıtlanmadı** — ve güçlü biçimde TERS yönde (−%9.98) |
 
 ---
 
@@ -78,7 +78,10 @@ kitaptan **alıntı** (sayfa numarasıyla) ya da **K3 ölçümü** (o zaman K3'�
 
 Tam kaynak dosyası: [`kaynak/kesitsel-momentum-K0.md`](kaynak/kesitsel-momentum-K0.md)
 
-> **K0 kapısı K3'e kadar AÇIK.** Kuralın kendisi ve üç eşiği kaynaktan
+> **K0 K3 ölçüldükten sonra kapandı.** Likidite eşiği ölçümden türetildi:
+> kalibrasyon MAKUL çıktığı için filtreye gerek kalmadı (0 = kapalı).
+>
+> Eski not: Kuralın kendisi ve üç eşiği kaynaktan
 > sayfa numarasıyla geliyor; ama likidite eşiği kaynakta YOK ve ölçümden
 > türetilecek. `pasaport.py dogrula` o dosyayı diskte arayıp bulamadıkça
 > bulgu yazar — bu bir hata değil, kapının kendisi.
@@ -89,7 +92,8 @@ Tam kaynak dosyası: [`kaynak/kesitsel-momentum-K0.md`](kaynak/kesitsel-momentum
 | tutus | 25 gün | s.146 kod: `holddays=25` |
 | ust_dilim | %10 | s.146 kod: `topN=50` (500 hisseden) |
 | atlama_ay | 0 ve 1 (ikisi de ölçülecek) | s.146 atlamıyor; literatür "12-1" kullanır — karar K3'e |
-| asgari_ciro | ölçülecek | `K3: docs/olcum/kesitsel-momentum-K3-A.md` |
+| asgari_ciro | 0 (filtre kapalı) | `K3: docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md` — kalibrasyon MAKUL çıktı, sembollerin %0'ı sıfır sinyal verdi; filtreye gerek kalmadı |
+| asgari_evren | 20 | `K3: docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md` — ölçüm sırasında bulundu: tek sembollü barda sıralama yapılıyordu |
 
 ### Kitaptan sapmalar
 
