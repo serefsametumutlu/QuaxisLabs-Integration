@@ -7,6 +7,14 @@ ad: Golden Zone              # kullanıcıya görünen ad
 paket: yapi                     # yapi | formasyon | trend | arbitraj
 referans: "references/G8es0m9W4AAiTAK.png"   # ANLAMAK için, kopyalamak için değil
 
+# Bu pasaportun KAPSADIĞI gösterge künyeleri (`indicators/katalog.py`).
+# Tarama yüzeyindeki verdikt rozeti bu eşlemeden okunur — rozet uydurulmaz.
+# `pasaport.py dogrula` katalogdaki her göstergenin TAM BİR pasaport
+# tarafından sahiplenildiğini denetler.
+gostergeler:
+  golden_zone: "Golden Zone"
+  golden_zone_r2: "Golden Zone · 2R"
+
 # K4'ün çıktısı. Kapı AÇILMADAN "ölçülmedi" dışında bir değer yazılamaz.
 #   olculmedi     — K4 açılmadı, elimizde sayı yok
 #   kanitlanmadi  — ölçüldü, FDR sonrası kenar bulunamadı

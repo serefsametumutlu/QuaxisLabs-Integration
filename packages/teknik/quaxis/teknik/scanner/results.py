@@ -252,6 +252,25 @@ class ResultsStore:
             )
         self._conn.commit()
 
+    def data_quality_summary(self, run_id: str) -> dict[str, list[str]]:
+        """Durum → o durumdaki semboller. Kaç sembolün GERÇEKTEN tarandığını
+        söyler.
+
+        Koşu raporu yalnız `n_errors` sayısını taşıyor ve o sayı gösterge
+        başına çarpılmış hâlde geliyor (23 verisiz sembol × 9 gösterge = 207).
+        Arayüzde "648 sembol tarandı" yazmak, 23'ünde hiç bakılmadığı hâlde
+        bakılmış gibi göstermek olurdu — README madde 5: atılan veri
+        raporlanır.
+        """
+        cur = self._conn.execute(
+            "SELECT status, symbol FROM data_quality WHERE run_id = ? ORDER BY symbol",
+            (run_id,),
+        )
+        ozet: dict[str, list[str]] = {}
+        for durum, sembol in cur.fetchall():
+            ozet.setdefault(durum, []).append(sembol)
+        return ozet
+
     def _write_json(self, run_id: str, item: SymbolIndicatorRun) -> None:
         assert item.result is not None
         out_dir = self.json_root / run_id

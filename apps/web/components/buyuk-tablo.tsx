@@ -11,7 +11,7 @@ import {
   Sparkline,
   type Kolon,
 } from "@/components/ui";
-import { VERDIKT_ACIKLAMA, ornekTarama, yasEtiketi, type TaramaSatiri } from "@/lib/ornek-veri";
+import { VERDIKT_ACIKLAMA, ornekSeri, ornekTarama, yasEtiketi, type TaramaSatiri } from "@/lib/ornek-veri";
 
 const SATIR_SAYISI = 500;
 
@@ -22,12 +22,7 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     className: "sym",
     width: "190px",
     sortValue: (r) => r.sembol,
-    cell: (r) => (
-      <>
-        {r.sembol}
-        <span className="sub">{r.ad}</span>
-      </>
-    ),
+    cell: (r) => r.sembol,
   },
   { id: "paket", header: "Paket", width: "150px", className: "mut", sortValue: (r) => r.paket, cell: (r) => r.paket },
   { id: "strateji", header: "Strateji", width: "165px", sortValue: (r) => r.strateji, cell: (r) => r.strateji },
@@ -45,7 +40,7 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     align: "right",
     width: "100px",
     className: "num dim",
-    sortValue: (r) => r.yas,
+    sortValue: (r) => r.yas ?? Number.MAX_SAFE_INTEGER,
     cell: (r) => yasEtiketi(r.yas),
   },
   {
@@ -63,14 +58,14 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     align: "right",
     width: "96px",
     className: "num mut",
-    sortValue: (r) => r.seviye,
-    cell: (r) => r.seviye.toFixed(2),
+    sortValue: (r) => r.seviye ?? 0,
+    cell: (r) => (r.seviye === null ? "—" : r.seviye.toFixed(2)),
   },
   {
     id: "seri",
     header: "20 bar",
     width: "84px",
-    cell: (r) => <Sparkline points={r.seri} dir={r.yon} />,
+    cell: (r) => <Sparkline points={ornekSeri(r)} dir={r.yon} />,
   },
   {
     id: "verdikt",

@@ -1,46 +1,22 @@
 /**
- * ÖRNEK VERİ — gerçek tarama çıktısı DEĞİLDİR.
+ * ÖRNEK VERİ — gerçek tarama çıktısı DEĞİLDİR. Yalnız **tasarım vitrini**
+ * için: bileşenleri 500 satırda göstermek, boş durumu denemek, üç temayı yan
+ * yana çizmek.
  *
- * Faz 2'de API, gösterge ve gerçek veri yok. Buradaki her şey deterministik
- * bir üreteçten gelir (aynı tohum = aynı satırlar) ve arayüzde her zaman
- * "örnek veri" etiketiyle gösterilir. README kural 6: ölçülmemiş bir iddia
+ * Ürünün tarama yüzeyi artık buradan okumuyor — gerçek veri
+ * [`tarama.ts`](./tarama.ts)'de ve `tools/tarama_disaktar.py` üretiyor.
+ * Satır TİPİ oradan alınır: iki ayrı şekil tutmak, vitrinde çalışan bir
+ * kolonun üründe kırılması demekti.
+ *
+ * Deterministik üreteç (aynı tohum = aynı satırlar) ve her yüzeyde
+ * "örnek veri" etiketi korunur. README kural 6: ölçülmemiş bir iddia
  * "kanıtlanmış" diye sunulmaz.
  */
 
-/** Kapanış taraması saati. Tek yerde dursun: duyuru şeridi ve üst bar okur. */
-export const TARAMA_SAATI = { saat: 18, dakika: 15, metin: "18:15" } as const;
+import type { TaramaSatiri, Verdikt, Yon } from "./tarama";
 
-/** Giriş ekranındaki olgu şeridi — hepsi doğrulanabilir sayılar. */
-export const OLGULAR = [
-  { n: "648", t: "BIST sembolü" },
-  { n: "4S + 1G", t: "zaman dilimi" },
-  { n: "7", t: "kapılı strateji süreci" },
-  { n: "586", t: "sembolde OOS ölçümü" },
-] as const;
-
-export type Yon = "up" | "down";
-export type Verdikt = "izlenen aday" | "kanıtlanmadı" | "ölçülmedi";
-
-export type TaramaSatiri = {
-  id: string;
-  sembol: string;
-  ad: string;
-  paket: string;
-  strateji: string;
-  yon: Yon;
-  durum: string;
-  yas: number;
-  fiyat: number;
-  seviye: number;
-  seri: number[];
-  verdikt: Verdikt;
-};
-
-export const VERDIKT_ACIKLAMA: Record<Verdikt, string> = {
-  "izlenen aday": "en az çürütülmüş üçlüden biri",
-  "kanıtlanmadı": "FDR eşiğini geçemedi",
-  "ölçülmedi": "K4 kapısı henüz açılmadı",
-};
+export type { TaramaSatiri, Verdikt, Yon };
+export { OLGULAR, TARAMA_SAATI, VERDIKT_ACIKLAMA, yasEtiketi } from "./tarama";
 
 /** Maketteki `rng` ile aynı doğrusal eşlenik üreteç — çıktı birebir tekrarlanır. */
 function rng(seed: number) {
@@ -49,10 +25,6 @@ function rng(seed: number) {
     s = (s * 1664525 + 1013904223) & 0x7fffffff;
     return s / 0x7fffffff;
   };
-}
-
-export function yasEtiketi(n: number) {
-  return n === 0 ? "son mum" : `${n} mum önce`;
 }
 
 function seri(seed: number, yukari: boolean, n = 22) {
@@ -64,25 +36,54 @@ function seri(seed: number, yukari: boolean, n = 22) {
   });
 }
 
-/** Maketteki tarama tablosunun on satırı — birebir. */
-const CEKIRDEK: Omit<TaramaSatiri, "id" | "seri">[] = [
-  { sembol: "THYAO", ad: "Türk Hava Yolları", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "down", durum: "Tamamlandı", yas: 0, fiyat: 209.1, seviye: 178.45, verdikt: "kanıtlanmadı" },
-  { sembol: "ASELS", ad: "Aselsan", paket: "Yapı", strateji: "Arz–Talep Bölgesi", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 78.45, seviye: 74.2, verdikt: "ölçülmedi" },
-  { sembol: "EREGL", ad: "Ereğli Demir Çelik", paket: "Formasyon", strateji: "Çift Dip", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 1204.75, seviye: 1180.0, verdikt: "kanıtlanmadı" },
-  { sembol: "TUPRS", ad: "Tüpraş", paket: "Trend & Momentum", strateji: "EWMAC", yon: "up", durum: "Onaylandı", yas: 2, fiyat: 142.3, seviye: 139.8, verdikt: "izlenen aday" },
-  { sembol: "KCHOL", ad: "Koç Holding", paket: "Yapı", strateji: "Piyasa Yapısı · BOS", yon: "up", durum: "Onaylandı", yas: 2, fiyat: 9.08, seviye: 8.94, verdikt: "ölçülmedi" },
-  { sembol: "SISE", ad: "Şişecam", paket: "Formasyon", strateji: "Yükselen Üçgen", yon: "up", durum: "Kırılım", yas: 2, fiyat: 41.66, seviye: 40.9, verdikt: "kanıtlanmadı" },
-  { sembol: "BIMAS", ad: "BİM", paket: "Yapı", strateji: "Yatay Aralık", yon: "down", durum: "Temas", yas: 3, fiyat: 512.0, seviye: 524.5, verdikt: "ölçülmedi" },
-  { sembol: "FROTO", ad: "Ford Otosan", paket: "Formasyon", strateji: "Bayrak", yon: "up", durum: "Onaylandı", yas: 3, fiyat: 1088.25, seviye: 1061.0, verdikt: "kanıtlanmadı" },
-  { sembol: "AKBNK", ad: "Akbank", paket: "Trend & Momentum", strateji: "MA Sistemi", yon: "down", durum: "Onaylandı", yas: 3, fiyat: 68.9, seviye: 70.15, verdikt: "izlenen aday" },
-  { sembol: "ENKAI", ad: "Enka İnşaat", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "up", durum: "Bölgede", yas: 3, fiyat: 58.44, seviye: 56.8, verdikt: "kanıtlanmadı" },
+/** Maketteki tarama tablosunun on satırı — birebir.
+ *
+ * Şirket adı alanı YOK: gerçek satırlarda da yok (evren dosyasında sembol
+ * var, ad yok). Vitrindeki kolon düzeni üründekiyle aynı kalsın diye. */
+const CEKIRDEK: Omit<
+  TaramaSatiri,
+  "id" | "seriAnahtari" | "zamanDilimi" | "gosterge" | "pasaport" | "stop" | "hedef"
+>[] = [
+  { sembol: "THYAO", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "down", durum: "Tamamlandı", yas: 0, fiyat: 209.1, seviye: 178.45, verdikt: "kanıtlanmadı" },
+  { sembol: "ASELS", paket: "Yapı", strateji: "Arz–Talep Bölgesi", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 78.45, seviye: 74.2, verdikt: "ölçülmedi" },
+  { sembol: "EREGL", paket: "Formasyon", strateji: "Çift Dip", yon: "up", durum: "Onaylandı", yas: 1, fiyat: 1204.75, seviye: 1180.0, verdikt: "kanıtlanmadı" },
+  { sembol: "TUPRS", paket: "Trend & Momentum", strateji: "EWMAC", yon: "up", durum: "Onaylandı", yas: 2, fiyat: 142.3, seviye: 139.8, verdikt: "izlenen aday" },
+  { sembol: "KCHOL", paket: "Yapı", strateji: "Piyasa Yapısı · BOS", yon: "up", durum: "Onaylandı", yas: 2, fiyat: 9.08, seviye: 8.94, verdikt: "ölçülmedi" },
+  { sembol: "SISE", paket: "Formasyon", strateji: "Yükselen Üçgen", yon: "up", durum: "Kırılım", yas: 2, fiyat: 41.66, seviye: 40.9, verdikt: "kanıtlanmadı" },
+  { sembol: "BIMAS", paket: "Yapı", strateji: "Yatay Aralık", yon: "down", durum: "Temas", yas: 3, fiyat: 512.0, seviye: 524.5, verdikt: "ölçülmedi" },
+  { sembol: "FROTO", paket: "Formasyon", strateji: "Bayrak", yon: "up", durum: "Onaylandı", yas: 3, fiyat: 1088.25, seviye: 1061.0, verdikt: "kanıtlanmadı" },
+  { sembol: "AKBNK", paket: "Trend & Momentum", strateji: "MA Sistemi", yon: "down", durum: "Onaylandı", yas: 3, fiyat: 68.9, seviye: 70.15, verdikt: "izlenen aday" },
+  { sembol: "ENKAI", paket: "Yapı", strateji: "Salınım Fibo ABCD", yon: "up", durum: "Bölgede", yas: 3, fiyat: 58.44, seviye: 56.8, verdikt: "kanıtlanmadı" },
 ];
 
-export const ORNEK_TARAMA: TaramaSatiri[] = CEKIRDEK.map((r, k) => ({
-  ...r,
-  id: `${r.sembol}-${r.strateji}`,
-  seri: seri(k * 7919 + 13, r.yon === "up"),
-}));
+/** Vitrin satırları gerçek satırla AYNI şekli taşır — eksik alanlar burada
+ * açıkça doldurulur, `as` ile kaçamak yapılmaz. */
+/** Vitrin serileri — gerçek tarafta olduğu gibi satırdan AYRI bir sözlükte. */
+const ORNEK_SERILER: Record<string, number[]> = {};
+
+/** Vitrin satırının fiyat serisi. */
+export function ornekSeri(satir: TaramaSatiri): number[] {
+  return ORNEK_SERILER[satir.seriAnahtari] ?? [];
+}
+
+function vitrinSatiri(r: (typeof CEKIRDEK)[number], id: string, tohum: number): TaramaSatiri {
+  const seriAnahtari = `${id}|1D`;
+  ORNEK_SERILER[seriAnahtari] = seri(tohum, r.yon === "up");
+  return {
+    ...r,
+    id,
+    zamanDilimi: "1D",
+    gosterge: "ornek",
+    pasaport: "ornek",
+    stop: null,
+    hedef: null,
+    seriAnahtari,
+  };
+}
+
+export const ORNEK_TARAMA: TaramaSatiri[] = CEKIRDEK.map((r, k) =>
+  vitrinSatiri(r, `${r.sembol}-${r.strateji}`, k * 7919 + 13),
+);
 
 const EKLER = ["A", "B", "C", "D", "E", "F", "G", "H", "İ", "K", "L", "M", "N", "O", "Ö", "P", "R", "S", "Ş", "T", "U", "Ü", "V", "Y", "Z"];
 const DURUMLAR = ["Onaylandı", "Tamamlandı", "Kırılım", "Temas", "Bölgede"];
@@ -106,20 +107,23 @@ export function ornekTarama(n: number): TaramaSatiri[] {
       EKLER[Math.floor(r() * EKLER.length)];
     const yon: Yon = r() > 0.42 ? "up" : "down";
     const fiyat = +(2 + r() * 1400).toFixed(2);
-    out.push({
-      id: `ornek-${i}`,
-      sembol: kod,
-      ad: `Örnek Ortaklık ${i}`,
-      paket: taban.paket,
-      strateji: taban.strateji,
-      yon,
-      durum: DURUMLAR[Math.floor(r() * DURUMLAR.length)],
-      yas: Math.floor(r() * 11),
-      fiyat,
-      seviye: +(fiyat * (0.9 + r() * 0.2)).toFixed(2),
-      seri: seri(i * 7919 + 13, yon === "up"),
-      verdikt: VERDIKTLER[Math.floor(r() * VERDIKTLER.length)],
-    });
+    out.push(
+      vitrinSatiri(
+        {
+          sembol: kod,
+          paket: taban.paket,
+          strateji: taban.strateji,
+          yon,
+          durum: DURUMLAR[Math.floor(r() * DURUMLAR.length)],
+          yas: Math.floor(r() * 11),
+          fiyat,
+          seviye: +(fiyat * (0.9 + r() * 0.2)).toFixed(2),
+          verdikt: VERDIKTLER[Math.floor(r() * VERDIKTLER.length)],
+        },
+        `ornek-${i}`,
+        i * 7919 + 13,
+      ),
+    );
   }
   return out;
 }

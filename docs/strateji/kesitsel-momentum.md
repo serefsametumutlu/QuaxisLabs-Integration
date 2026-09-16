@@ -7,6 +7,15 @@ ad: Kesitsel Momentum              # kullanıcıya görünen ad
 paket: trend                     # yapi | formasyon | trend | arbitraj
 referans: ""                    # references/ altındaki hedef görsel (K5 için)
 
+# Bu pasaportun KAPSADIĞI gösterge künyeleri (`indicators/katalog.py`).
+# Tarama yüzeyindeki verdikt rozeti bu eşlemeden okunur — rozet uydurulmaz.
+# `kesitsel_donus` ayrı bir HİPOTEZ ama ayrı bir strateji değil: kendi ön
+# kaydıyla ölçüldü, reddedildi ve bu pasaportun altında etiketli duruyor.
+gostergeler:
+  kesitsel_momentum: "Kesitsel Momentum"
+  kesitsel_momentum_12_1: "Kesitsel Momentum · 12-1"
+  kesitsel_donus: "Kesitsel Dönüş"
+
 # K4'ün çıktısı. Kapı AÇILMADAN "ölçülmedi" dışında bir değer yazılamaz.
 #   olculmedi     — K4 açılmadı, elimizde sayı yok
 #   kanitlanmadi  — ölçüldü, FDR sonrası kenar bulunamadı

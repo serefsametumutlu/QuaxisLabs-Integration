@@ -22,7 +22,7 @@ import {
   Unit,
   type Kolon,
 } from "@/components/ui";
-import { ORNEK_KARTLAR, ORNEK_TARAMA, VERDIKT_ACIKLAMA, yasEtiketi, type TaramaSatiri } from "@/lib/ornek-veri";
+import { ORNEK_KARTLAR, ORNEK_TARAMA, VERDIKT_ACIKLAMA, ornekSeri, yasEtiketi, type TaramaSatiri } from "@/lib/ornek-veri";
 import { StratejiKucukResim } from "@/components/strateji-kucuk-resim";
 
 const TAZELIK = [
@@ -70,7 +70,7 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     id: "seri",
     header: "20 bar",
     width: "20%",
-    cell: (r) => <Sparkline points={r.seri} dir={r.yon} width={54} height={16} />,
+    cell: (r) => <Sparkline points={ornekSeri(r)} dir={r.yon} width={54} height={16} />,
   },
 ];
 

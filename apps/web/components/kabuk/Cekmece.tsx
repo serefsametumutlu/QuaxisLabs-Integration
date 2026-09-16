@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button, Pill } from "@/components/ui";
-import { VERDIKT_ACIKLAMA, yasEtiketi, type TaramaSatiri } from "@/lib/ornek-veri";
+import { VERDIKT_ACIKLAMA, yasEtiketi, type TaramaSatiri } from "@/lib/tarama";
 import { Faz4Isareti, GrafikYeri } from "./GrafikYeri";
 
 type Props = {
@@ -53,7 +53,7 @@ export function Cekmece({ satir, kapat }: Props) {
         <header>
           <span className="sym">{satir.sembol}</span>
           <span className="dim" style={{ fontSize: 12 }}>
-            {satir.ad}
+            {satir.gosterge}
           </span>
           <Pill tone="acc" small>
             {satir.strateji}
@@ -95,7 +95,7 @@ export function Cekmece({ satir, kapat }: Props) {
             </div>
             <div>
               <div className="k">Seviye</div>
-              <div className="v">{satir.seviye.toFixed(2)}</div>
+              <div className="v">{satir.seviye === null ? "—" : satir.seviye.toFixed(2)}</div>
             </div>
             <div>
               <div className="k">Durum</div>

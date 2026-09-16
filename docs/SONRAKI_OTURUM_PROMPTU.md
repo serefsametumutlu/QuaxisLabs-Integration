@@ -1,18 +1,18 @@
 # Sonraki oturum — nerede kaldık
 
 **Son güncelleme:** 2026-09-17 · **Son commit:** `867131b` üzerine
-**Depo durumu:** temiz · **280 test yeşil** (+3 `network` deselect) · ruff
+**Depo durumu:** temiz · **287 test yeşil** (+3 `network` deselect) · ruff
 temiz · pasaport doğrulayıcı tutarlı
 
 ---
 
 ## Tek cümleyle
 
-Üç strateji ailesi ölçüldü, üçü de elendi; sonra **ölçüm zemininin kendisi
-denetlendi**, gerçek veri kusurları bulunup ön kayıtla düzeltildi ve **üç
-ailenin de ölçümü düzeltilmiş veriyle bir kez yenilendi. Üçünde de verdikt
-değişmedi.** Ön kayıt [`onkayit-veri-duzeltme.md`](olcum/onkayit-veri-duzeltme.md)
-**kapandı**.
+Üç strateji ailesi ölçüldü, üçü de elendi; ölçüm zemini denetlenip ön kayıtla
+düzeltildi ve üç ailenin de ölçümü yenilendi — **üçünde de verdikt
+değişmedi**. Sonra **gerçek tarama motoru** evrende koştu ve ürün maket
+veriden kurtuldu: harmoniklerin **K6 kapısı kapandı**, projenin yedi kapıyı
+da geçen **ilk stratejisi**.
 
 ---
 
@@ -32,8 +32,30 @@ değişmedi.** Ön kayıt [`onkayit-veri-duzeltme.md`](olcum/onkayit-veri-duzelt
 > sütunları 17 Eylül'ünkiyle yan yana konamaz; karşılaştırılabilen büyüklük
 > **fark**tır (strateji − adil baz), o da maliyete neredeyse duyarsızdır.
 
-**Sıradaki iş:** aşağıdaki "açık başlıklar" listesinden seçilir. Yenileme
-işi bitti.
+---
+
+## Gerçek tarama motoru (2026-09-17) — ADR-003
+
+`/tarama` artık maket veri göstermiyor. Karar ve gerekçeler:
+[`ADR-003`](karar/ADR-003-tarama-koprusu.md).
+
+```bash
+python tools/tarama.py kos            # gün sonu taraması (1G, tüm evren)
+python tools/tarama.py ozet           # ne çıktı
+python tools/tarama_disaktar.py       # results.db -> apps/web/lib/tarama-verisi.json
+```
+
+İlk koşu `bist_2026-09-16`: **625/648 sembol**, 15 dk 44 sn, **2656 güncel
+sinyal**, repaint alarmı yok. 23 sembolde sağlayıcı veri döndürmüyor ve bu
+arayüzde adlarıyla yazılı.
+
+Rozet artık denetleniyor: pasaport künyelerindeki `gostergeler:` eşlemesi
+göstergeyi pasaporta bağlar, `pasaport.py dogrula` sahipsiz gösterge bırakmaz.
+
+**Dikkat:** `apps/web/lib/tarama-verisi.json` ~980 KB ve depoda. Her günün
+koşusu commit'lenirse depo şişer — ürün sürümlerinde tazelenmeli.
+
+**Sıradaki iş:** aşağıdaki "açık başlıklar" listesinden seçilir.
 
 ---
 
@@ -105,10 +127,12 @@ her raporda yazılı.
 |---|---|---|
 | Golden Zone (ICT OTE) | K4 | `kanıtlanmadı` ⏸ |
 | Kesitsel Momentum | K4 | `kanıtlanmadı` ⏸ |
-| Harmonik ×4 (Pesavento) | K5 ✅ | `kanıtlanmadı` ⏸ |
+| Harmonik ×4 (Pesavento) | **K6 ✅** | `kanıtlanmadı` — yayında, etiketli |
 | Salınım Fibo ABCD | — | dedektörü yok, yalnız çizimi var |
 
-**Yayınlanmış (K6) strateji: 0.**
+**Yayınlanmış (K6) strateji: 1** (harmonikler). Yayınlanmış olmak "işe
+yarıyor" demek değil: verdikt `kanıtlanmadı`, ürün formasyonu gösteriyor ama
+sistem kimseye "al" demiyor ve alarm kurulmuyor.
 
 ---
 
@@ -119,9 +143,12 @@ her raporda yazılı.
    (p=1.0000). Açığa satılamaz ama **filtre** olarak kullanılabilir. Ön
    kaydı yazılmadı, makine hazır, bir turda biter.
 2. **Gerçek tarama motoru** — K6'yı kapatır, üç stratejinin hepsine yarar
-3. **Hayatta kalma yanlılığını sınırlamak** — KAP'tan 2010–2026 BIST
+3. **Strateji kütüphanesi eksik** — `golden-zone` ve `kesitsel-momentum`
+   pasaportları var ama `lib/ornek-strateji.ts`'te kaydı yok. Tarama
+   tablosunda görünüp kütüphanede görünmüyorlar; kartların üçü de hâlâ maket.
+4. **Hayatta kalma yanlılığını sınırlamak** — KAP'tan 2010–2026 BIST
    şirket listesi çekip kaç sembolün eksik olduğunu saymak
-4. **Kalan dört harmonik ekol** (Bat/Crab/Shark · Cypher · 5-0) — ayrı
+5. **Kalan dört harmonik ekol** (Bat/Crab/Shark · Cypher · 5-0) — ayrı
    kitaplar, ayrı K0. **Beklenen değeri en düşük iş.**
 
 ---

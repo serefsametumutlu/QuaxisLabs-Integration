@@ -363,6 +363,63 @@ def tek_strateji_kurali(hepsi: list[Pasaport]) -> list[Bulgu]:
     return []
 
 
+def gosterge_sahipligi(hepsi: list[Pasaport]) -> list[Bulgu]:
+    """Katalogdaki her gösterge TAM BİR pasaport tarafından sahiplenilmeli.
+
+    Tarama yüzeyi her satırın yanına bir verdikt rozeti koyar ve o rozeti
+    künyedeki `gostergeler:` eşlemesinden okur. Eşleme eksikse rozet ya
+    uydurulur ya da düşer; ikisi de README madde 6'yı ("ölçülmemiş bir iddia
+    kanıtlanmış diye sunulmaz") çiğner. Sahipsiz gösterge = arayüzde
+    rozetsiz satır; iki kez sahiplenilmiş gösterge = hangi verdiktin
+    gösterileceği belirsiz.
+
+    Katalog okunamıyorsa (ör. bağımlılık yok) kural SESSİZCE atlanmaz —
+    bulgu olarak yazılır.
+    """
+    try:
+        sys.path.insert(0, str(KOK / "packages" / "teknik"))
+        from quaxis.teknik.indicators.katalog import KATALOG
+        katalog_adlari = set(KATALOG.names())
+    except Exception as exc:  # noqa: BLE001 — sebebi ne olursa olsun rapor edilir
+        return [Bulgu("(depo)", "", f"katalog okunamadı, gösterge sahipliği denetlenemedi: {exc}")]
+
+    sahip: dict[str, list[str]] = {}
+    bulgular: list[Bulgu] = []
+    for pas in hepsi:
+        bildirilen = pas.kunye.get("gostergeler") or {}
+        if not isinstance(bildirilen, dict):
+            bulgular.append(
+                Bulgu(pas.slug, "", "`gostergeler:` bir eşleme olmalı "
+                      "(`gosterge_adi: \"Görünen Ad\"`), liste değil")
+            )
+            continue
+        for ad, etiket in bildirilen.items():
+            sahip.setdefault(str(ad), []).append(pas.slug)
+            if not str(etiket or "").strip():
+                bulgular.append(
+                    Bulgu(pas.slug, "", f"gösterge '{ad}' için görünen ad boş — "
+                          "tarama tablosunda etiketsiz satır üretir")
+                )
+
+    for ad in sorted(katalog_adlari - set(sahip)):
+        bulgular.append(
+            Bulgu("(depo)", "", f"gösterge '{ad}' hiçbir pasaportta `gostergeler:` altında yok — "
+                  "tarama yüzeyinde verdikt rozeti olmayan satır üretir")
+        )
+    for ad in sorted(set(sahip) - katalog_adlari):
+        bulgular.append(
+            Bulgu("(depo)", "", f"gösterge '{ad}' pasaportta bildirilmiş ama katalogda yok "
+                  f"(sahip: {', '.join(sahip[ad])})")
+        )
+    for ad, sahipler in sorted(sahip.items()):
+        if len(sahipler) > 1:
+            bulgular.append(
+                Bulgu("(depo)", "", f"gösterge '{ad}' {len(sahipler)} pasaportta birden "
+                      f"sahiplenilmiş: {', '.join(sahipler)}")
+            )
+    return bulgular
+
+
 # ------------------------------------------------------------------ komutlar
 
 
@@ -385,6 +442,7 @@ def komut_dogrula(slug: str | None) -> int:
         bulgular += dogrula(p)
     if slug is None:
         bulgular += tek_strateji_kurali(hepsi)
+        bulgular += gosterge_sahipligi(hepsi)
 
     for p in secili:
         print(f"{p.slug:<24} {p.son_kapi:<4} {p.kunye.get('verdikt', '?')}")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TARAMA_SAATI } from "@/lib/ornek-veri";
+import { TARAMA_SAATI } from "@/lib/tarama";
 
 /** Bir sonraki kapanış taramasına kalan süre. Saat 18:15. */
 function kalanSure(simdi: Date) {

@@ -117,13 +117,29 @@ def run_eod(
         )
     )
 
-    logger.info("Veri güncelleniyor (1H,1D; 4H türetilir) ...")
+    # YALNIZ taranacak zaman dilimlerinin dayandığı HAM veriyi çek.
+    #
+    # Eskiden her koşuda H1 + D1 çekiliyordu, taranan zaman dilimi ne olursa
+    # olsun. 648 sembollük evrende H1 çekimi tek başına saatler sürüyor ve
+    # 1G taraması onu HİÇ kullanmıyor: 4H, H1'den türetilir; W1, D1'den.
+    # Yalnız 1G tarayan bir koşu için H1 saf israftı.
+    raw_needed: set[Timeframe] = set()
+    for tf in tf_enums:
+        raw_needed.add(Timeframe.H1 if tf in (Timeframe.H1, Timeframe.H4) else Timeframe.D1)
+    raw_tfs = tuple(sorted(raw_needed, key=lambda x: x.value))
+    logger.info(
+        "Veri güncelleniyor (%s; 4H H1'den, W1 D1'den türetilir) ...",
+        ",".join(x.value for x in raw_tfs),
+    )
     provider = YFinanceProvider()
     store = Store(provider)
     update_failures: list[str] = []
     for symbol in universe:
         try:
-            store.update(symbol, mkt, datetime(2020, 1, 1, tzinfo=UTC), datetime.now(UTC))
+            store.update(
+                symbol, mkt, datetime(2020, 1, 1, tzinfo=UTC), datetime.now(UTC),
+                timeframes=raw_tfs,
+            )
         except Exception as exc:  # noqa: BLE001 — tek sembol hatası taramayı durdurmamalı
             update_failures.append(symbol)
             logger.warning("Veri güncelleme hatası %s: %s", symbol, exc)

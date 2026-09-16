@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ORNEK_TARAMA } from "@/lib/ornek-veri";
+import { TARAMA } from "@/lib/tarama";
 import { STRATEJILER } from "@/lib/ornek-strateji";
 import { YUZEYLER } from "@/lib/yollar";
 
@@ -11,11 +11,12 @@ type Kayit = { tur: string; ad: string; alt?: string; yol: string };
 const TR = new Intl.Collator("tr", { sensitivity: "base" });
 
 function kayitlar(): Kayit[] {
-  const semboller = ORNEK_TARAMA.map((r) => ({
+  // Sinyal veren semboller — aynı sembol birden çok stratejiden gelebilir,
+  // palette bir kez görünsün.
+  const semboller = [...new Set(TARAMA.satirlar.map((r) => r.sembol))].map((sembol) => ({
     tur: "Sembol",
-    ad: r.sembol,
-    alt: r.ad,
-    yol: `/grafik?sembol=${r.sembol}`,
+    ad: sembol,
+    yol: `/grafik?sembol=${sembol}`,
   }));
   const stratejiler = STRATEJILER.map((s) => ({
     tur: "Strateji",

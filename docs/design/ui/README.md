@@ -542,3 +542,104 @@ güvenilmez bulunan +0.582R.
   kendi etiketlerinden üretiliyor, elle yazılan sayı yok.
 - Verdikt künyede: **"tarihsel isabet · kanıtlanmadı"** beş stratejinin
   beşinde de görünüyor.
+
+---
+
+## Tarama yüzeyi — maket veriden gerçek çıktıya (2026-09-17)
+
+`/tarama` aylarca `lib/ornek-veri.ts`'ten maket satır gösterdi. Gerçek tarama
+çıktısına bağlandı ([ADR-003](../../karar/ADR-003-tarama-koprusu.md)) ve
+zorunlu görsel kabul döngüsü koşuldu. **Üç iterasyon, üçünde de gerçek kusur.**
+
+### i1 — zaman dilimi kodu satırlarla eşleşmiyordu
+
+Tablo `Tümü` filtresinde bile **boştu**. Sebep renkte ya da yerleşimde değildi:
+zaman dilimi çipinin değeri koşu kaydından `"1d"` olarak geliyordu, satırlarda
+ise sinyaller `"1D"` taşıyor. `r.zamanDilimi === tf` hiçbir zaman tutmuyordu.
+
+Bakmadan bitirilseydi görünmezdi: tsc temiz, eslint temiz, testler yeşil —
+iki string de `string`. Yalnız ekranda "sinyal yok" diye görünüyordu ve bu
+**doğru bir boş durum sanılabilirdi.**
+
+Düzeltme: künyeye kanonik (BÜYÜK harf) yazım yazılıyor, yanında Türkçe etiket
+(`{kod: "1D", ad: "1G"}`). Arayüz `ad`'ı gösterir, `kod` ile filtreler.
+
+### i2 — Yaş kolonu kesiliyordu, sembol altında ham gösterge adı vardı
+
+| Kusur | Görünen |
+|---|---|
+| Yaş hücresi taşıyor | `135 mum ...` — üç haneli yaşta "önce" eki sığmıyor |
+| Sembol alt satırı | `golden_zone_r2` — Strateji kolonunun (`Golden Zone · 2R`) snake_case tekrarı |
+
+Alt satır, kaldırılan şirket adı alanının yerine konmuştu. Türkçe etiket
+kuralını da çiğniyordu.
+
+Düzeltme: `yasEtiketi` "135 mum" üretiyor ("önce" zaten kolon başlığında);
+alt satır kaldırıldı ve sembol kolonu 176px → 116px'e indi. Kazanılan genişlik
+`Tarihsel isabet` kolonunu 1440'ta tam görünür yaptı — skill'in uyardığı
+"kolon toplamı levhayı aşarsa K4 çıktısını taşıyan kolon kesilir" tuzağı.
+
+### i3 — doğrulandı
+
+1440×900'de yatay kaydırma yok, on üç kolonun hepsi tam. Yaş `8 mum` /
+`59 mum` / `135 mum` olarak tam okunuyor. Rozet beş satırda da
+**`kanıtlanmadı`** — ve artık pasaport künyesinden okunuyor, elle yazılmıyor.
+
+### i4 — gerçek veri geldi, iki kolon kesildi
+
+İlk üç iterasyon 7 satırlık deneme koşusuyla yapıldı. Tam koşu (**2656
+sinyal**) gelince iki kolon taştı; maket veride ikisi de kısaydı ve
+görünmüyordu.
+
+| Kolon | Kesilen |
+|---|---|
+| Paket | `Trend & Moment…` (126px) |
+| Strateji | `Kesitsel Momentum …` (150px) |
+
+Genişlikler tahminle değil **ölçümle** yeniden dağıtıldı: her kolonun en uzun
+içeriği ve başlığı tarayıcıda `Range.getBoundingClientRect()` ile ölçüldü,
+üstüne hücre dolgusu eklendi.
+
+Ölçüm bir sürpriz verdi: `Tarihsel isabet` kolonunda bağlayıcı olan **içerik
+değil başlık**. Rozet 84px, başlık `TARİHSEL İSABET` 144px. İçeriğe göre
+daraltılsaydı başlık kesilecekti — tam da K4 çıktısını taşıyan kolonda.
+
+### i5 — sparkline hücresini 4 piksel taşıyordu, başlık 2 bar yalan söylüyordu
+
+| Kusur | Ölçülen |
+|---|---|
+| SVG 62px, hücre iç kutusu 58px | 4px taşma (`scrollWidth > clientWidth`) |
+| Başlık `20 bar` | seri **22** bar taşıyor |
+
+İkisi de gözle fark edilmeyecek kadar küçük ve ikisi de yanlış. Kolon 84px'e
+çıkarıldı (62 + 2×12 dolgu); başlık artık veriden türetiliyor
+(`SERI_BAR = Object.values(TARAMA.seriler)[0]?.length`), sabit yazılmıyor.
+
+### i6 — doğrulandı
+
+1440×900'de yatay kaydırma yok, taşan hücre yok, taşan başlık yok
+(`scrollWidth === clientWidth` on kolonda da). 2656 satırda sanallaştırma
+çalışıyor; liste içinde kaydırınca satırlar `son mum` → `1 mum` diye
+ilerliyor.
+
+Künye satırı tam okunuyor:
+
+> `bist_2026-09-16` koşusunun gerçek çıktısı · **625/648** sembol · 1G · kod
+> `197285a`. **23 sembolde sağlayıcı veri döndürmedi ve o sembollere hiç
+> bakılmadı:** ALMAD, DAGHL, … YGYO.
+
+Dipnot da `648` değil **`625 sembol tarandı`** diyor. İkisi ayrı sayı ve
+ayrı duruyor.
+
+### Doğrulanıp kusur bulunmayanlar
+
+- Sol ray sayaçları gerçek: Tarama 2656 · Kütüphane 3 · Yapı 2 · Formasyon 1 ·
+  · Yapı 2 · Formasyon 1 · Trend 0 · Arbitraj 0 · BIST Tümü 648. Eskiden
+  `47 / 4 / 4 / 3 / 2 / 21` yazılıydı ve hiçbirinin arkasında kod yoktu.
+- Boş durum ("Son 3 mumda bu filtreye uyan sinyal yok") doğru çalışıyor;
+  sahte satırla doldurulmuyor.
+- Yön hücreleri renge tek başına yaslanmıyor: `AL`/`SAT` metni + hap biçimi.
+- İstatistik kutularındaki `—` (tarama süresi, en üretken paket) tamamlanmamış
+  koşuda doğru davranış — sıfır ya da uydurma sayı göstermiyor.
+- Mono `0` glifi kutu gibi görünüyor ama tofu değil: JetBrains Mono'nun
+  çentikli sıfırı, tasarımın kendi tercihi.

@@ -17,12 +17,13 @@ import {
 } from "@/components/ui";
 import { Cekmece } from "@/components/kabuk/Cekmece";
 import {
-  ORNEK_TARAMA,
+  SERI_BAR,
+  TARAMA,
   VERDIKT_ACIKLAMA,
-  ornekTarama,
+  seri,
   yasEtiketi,
   type TaramaSatiri,
-} from "@/lib/ornek-veri";
+} from "@/lib/tarama";
 
 const TAZELIK = [
   { value: "1", label: "Son 1 mum" },
@@ -31,10 +32,10 @@ const TAZELIK = [
   { value: "hepsi", label: "Tümü" },
 ] as const;
 
-const TF = [
-  { value: "1g", label: "1G" },
-  { value: "4s", label: "4S" },
-] as const;
+/** Zaman dilimi seçenekleri KOŞUDAN gelir, elle yazılmaz. Taranmamış bir
+ *  zaman dilimini seçenek olarak sunmak, boş listeyi "sinyal yok" diye
+ *  gösterirdi — oysa doğrusu "orada hiç bakılmadı". */
+const TF = TARAMA.kunye.zamanDilimleri.map((z) => ({ value: z.kod, label: z.ad }));
 
 const YON = [
   { value: "hepsi", label: "Tümü" },
@@ -47,39 +48,36 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     id: "sembol",
     header: "Sembol",
     className: "sym",
-    width: "176px",
+    width: "84px",
     sortValue: (r) => r.sembol,
-    cell: (r) => (
-      <>
-        {r.sembol}
-        <span className="sub">{r.ad}</span>
-      </>
-    ),
+    cell: (r) => r.sembol,
   },
-  { id: "paket", header: "Paket", width: "126px", className: "mut", sortValue: (r) => r.paket, cell: (r) => r.paket },
-  { id: "strateji", header: "Strateji", width: "150px", sortValue: (r) => r.strateji, cell: (r) => r.strateji },
+  { id: "paket", header: "Paket", width: "152px", className: "mut", sortValue: (r) => r.paket, cell: (r) => r.paket },
+  { id: "strateji", header: "Strateji", width: "188px", sortValue: (r) => r.strateji, cell: (r) => r.strateji },
   {
     id: "yon",
     header: "Yön",
-    width: "76px",
+    width: "66px",
     sortValue: (r) => r.yon,
     cell: (r) => <Pill tone={r.yon}>{r.yon === "up" ? "AL" : "SAT"}</Pill>,
   },
-  { id: "durum", header: "Durum", width: "104px", className: "mut", sortValue: (r) => r.durum, cell: (r) => r.durum },
+  { id: "durum", header: "Durum", width: "92px", className: "mut", sortValue: (r) => r.durum, cell: (r) => r.durum },
   {
     id: "yas",
     header: "Yaş",
     align: "right",
-    width: "94px",
+    width: "86px",
     className: "num dim",
-    sortValue: (r) => r.yas,
+    // Yaşı bilinmeyen satır (eski run'dan gelen kayıt) en sona düşsün —
+    // "0" saymak onu en taze satır gibi gösterirdi.
+    sortValue: (r) => r.yas ?? Number.MAX_SAFE_INTEGER,
     cell: (r) => yasEtiketi(r.yas),
   },
   {
     id: "fiyat",
     header: "Fiyat",
     align: "right",
-    width: "96px",
+    width: "82px",
     className: "num",
     sortValue: (r) => r.fiyat,
     cell: (r) => r.fiyat.toFixed(2),
@@ -88,16 +86,23 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
     id: "seviye",
     header: "Seviye",
     align: "right",
-    width: "88px",
+    width: "82px",
     className: "num mut",
-    sortValue: (r) => r.seviye,
-    cell: (r) => r.seviye.toFixed(2),
+    sortValue: (r) => r.seviye ?? 0,
+    cell: (r) => (r.seviye === null ? "—" : r.seviye.toFixed(2)),
   },
-  { id: "seri", header: "20 bar", width: "72px", cell: (r) => <Sparkline points={r.seri} dir={r.yon} /> },
+  {
+    id: "seri",
+    header: `${SERI_BAR} bar`,
+    // 84px: sparkline 62px + 2×12px hücre dolgusu. 76px'te SVG hücreyi
+    // 4 piksel taşıyordu.
+    width: "84px",
+    cell: (r) => <Sparkline points={seri(r)} dir={r.yon} />,
+  },
   {
     id: "verdikt",
     header: "Tarihsel isabet",
-    width: "130px",
+    width: "150px",
     sortValue: (r) => r.verdikt,
     cell: (r) => (
       <Pill tone={r.verdikt === "izlenen aday" ? "acc" : "nötr"} title={VERDIKT_ACIKLAMA[r.verdikt]}>
@@ -109,19 +114,31 @@ const KOLONLAR: Kolon<TaramaSatiri>[] = [
 
 /** Tarama — ürünün giriş noktası. Tazelik birinci sınıf filtre. */
 export default function TaramaSayfasi() {
+  const kunye = TARAMA.kunye;
   const [tazelik, setTazelik] = useState<string>("3");
-  const [tf, setTf] = useState<string>("1g");
+  const [tf, setTf] = useState<string>(TF[0]?.value ?? "");
   const [yon, setYon] = useState<string>("hepsi");
   const [acilan, setAcilan] = useState<TaramaSatiri | null>(null);
 
-  const tumu = useMemo(() => ornekTarama(160), []);
-
   const satirlar = useMemo(() => {
     const esik = tazelik === "hepsi" ? Infinity : Number(tazelik);
-    return tumu.filter((r) => r.yas < esik && (yon === "hepsi" || r.yon === yon));
-  }, [tumu, tazelik, yon]);
+    return TARAMA.satirlar.filter(
+      (r) =>
+        r.zamanDilimi === tf &&
+        (r.yas === null ? tazelik === "hepsi" : r.yas < esik) &&
+        (yon === "hepsi" || r.yon === yon),
+    );
+  }, [tazelik, tf, yon]);
 
   const yukari = satirlar.filter((r) => r.yon === "up").length;
+
+  /** En üretken paket — elle "Yapı" yazmak yerine sayılır. */
+  const enUretkenPaket = useMemo(() => {
+    const sayim = new Map<string, number>();
+    for (const r of satirlar) sayim.set(r.paket, (sayim.get(r.paket) ?? 0) + 1);
+    const en = [...sayim.entries()].sort((a, b) => b[1] - a[1])[0];
+    return en ? en[0] : "—";
+  }, [satirlar]);
 
   return (
     <>
@@ -137,16 +154,9 @@ export default function TaramaSayfasi() {
 
         <StatTileGrid>
           <StatTile
-            label="Yeni sinyal"
+            label="Filtreye uyan sinyal"
             value={satirlar.length}
-            hint={
-              <>
-                <Pill tone="up" small>
-                  +12
-                </Pill>
-                <span>önceki koşuya göre</span>
-              </>
-            }
+            hint={<span>{kunye.eslesen} sinyalin içinden</span>}
           />
           <StatTile
             label="Yön dağılımı"
@@ -159,15 +169,27 @@ export default function TaramaSayfasi() {
             }
             hint="alış / satış"
           />
-          <StatTile label="En üretken paket" value="Yapı" textValue hint="sinyallerin çoğunluğu" />
+          <StatTile
+            label="En üretken paket"
+            value={enUretkenPaket}
+            textValue
+            hint="bu filtredeki çoğunluk"
+          />
           <StatTile
             label="Tarama süresi"
             value={
-              <>
-                6<Unit>dk</Unit> 22<Unit>sn</Unit>
-              </>
+              kunye.sureSn === null ? (
+                "—"
+              ) : (
+                <>
+                  {Math.floor(kunye.sureSn / 60)}
+                  <Unit>dk</Unit> {kunye.sureSn % 60}
+                  <Unit>sn</Unit>
+                </>
+              )
             }
-            hint="648 sembol · 4S + 1G"
+            textValue={kunye.sureSn === null}
+            hint={`${kunye.taranan} sembol · ${kunye.zamanDilimleri.map((z) => z.ad).join(" + ")}`}
           />
         </StatTileGrid>
 
@@ -189,7 +211,7 @@ export default function TaramaSayfasi() {
           columns={KOLONLAR}
           rows={satirlar}
           rowKey={(r) => r.id}
-          caption="Bugünün tarama sonuçları — örnek veri; kolonlar sıralanabilir, liste sanallaştırılmıştır."
+          caption={`${kunye.tarih} kapanış taraması — gerçek çıktı; kolonlar sıralanabilir, liste sanallaştırılmıştır.`}
           height={520}
           initialSort={{ columnId: "yas", dir: "asc" }}
           onRowActivate={setAcilan}
@@ -208,8 +230,8 @@ export default function TaramaSayfasi() {
           footNote={
             <>
               <span>
-                <span className="num">{satirlar.length}</span> sinyal · <span className="num">648</span>{" "}
-                sembol tarandı
+                <span className="num">{satirlar.length}</span> sinyal ·{" "}
+                <span className="num">{kunye.taranan}</span> sembol tarandı
               </span>
               <span className="ayrac" />
               <span>satıra tıkla → grafik çekmecesi</span>
@@ -220,11 +242,35 @@ export default function TaramaSayfasi() {
         />
 
         <p className="dim" style={{ fontSize: 12, margin: "10px 0 0", maxWidth: "80ch", lineHeight: 1.55 }}>
-          Örnek veri — gerçek tarama çıktısı değil.{" "}
-          <b className="mut">Tarihsel isabet</b> kolonu K4 (istatistik) kapısının çıktısını taşır;
-          ölçülmemiş bir strateji burada “ölçülmedi” görünür, gizlenmez. İlk{" "}
-          <span className="num">{ORNEK_TARAMA.length}</span> satır gerçek BIST sembolleriyle, kalanı
-          türetilmiş örnek kodlarla.
+          <b className="mut">{kunye.runId}</b> koşusunun gerçek çıktısı ·{" "}
+          <span className="num">{kunye.taranan}</span>/
+          <span className="num">{kunye.evren ?? "—"}</span> sembol ·{" "}
+          {kunye.zamanDilimleri.map((z) => z.ad).join(" + ")} · kod{" "}
+          <span className="num">{kunye.gitSha ?? "—"}</span>.{" "}
+          {kunye.verisiGelmeyen.length > 0 && (
+            <>
+              <span className="num">{kunye.verisiGelmeyen.length}</span> sembolde sağlayıcı veri
+              döndürmedi ve o sembollere <b className="mut">hiç bakılmadı</b>:{" "}
+              <span className="mut">{kunye.verisiGelmeyen.join(", ")}</span>.{" "}
+            </>
+          )}
+          <b className="mut">Tarihsel isabet</b> kolonu K4 (istatistik) kapısının çıktısını taşır ve
+          satırın göstergesini sahiplenen pasaporttan okunur — uydurulmaz; ölçülmemiş bir strateji
+          burada “ölçülmedi” görünür, gizlenmez.{" "}
+          {kunye.kesilen > 0 && (
+            <>
+              Satır sınırı yüzünden <span className="num">{kunye.kesilen}</span> sinyal bu listeye
+              girmedi.{" "}
+            </>
+          )}
+          {kunye.veriYok > 0 && (
+            <>
+              <span className="num">{kunye.veriYok}</span> sinyal, fiyat serisi okunamadığı için
+              atlandı.{" "}
+            </>
+          )}
+          Şirket adı kolonu yok: evren dosyasında sembol var, ad yok — elimizde olmayan bir alanı
+          doldurmuyoruz.
         </p>
       </section>
 

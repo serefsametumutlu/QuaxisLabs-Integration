@@ -5,6 +5,15 @@ ad: Harmonik Formasyonlar (Pesavento)
 paket: formasyon
 referans: ""
 
+# Bu pasaportun KAPSADIĞI gösterge künyeleri (`indicators/katalog.py`).
+# Dört formasyon tek pasaport altında ama DÖRT AYRI künye — soru
+# "harmonikler çalışıyor mu" değil, "hangisi".
+gostergeler:
+  harmonik_abcd: "AB=CD"
+  harmonik_gartley: "Gartley 222"
+  harmonik_kelebek: "Kelebek"
+  harmonik_uc_surus: "Üç Sürüş"
+
 verdikt: kanitlanmadi
 
 durum: durduruldu
@@ -21,6 +30,11 @@ durdurma_gerekcesi: >
   teknigi isabeti %32.8'den %45.3'e cikariyor ama adil bazdan
   ayrilamiyor. On kayit §7 geregi ucuncu varyant denenmeyecek.
   Ozet: docs/olcum/onkayit-harmonik-teyit.md
+  DURDURULAN ARASTIRMADIR, URUN DEGIL. K6 2026-09-17'de kapandi: dort
+  formasyon grafikte, kutuphanede ve GERCEK tarama tablosunda duruyor --
+  yaninda "tarihsel isabet: kanitlanmadi" rozetiyle. Eleme degil
+  ETIKETLEME (README madde 6). Durdurulan sey ucuncu bir varyant denemek;
+  kullanicidan gizlemek degil.
 
 kapilar:
   K0: { gecildi: 2026-09-13, kanit: ["docs/strateji/kaynak/harmonik-pesavento-K0.md"] }
@@ -29,7 +43,7 @@ kapilar:
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K3-1D.md", "docs/olcum/harmonik-pesavento-K3-karar-kurali.md"] }
   K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/harmonik-pesavento-K4-1D-long.md", "docs/olcum/harmonik-pesavento-K4-1D-hepsi.md", "docs/olcum/harmonik-pesavento-K4b-teyit-1D-long.md", "docs/olcum/onkayit-harmonik-teyit.md"] }
   K5: { gecildi: 2026-09-14, kanit: ["docs/design/ui/harmonik-pesavento-abcd-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-gartley-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-kelebek-koyu-1440-son.png", "docs/design/ui/harmonik-pesavento-uc-surus-koyu-1440-son.png", "docs/design/ui/README.md"], onay: 2026-09-14 }
-  K6: { gecildi: null, kanit: [] }
+  K6: { gecildi: 2026-09-17, kanit: ["docs/karar/ADR-003-tarama-koprusu.md", "apps/web/app/(uygulama)/tarama/page.tsx", "apps/web/lib/tarama.ts", "tools/tarama.py", "tools/tarama_disaktar.py"] }
 ---
 
 # Harmonik Formasyonlar (Pesavento) — Strateji Pasaportu
@@ -464,9 +478,9 @@ onaylandığında **hesaplanan** bir fiyattır.
 | Grafik yüzeyi | ✅ `/grafik` — strateji seçicide dört formasyon; `?f=harmonik-<ad>` derin bağlantısı |
 | Kütüphane kartı | ✅ `lib/ornek-veri.ts` — dört kart, gerçek kaynak ve verdiktle |
 | Strateji sayfası | ✅ [`/stratejiler/harmonik-pesavento`](../../apps/web/lib/ornek-strateji.ts) — gerçek levha, parametreler, kaynak kutuları, K4 ölçümü, SSS |
-| Tarama kolonu | ⏳ **tarama yüzeyi hâlâ maket veriyle çalışıyor** |
+| Tarama kolonu | ✅ `/tarama` — gerçek gün sonu koşusu (`bist_2026-09-16`); dört formasyon da taranıyor, rozet bu pasaportun `verdikt` alanından okunuyor |
 | Alarm kuralı | ✅ **alarm YOK** — gerekçe aşağıda |
-| Durum | **kapı KAPANMADI** (tarama kolonu) |
+| Durum | ✅ **kapı KAPANDI — 2026-09-17** |
 
 ### Neden alarm yok — ve bu bir eksik değil
 
@@ -478,15 +492,34 @@ sistem kimseyi uyandırmaz.
 Alarm kuralı `abcd·teyit` ileriye dönük izlemede eşiği geçerse yeniden
 düşünülür — o zamana kadar **alarmın olmaması kuralın kendisidir.**
 
-### Tarama kolonu neden açık
+### Tarama kolonu nasıl kapandı (2026-09-17)
 
-Tarama yüzeyi (`/tarama`) hâlâ `lib/ornek-veri.ts`'ten maket satır
-üretiyor ve bu **bütün stratejiler için** böyle — harmoniklere özgü bir
-eksik değil, ürünün kendi açığı (bkz. `docs/strateji/ENVANTER.md` §1).
+Kapı, harmoniklere özgü bir eksik yüzünden değil ürünün kendi açığı yüzünden
+açıktı: tarama yüzeyi `lib/ornek-veri.ts`'ten maket satır üretiyordu. Eski
+not şunu diyordu:
 
-Buraya sahte harmonik satırlar eklemek kapıyı kapatırdı ama yalan olurdu:
-kullanıcı gerçek bir tarama sonucu sandığı şeye bakardı. **Kapı açık
-kalıyor**; gerçek tarama motoru evrende koştuğunda kapanacak.
+> "Buraya sahte harmonik satırlar eklemek kapıyı kapatırdı ama yalan olurdu."
+
+Sahte satır eklenmedi. Gerçek tarama motoru evrende koştu
+([ADR-003](../karar/ADR-003-tarama-koprusu.md)):
+
+| | |
+|---|---|
+| Koşu | `bist_2026-09-16` · 1G · 625/648 sembol |
+| Süre | 15 dk 44 sn (veri güncelleme dahil) |
+| Güncel sinyal | 2656 |
+| Harmonik payı | `abcd` 531 · `uc_surus` 66 · `gartley` 50 · `kelebek` 42 |
+
+**Dördü de tarama tablosunda görünüyor** ve her satırın yanında bu
+pasaportun künyesinden okunan `kanıtlanmadı` rozeti duruyor. Rozet elle
+yazılmıyor: künyedeki `gostergeler:` eşlemesi dört formasyonu bu pasaporta
+bağlıyor ve `tools/pasaport.py dogrula` katalogdaki her göstergenin tam bir
+pasaport tarafından sahiplenildiğini denetliyor.
+
+**Tazelik dürüst.** Son 10 barda yalnız **bir** taze harmonik sinyal var
+(`abcd`). Tablo varsayılan "son 3 mum" filtresinde harmonik göstermiyor ve
+bu doğru: formasyon seyrek. Listeyi doldurmak için eski sinyaller taze gibi
+gösterilmiyor — yaş kolonu kaç bar geçtiğini yazıyor.
 
 ### Nasıl okunur — dört soru
 

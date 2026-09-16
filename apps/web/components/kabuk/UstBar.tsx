@@ -1,7 +1,7 @@
 "use client";
 
 import { Eyebrow, Pill, ThemeSegment } from "@/components/ui";
-import { TARAMA_SAATI } from "@/lib/ornek-veri";
+import { TARAMA_SAATI } from "@/lib/tarama";
 import { AksanSecici } from "./AksanSecici";
 import { Marka } from "./Marka";
 import { Omni } from "./Omni";

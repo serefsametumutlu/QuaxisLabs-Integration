@@ -21,17 +21,24 @@ Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 | **Golden Zone** (ICT OTE) | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | **Kesitsel Momentum** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
 | Kesitsel Dönüş (ters varyant) | ✅ | — | *(momentumun içinde)* | ✅ | **reddedildi** (ön kayıtlı) |
-| **Harmonik · AB=CD** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
-| **Harmonik · Gartley 222** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
-| **Harmonik · Butterfly** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
-| **Harmonik · Three Drives** | ✅ | — | ✅ | ✅ | `kanıtlanmadı` — ⏸ durduruldu |
+| **Harmonik · AB=CD** | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ✅ **K6 yayında** |
+| **Harmonik · Gartley 222** | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ✅ **K6 yayında** |
+| **Harmonik · Butterfly** | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ✅ **K6 yayında** |
+| **Harmonik · Three Drives** | ✅ | ✅ | ✅ | ✅ | `kanıtlanmadı` — ✅ **K6 yayında** |
 | **Salınım Fibo ABCD** | ❌ **YOK** | ✅ | ❌ | ❌ | — |
 
-**Yayınlanmış (K6) strateji: 0.** Harmonikler K5'i geçti (kullanıcı onayı
-2026-09-14) ve ürün yüzeylerinin üçü hazır — grafik, kütüphane kartı,
-strateji sayfası. K6 **tarama kolonu** yüzünden açık: tarama yüzeyi hâlâ
-maket veriyle çalışıyor ve oraya sahte harmonik satır eklemek kapıyı
-kapatırdı ama yalan olurdu.
+**Yayınlanmış (K6) strateji: 1** — harmonikler, **2026-09-17**. Projenin
+yedi kapının hepsini geçen ilk stratejisi.
+
+Kapıyı kapatan şey harmoniklerle ilgili değildi: tarama yüzeyi maket veriyle
+çalışıyordu ve oraya sahte harmonik satır eklemek kapıyı kapatırdı ama yalan
+olurdu. Gerçek tarama motoru evrende koştu
+([ADR-003](../karar/ADR-003-tarama-koprusu.md)) ve dört formasyon da gerçek
+tabloda, yanlarında `kanıtlanmadı` rozetiyle görünüyor.
+
+**Yayınlanmış olmak "işe yarıyor" demek değildir.** Verdikt hâlâ
+`kanıtlanmadı`; ürün formasyonu gösteriyor, sistem kimseye "al" demiyor ve
+alarm kurulmuyor. Eleme değil etiketleme.
 
 Dört harmonik formasyon tek pasaport altında
 ([`harmonik-pesavento.md`](harmonik-pesavento.md)) ama **dört ayrı künye**
@@ -44,10 +51,24 @@ grafiği elle girilmiş sayılarla çiziliyor; "bu formasyon ne zaman oluştu"
 sorusunu cevaplayan kod yok. Harmoniklere buradan devam edilecekse ilk iş
 o dedektörü yazmaktır.
 
-### Arayüzdeki sayılar gerçek değil
+### Arayüzdeki sayılar artık gerçek (2026-09-17)
 
-Sol raydaki **Yapı 4 · Formasyon 3 · Trend & Momentum 2 · İst. Arbitraj 0**
-maket verisidir (`apps/web/lib/ornek-veri.ts`). Karşılığı olan kod yoktur.
+Eskiden sol rayda **Yapı 4 · Formasyon 3 · Trend & Momentum 2 · İst. Arbitraj 0**
+ve **Takip listem 21** yazıyordu; hiçbirinin arkasında kod yoktu.
+
+Tarama yüzeyi gerçek çıktıya bağlandı
+([ADR-003](../karar/ADR-003-tarama-koprusu.md)): tarama sayacı gün sonu
+koşusundan, paket sayaçları strateji kayıt defterinden geliyor. "Takip listem"
+kaldırıldı — öyle bir özellik yok.
+
+`lib/ornek-veri.ts` silinmedi ama görevi daraldı: yalnız **tasarım vitrini**
+için (bileşenleri 500 satırda göstermek, boş durumu denemek). Satır tipini
+gerçek veriden alıyor, yani vitrinde çalışan bir kolon üründe kırılamaz.
+
+Hâlâ maket olan: **strateji kütüphanesi kartlarının üçü** (`Piyasa Yapısı`,
+`Arz–Talep`, `Adil Değer Boşluğu`) — arkalarında kod yok, verdiktleri
+`ölçülmedi`. Ayrıca `golden-zone` ve `kesitsel-momentum` pasaportları var ama
+kütüphanede kaydı yok: tarama tablosunda görünüp kütüphanede görünmüyorlar.
 
 ---
 
