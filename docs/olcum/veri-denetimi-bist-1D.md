@@ -9,14 +9,14 @@
 | | |
 |---|---|
 | Evren dosyasındaki sembol | 648 |
-| Verisi olan | **544** |
-| Dosyası yok | 104 |
+| Verisi olan | **625** |
+| Dosyası yok | 23 |
 | Dosyası var ama boş | 0 |
-| Toplam bar | 1 433 075 |
-| Sembol başına bar (medyan) | 3349 |
+| Toplam bar | 1 704 151 |
+| Sembol başına bar (medyan) | 3592 |
 | En kısa / en uzun | 19 / 4290 |
 
-Dosyası olmayanlar (104): `KRPLS`, `BMSTL`, `ERCB`, `GEDIK`, `OSMEN`, `OYYAT`, `ISBTR`, `QNBTR`, `SKBNK`, `EDATA`, `INTEK`, `LOGO`, `MIATK`, `MTRKS`, `BIGTK`, `PCILT`, `SNKRN`, `BASGZ`, `BIOEN`, `LYDYE`, `MANAS`, `NTGAZ`, `QNBFK`, `QNBFL`, `ADESE`, `AKFGY`, `ATAGY`, `ISGYO`, `KUYAS`, `PEHOL`, `PSGYO`, `RYGYO`, `YGYO`, `HUBVC`, `MGROS`, `CCOLA`, `DARDL`, `DUNYH`, `EFORC`, `ELITE` …
+Dosyası olmayanlar (23): `SNKRN`, `QNBFL`, `PEHOL`, `YGYO`, `EFORC`, `SELGD`, `DAGHL`, `DOBUR`, `IPEKE`, `KOZAA`, `KOZAL`, `ROYAL`, `METUR`, `ALMAD`, `GRTRK`, `IDEAS`, `ITTFH`, `KARYE`, `KERVT`, `MIPAZ`, `QNBFB`, `TETMT`, `UZERB`
 
 **Bu sayı kendi başına bir bulgu.** Evren dosyası bu sembolleri listeliyor ama veri yok — yani her ölçüm, farkında olmadan daha küçük bir evrende koşuyor.
 
@@ -24,9 +24,9 @@ Dosyası olmayanlar (104): `KRPLS`, `BMSTL`, `ERCB`, `GEDIK`, `OSMEN`, `OYYAT`, 
 
 Son barın yılı — **listeden düşen sembol varsa burada görünür:**
 
-`2026: 544`
+`2026: 625`
 
-**544 sembolün 544'inin son barı 2026'da.** Listeden düşmüş tek bir şirket yok.
+**625 sembolün 625'inin son barı 2026'da.** Listeden düşmüş tek bir şirket yok.
 
 Bu, evren dosyasının **bugünün listesinin anlık görüntüsü** olmasının doğrudan sonucu. 2010–bugün arasında iflas eden, birleşen ya da kottan çıkarılan her şirket veri setinde YOK.
 
@@ -39,7 +39,7 @@ Yanlılık hem stratejiyi hem adil bazı besliyor — ikisi de aynı evrenden ç
 
 İlk barın yılı (halka arz dağılımının vekili):
 
-`2010: 223 · 2011: 17 · 2012: 22 · 2013: 19 · 2014: 13 · 2015: 8 · 2016: 2 · 2017: 3 · 2018: 10 · 2019: 5 · 2020: 9 · 2021: 37 · 2022: 32 · 2023: 32 · 2024: 61 · 2025: 19 · 2026: 32`
+`2010: 266 · 2011: 21 · 2012: 33 · 2013: 20 · 2014: 14 · 2015: 8 · 2016: 2 · 2017: 3 · 2018: 10 · 2019: 5 · 2020: 11 · 2021: 52 · 2022: 36 · 2023: 32 · 2024: 61 · 2025: 19 · 2026: 32`
 
 ## 3 · OHLC bütünlüğü
 
@@ -51,46 +51,46 @@ Yanlılık hem stratejiyi hem adil bazı besliyor — ikisi de aynı evrenden ç
 
 | Yıl | Bar | `açılış == kapanış` | Oran |
 |---|---|---|---|
-| 2010 | 55767 | 45502 | **%81.6** |
-| 2011 | 60081 | 57198 | **%95.2** |
-| 2012 | 65231 | 62916 | **%96.5** |
-| 2013 | 70371 | 54597 | **%77.6** |
-| 2014 | 74625 | 36705 | **%49.2** |
-| 2015 | 78002 | 34202 | **%43.8** |
-| 2016 | 79003 | 16171 | **%20.5** |
-| 2017 | 79384 | 12963 | **%16.3** |
-| 2018 | 82061 | 12555 | **%15.3** |
-| 2019 | 82794 | 13805 | **%16.7** |
-| 2020 | 82311 | 6096 | **%7.4** |
-| 2021 | 86215 | 5509 | **%6.4** |
-| 2022 | 96807 | 5692 | **%5.9** |
-| 2023 | 103797 | 3934 | **%3.8** |
-| 2024 | 117343 | 3802 | **%3.2** |
-| 2025 | 126721 | 4400 | **%3.5** |
-| 2026 | 92562 | 5117 | **%5.5** |
+| 2010 | 66419 | 54291 | **%81.7** |
+| 2011 | 71884 | 68448 | **%95.2** |
+| 2012 | 78099 | 75341 | **%96.5** |
+| 2013 | 85296 | 66510 | **%78.0** |
+| 2014 | 90161 | 44937 | **%49.8** |
+| 2015 | 93662 | 42160 | **%45.0** |
+| 2016 | 94659 | 21246 | **%22.4** |
+| 2017 | 94984 | 16852 | **%17.7** |
+| 2018 | 97721 | 16023 | **%16.4** |
+| 2019 | 98394 | 16692 | **%17.0** |
+| 2020 | 97536 | 7587 | **%7.8** |
+| 2021 | 103212 | 6556 | **%6.4** |
+| 2022 | 116810 | 6757 | **%5.8** |
+| 2023 | 123964 | 4792 | **%3.9** |
+| 2024 | 137543 | 4571 | **%3.3** |
+| 2025 | 147052 | 5347 | **%3.6** |
+| 2026 | 106755 | 6139 | **%5.8** |
 
 ## 5 · Diğer kusurlar
 
 | Kusur | Sayı | Ne demek |
 |---|---|---|
-| Hacimsiz bar | 40 889 | O gün işlem görmemiş; fiyat gerçek bir gözlem değil |
-| Donuk bar (≥5 bar aynı kapanış) | 17 470 | Sağlayıcı son fiyatı tekrar ediyor olabilir |
-| Marjı aşan günlük getiri (>%20) | 1 021 bar / 289 sembol | Çoğu GERÇEK (devre kesici, sermaye olayı). Yalnız %17'i hacimsiz barın ardından |
+| Hacimsiz bar | 51 456 | O gün işlem görmemiş; fiyat gerçek bir gözlem değil |
+| Donuk bar (≥5 bar aynı kapanış) | 22 005 | Sağlayıcı son fiyatı tekrar ediyor olabilir |
+| Marjı aşan günlük getiri (>%20) | 1 345 bar / 341 sembol | Çoğu GERÇEK (devre kesici, sermaye olayı). Yalnız %16'i hacimsiz barın ardından |
 
 En büyük tek günlük sıçramalar:
 
 | sembol | aşan bar | en büyük |
 |---|---|---|
+| `TRHOL` | 5 | **%10124** |
 | `ISATR` | 16 | **%8781** |
 | `KSTUR` | 23 | **%2525** |
 | `KGYO` | 4 | **%952** |
 | `CRFSA` | 3 | **%459** |
+| `ISBTR` | 16 | **%447** |
 | `ISGSY` | 9 | **%401** |
+| `FRIGO` | 11 | **%386** |
 | `POLHO` | 4 | **%319** |
 | `UMPAS` | 6 | **%301** |
-| `LYDHO` | 6 | **%271** |
-| `EMNIS` | 10 | **%215** |
-| `YYAPI` | 14 | **%184** |
 
 ## 6 · Bayat bar testi — bu denetimin en önemli ölçümü
 
@@ -100,9 +100,9 @@ Hacimsiz bir barın fiyatı, **kimsenin işlem yapmadığı** bir fiyattır: sa�
 
 | giriş barı | n | ortalama | medyan |
 |---|---|---|---|
-| **hacimsiz** | 40 779 | **%15.31** | %0.00 |
-| normal | 1 370 593 | %6.93 | %1.42 |
-| **fark** | | **%+8.37** | |
+| **hacimsiz** | 51 304 | **%13.46** | %0.00 |
+| normal | 1 627 904 | %7.13 | %1.41 |
+| **fark** | | **%+6.33** | |
 
 Medyanın hacimsiz tarafta **%0.00** olması deseni ele veriyor: barların çoğu düz, ama bir kuyruk büyük sıçramalarla ortalamayı yukarı çekiyor. Bayat fiyatın imzası tam olarak budur.
 

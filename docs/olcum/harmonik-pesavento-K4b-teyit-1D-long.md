@@ -1,6 +1,6 @@
 # Harmonik (Pesavento) — K4 İstatistik · 1D
 
-**Tarih:** 2026-09-13 · **Evren:** 507 BIST sembolü · **Yön:** long
+**Tarih:** 2026-09-14 · **Evren:** 588 BIST sembolü · **Yön:** long
 
 Ölçüt: **üç bariyerli R** (stop / hedef / zaman). Stop ve hedef stratejinin kendi kuralından geliyor. İşlem maliyeti dahil (taraf başına %0.050 komisyon + %0.050 kayma). **Aynı barda stop ve hedef birlikte vurulduysa STOP sayılır.**
 
@@ -10,53 +10,53 @@ Bağımsız gözlem **sembol**, bar değil. Adil baz: aynı risk yapısıyla ras
 
 | künye | işlem | sembol | isabet | beklenen R | adil baz | fark | PF | p |
 |---|---|---|---|---|---|---|---|---|
-| `abcd·kor` | 2413 | 451 | %32.8 | **+0.148R** | +0.323R | -0.176R | 1.22 | 1.0000 |
-| `abcd·teyit` | 803 | 362 | %45.3 | **+0.707R** | +0.349R | +0.359R | 2.35 | 0.0685 |
-| `gartley·kor` | 108 | 92 | %35.2 | **+0.053R** | +0.240R | -0.187R | 1.08 | 0.8941 |
-| `gartley·teyit` | 36 | 36 | %41.7 | **-0.108R** | +0.171R | -0.278R | 0.82 | 0.8926 |
-| `kelebek·kor` | 138 | 113 | %30.4 | **-0.195R** | +0.228R | -0.423R | 0.71 | 1.0000 |
-| `kelebek·teyit` | 44 | 43 | %45.5 | **+0.174R** | +0.183R | -0.009R | 1.39 | 0.4633 |
-| `uc_surus·kor` | 142 | 117 | %24.6 | **-0.256R** | +0.150R | -0.407R | 0.68 | 0.9990 |
-| `uc_surus·teyit` | 37 | 35 | %51.4 | **+0.173R** | +0.105R | +0.069R | 1.42 | 0.2499 |
+| `abcd·kor` | 2882 | 525 | %32.8 | **+0.152R** | +0.320R | -0.168R | 1.22 | 1.0000 |
+| `abcd·teyit` | 921 | 424 | %46.1 | **+0.612R** | +0.346R | +0.266R | 2.20 | 0.0445 |
+| `gartley·kor` | 130 | 111 | %36.9 | **+0.115R** | +0.221R | -0.106R | 1.18 | 0.7726 |
+| `gartley·teyit` | 43 | 42 | %41.9 | **-0.104R** | +0.190R | -0.294R | 0.82 | 0.9070 |
+| `kelebek·kor` | 163 | 132 | %30.7 | **-0.171R** | +0.212R | -0.383R | 0.75 | 1.0000 |
+| `kelebek·teyit` | 47 | 46 | %46.8 | **+0.154R** | +0.171R | -0.017R | 1.35 | 0.5012 |
+| `uc_surus·kor` | 175 | 145 | %24.6 | **-0.256R** | +0.158R | -0.414R | 0.68 | 1.0000 |
+| `uc_surus·teyit` | 52 | 49 | %46.2 | **+0.099R** | +0.121R | -0.022R | 1.21 | 0.4693 |
 
 ## OOS — ikincil
 
 | künye | işlem | sembol | isabet | beklenen R | adil baz | fark | PF | p |
 |---|---|---|---|---|---|---|---|---|
-| `abcd·kor` | 622 | 325 | %40.8 | **+0.425R** | +0.367R | +0.059R | 1.73 | 0.7561 |
-| `abcd·teyit` | 301 | 207 | %50.2 | **+0.345R** | +0.350R | -0.005R | 1.76 | 0.3953 |
-| `gartley·kor` | 29 | 27 | %37.9 | **+0.105R** | +0.318R | -0.212R | 1.17 | 0.6847 |
-| `gartley·teyit` | 16 | 16 | %56.2 | **+0.374R** | +0.223R | +0.151R | 1.83 | 0.3128 |
-| `kelebek·kor` | 21 | 21 | %33.3 | **-0.112R** | +0.348R | -0.461R | 0.81 | 0.9240 |
-| `kelebek·teyit` | 7 | 7 | %57.1 | **+0.437R** | +0.319R | +0.118R | 2.00 | 0.3828 |
-| `uc_surus·kor` | 46 | 43 | %26.1 | **-0.197R** | +0.192R | -0.389R | 0.75 | 0.9180 |
-| `uc_surus·teyit` | 17 | 16 | %47.1 | **+0.008R** | +0.198R | -0.190R | 1.02 | 0.5747 |
+| `abcd·kor` | 728 | 382 | %41.3 | **+0.444R** | +0.380R | +0.063R | 1.77 | 0.5577 |
+| `abcd·teyit` | 356 | 247 | %51.1 | **+0.347R** | +0.349R | -0.002R | 1.77 | 0.3553 |
+| `gartley·kor` | 34 | 32 | %38.2 | **+0.115R** | +0.304R | -0.189R | 1.19 | 0.6952 |
+| `gartley·teyit` | 20 | 20 | %55.0 | **+0.356R** | +0.271R | +0.085R | 1.85 | 0.3728 |
+| `kelebek·kor` | 23 | 23 | %34.8 | **-0.049R** | +0.376R | -0.425R | 0.92 | 0.9075 |
+| `kelebek·teyit` | 7 | 7 | %57.1 | **+0.437R** | +0.315R | +0.122R | 2.00 | 0.3783 |
+| `uc_surus·kor` | 57 | 53 | %28.1 | **-0.131R** | +0.206R | -0.337R | 0.83 | 0.9140 |
+| `uc_surus·teyit` | 25 | 24 | %44.0 | **-0.001R** | +0.212R | -0.213R | 1.00 | 0.6507 |
 
 ## IS — ikincil
 
 | künye | işlem | sembol | isabet | beklenen R | adil baz | fark | PF | p |
 |---|---|---|---|---|---|---|---|---|
-| `abcd·kor` | 1791 | 425 | %30.0 | **+0.051R** | +0.297R | -0.246R | 1.07 | 1.0000 |
-| `abcd·teyit` | 502 | 298 | %42.4 | **+0.925R** | +0.342R | +0.582R | 2.63 | 0.0780 |
-| `gartley·kor` | 79 | 68 | %34.2 | **+0.034R** | +0.214R | -0.180R | 1.05 | 0.9185 |
-| `gartley·teyit` | 20 | 20 | %30.0 | **-0.493R** | +0.138R | -0.631R | 0.31 | 0.9975 |
-| `kelebek·kor` | 117 | 98 | %29.9 | **-0.210R** | +0.162R | -0.373R | 0.70 | 0.9985 |
-| `kelebek·teyit` | 37 | 36 | %43.2 | **+0.124R** | +0.120R | +0.004R | 1.27 | 0.4368 |
-| `uc_surus·kor` | 96 | 85 | %24.0 | **-0.285R** | +0.124R | -0.409R | 0.64 | 0.9925 |
-| `uc_surus·teyit` | 20 | 20 | %55.0 | **+0.314R** | +0.121R | +0.193R | 1.82 | 0.2534 |
+| `abcd·kor` | 2154 | 494 | %29.9 | **+0.053R** | +0.288R | -0.234R | 1.07 | 1.0000 |
+| `abcd·teyit` | 565 | 344 | %43.0 | **+0.779R** | +0.361R | +0.417R | 2.42 | 0.0840 |
+| `gartley·kor` | 96 | 84 | %36.5 | **+0.115R** | +0.201R | -0.085R | 1.18 | 0.7931 |
+| `gartley·teyit` | 23 | 22 | %30.4 | **-0.503R** | +0.131R | -0.634R | 0.30 | 0.9960 |
+| `kelebek·kor` | 140 | 116 | %30.0 | **-0.191R** | +0.145R | -0.336R | 0.73 | 0.9975 |
+| `kelebek·teyit` | 40 | 39 | %45.0 | **+0.104R** | +0.118R | -0.013R | 1.24 | 0.4828 |
+| `uc_surus·kor` | 118 | 106 | %22.9 | **-0.317R** | +0.128R | -0.445R | 0.61 | 0.9990 |
+| `uc_surus·teyit` | 27 | 27 | %48.1 | **+0.192R** | +0.126R | +0.066R | 1.43 | 0.3758 |
 
 ## BH-FDR (q = 0.05) — tüm dönem, 8 test
 
 | künye | p | FDR eşiğini geçti mi |
 |---|---|---|
-| `abcd·teyit` | 0.0685 | ✘ |
-| `uc_surus·teyit` | 0.2499 | ✘ |
-| `kelebek·teyit` | 0.4633 | ✘ |
-| `gartley·teyit` | 0.8926 | ✘ |
-| `gartley·kor` | 0.8941 | ✘ |
-| `uc_surus·kor` | 0.9990 | ✘ |
+| `abcd·teyit` | 0.0445 | ✘ |
+| `uc_surus·teyit` | 0.4693 | ✘ |
+| `kelebek·teyit` | 0.5012 | ✘ |
+| `gartley·kor` | 0.7726 | ✘ |
+| `gartley·teyit` | 0.9070 | ✘ |
 | `abcd·kor` | 1.0000 | ✘ |
 | `kelebek·kor` | 1.0000 | ✘ |
+| `uc_surus·kor` | 1.0000 | ✘ |
 
 ## Teyit katkı yaptı mı (ön kayıt §6, madde 4)
 
@@ -64,23 +64,23 @@ Teyitli varyantın körlemesineden **daha iyi** olması gerekiyor; yoksa teyit '
 
 | formasyon | körlemesine fark | teyitli fark | teyidin katkısı |
 |---|---|---|---|
-| `abcd` | -0.176R | +0.359R | **+0.534R** |
-| `gartley` | -0.187R | -0.278R | **-0.091R** |
-| `kelebek` | -0.423R | -0.009R | **+0.414R** |
-| `uc_surus` | -0.407R | +0.069R | **+0.475R** |
+| `abcd` | -0.168R | +0.266R | **+0.434R** |
+| `gartley` | -0.106R | -0.294R | **-0.188R** |
+| `kelebek` | -0.383R | -0.017R | **+0.366R** |
+| `uc_surus` | -0.414R | -0.022R | **+0.392R** |
 
 ## Çıkış kırılımı
 
 | formasyon | hedef | stop | zaman | ort. kazanç | ort. kayıp |
 |---|---|---|---|---|---|
-| `abcd·kor` | %23 | %65 | %13 | +2.52R | -1.01R |
-| `abcd·teyit` | %35 | %47 | %18 | +2.72R | -0.96R |
-| `gartley·kor` | %31 | %64 | %6 | +2.05R | -1.03R |
-| `gartley·teyit` | %36 | %58 | %6 | +1.18R | -1.03R |
-| `kelebek·kor` | %18 | %65 | %17 | +1.61R | -0.98R |
-| `kelebek·teyit` | %36 | %41 | %23 | +1.37R | -0.82R |
-| `uc_surus·kor` | %24 | %75 | %1 | +2.17R | -1.05R |
-| `uc_surus·teyit` | %59 | %38 | %3 | +1.14R | -0.85R |
+| `abcd·kor` | %23 | %65 | %12 | +2.54R | -1.01R |
+| `abcd·teyit` | %37 | %45 | %18 | +2.43R | -0.95R |
+| `gartley·kor` | %32 | %62 | %6 | +2.06R | -1.02R |
+| `gartley·teyit` | %35 | %56 | %9 | +1.14R | -1.00R |
+| `kelebek·kor` | %20 | %64 | %16 | +1.67R | -0.99R |
+| `kelebek·teyit` | %40 | %38 | %21 | +1.26R | -0.82R |
+| `uc_surus·kor` | %24 | %75 | %1 | +2.18R | -1.05R |
+| `uc_surus·teyit` | %56 | %42 | %2 | +1.22R | -0.86R |
 
 ## Örneklem yeterli mi
 
@@ -88,12 +88,12 @@ Pardo s.295: 30–50 işlem asgari kabul edilir. **Sembol sayısı 30'un altınd
 
 | künye | sembol | yeterli mi |
 |---|---|---|
-| `abcd·kor` | 451 | ✔ |
-| `abcd·teyit` | 362 | ✔ |
-| `gartley·kor` | 92 | ✔ |
-| `gartley·teyit` | 36 | ✔ |
-| `kelebek·kor` | 113 | ✔ |
-| `kelebek·teyit` | 43 | ✔ |
-| `uc_surus·kor` | 117 | ✔ |
-| `uc_surus·teyit` | 35 | ✔ |
+| `abcd·kor` | 525 | ✔ |
+| `abcd·teyit` | 424 | ✔ |
+| `gartley·kor` | 111 | ✔ |
+| `gartley·teyit` | 42 | ✔ |
+| `kelebek·kor` | 132 | ✔ |
+| `kelebek·teyit` | 46 | ✔ |
+| `uc_surus·kor` | 145 | ✔ |
+| `uc_surus·teyit` | 49 | ✔ |
 

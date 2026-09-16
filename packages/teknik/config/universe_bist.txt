@@ -1,6 +1,19 @@
 # BIST evreni — kaynak: bilanco-radar/bist-sektorler-ve-hisseler.md (Fintables
 # Sektörler sayfası, 13 Ağustos 2026 itibarıyla teyitli). 648 sembol, 44 sektör
 # + Sektörü Tanımsız. Satır başına bir sembol; '#' yorum satırıdır.
+#
+# ⚠ HAYATTA KALMA YANLILIĞI — bu dosya BUGÜNÜN listesinin anlık
+# görüntüsüdür. 2010'dan bu yana kottan çıkan, iflas eden ya da birleşen
+# hiçbir şirket burada YOK. Verisi olan 625 sembolün 625'inin son barı
+# 2026'da. Bu düzeltilemiyor (sağlayıcıda o şirketlerin verisi yok) ve
+# her ölçüm raporuna sabit bir uyarı olarak giriyor.
+#
+# Veri çekilemeyen 23 sembol (2026-09-14): SNKRN QNBFL PEHOL YGYO EFORC
+# SELGD DAGHL DOBUR IPEKE KOZAA KOZAL ROYAL METUR ALMAD GRTRK IDEAS ITTFH
+# KARYE KERVT MIPAZ QNBFB TETMT UZERB — sağlayıcı hiç veri döndürmüyor
+# (bir kısmının işlem sırası kapalı). Listeden DÜŞÜRÜLMÜYORLAR: evren
+# dosyası neyin hedeflendiğini gösterir, ölçüm raporu neyin elde
+# edildiğini. İkisini karıştırmak, eksikliği görünmez yapar.
 
 # Ambalaj (11)
 BAKAB

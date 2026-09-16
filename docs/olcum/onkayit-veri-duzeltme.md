@@ -1,7 +1,9 @@
 # Ön kayıt — Veri düzeltmesi ve ölçümlerin yenilenmesi
 
 **Yazıldığı tarih:** 2026-09-14
-**Durum:** ⏳ düzeltme UYGULANMADAN ve sonuçlar GÖRÜLMEDEN yazıldı.
+**Durum:** 🔶 **KISMEN KOŞULDU.** Belge sonuç görülmeden yazılıp `60b0c19`
+ile commit edildi. Düzeltme uygulandı (`6673b71`); üç aileden **yalnız
+harmonikler** yeniden ölçüldü. Golden Zone ve Kesitsel Momentum bekliyor.
 
 > Bu belge, üç olumsuz verdiktten **sonra** yapılan bir veri düzeltmesini
 > tarif ediyor ve tam da bu yüzden var. Olumsuz bir sonucun ardından
@@ -185,6 +187,77 @@ bulunursa kendi ön kaydını hak eder.
 
 ---
 
-## 7. Sonuç
+## 7. Sonuç — harmonik ailesi (2026-09-14)
 
-*(düzeltme uygulandıktan sonra, olduğu gibi eklenecek)*
+Ölçüm dosyası:
+[`harmonik-pesavento-K4b-teyit-1D-long.md`](harmonik-pesavento-K4b-teyit-1D-long.md)
+
+### Veri düzeltmesinin evrene etkisi
+
+| | Önce | Sonra |
+|---|---|---|
+| Verisi olan sembol | 544 | **625** |
+| Toplam bar | 1 433 075 | **1 704 151** |
+
+81 sembol kurtarıldı (Migros, Coca-Cola İçecek, Logo, Anadolu Grubu,
+Şekerbank dahil). Kalan 23'te sağlayıcı gerçekten veri döndürmüyor.
+
+### En güçlü aday: `abcd·teyit`
+
+| | Düzeltme öncesi | Düzeltme sonrası |
+|---|---|---|
+| İşlem | 803 | **921** |
+| Sembol | 362 | **424** |
+| İsabet | %45.3 | **%46.1** |
+| Beklenen R | +0.707R | +0.612R |
+| Adil baz | +0.349R | +0.346R |
+| **Fark** | +0.359R | **+0.266R** |
+| **p** | 0.0685 | **0.0445** |
+
+### Karar kuralı (§5) — dördü de uygulandı
+
+| Madde | Sonuç |
+|---|---|
+| 1 · Fark pozitif | ✔ +0.266R |
+| 2 · p ≤ 0.05 **ve** BH-FDR | ✘ p=0.0445 düz eşiği geçti, **FDR eşiği 0.00625** — geçemedi |
+| 3 · ≥ 30 sembol | ✔ 424 |
+
+**VERDİKT DEĞİŞMEDİ: `kanıtlanmadı`.**
+
+§5'te yazılıydı: *"Fark büyür ama p eşiği geçmezse verdikt değişmez.
+'Yaklaştı' bir sonuç değildir."* Sekiz testlik ailede BH-FDR'nin ilk sırası
+için eşik 0.00625; 0.0445 onun yedi katı.
+
+### Tahminim (§4) yarı yarıya tuttu
+
+| Tahmin | Gerçek |
+|---|---|
+| Adil baz düşecek | ✘ neredeyse aynı kaldı (+0.349R → +0.346R) |
+| Stratejilerin sayısı az değişecek | ✔ isabet %45.3 → %46.1 |
+| **Fark yükselecek** | ✘ **düştü** (+0.359R → +0.266R) |
+
+Yanıldım ve sebebini biliyorum: fark, bazın düşmesinden değil **evrenin
+büyümesinden** etkilendi. 81 yeni sembol (aralarında BIST'in en büyükleri)
+girince strateji tarafı %0.095R geriledi. Yani düzeltme, ölçümü
+iyileştirmedi — **daha doğru** yaptı.
+
+§5 bu durumu da öngörmüştü: *"fark küçülürse tahminim yanlıştı, öyle
+yazılır ve düzeltme yine de KALIR — doğru olduğu için, sonucu
+iyileştirdiği için değil."* Kalıyor.
+
+### Teyit tekniği yine ölçülebilir bir etki taşıyor
+
+| formasyon | körlemesine fark | teyitli fark | teyidin katkısı |
+|---|---|---|---|
+| `abcd` | −0.168R | +0.266R | **+0.434R** |
+| `kelebek` | −0.383R | −0.017R | **+0.366R** |
+| `uc_surus` | −0.414R | −0.022R | **+0.392R** |
+| `gartley` | −0.106R | −0.294R | −0.188R |
+
+Dörtte üçünde KURAL-30 bekleme tekniği farkı belirgin biçimde iyileştiriyor
+— ama hiçbirini adil bazdan ayrılacak kadar değil.
+
+### Kalan iş
+
+Ön kayıt §6 **üç ailenin de** yenilenmesini istiyor. Golden Zone ve
+Kesitsel Momentum henüz koşulmadı; bu bölüm onlar koşulunca tamamlanacak.

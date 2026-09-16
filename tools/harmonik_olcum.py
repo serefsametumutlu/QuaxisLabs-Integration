@@ -81,6 +81,20 @@ AILE: list[tuple[str, str]] = [
     (ad, varyant) for ad in FORMASYON for varyant in ("kor", "teyit")
 ]
 
+#: **D4 — gövde tabanlı kural 2014'ten başlar** (ön kayıt:
+#: `docs/olcum/onkayit-veri-duzeltme.md`).
+#:
+#: KURAL-30 teyidi `close > open` şartı arıyor. Kaynak BIST için 2014
+#: öncesinde gerçek açılış fiyatı vermiyor: `açılış == kapanış` oranı
+#: 2012'de %96.5, 2010'da %81.6 (2024'te %3.2). O dönemde şart neredeyse
+#: hiç sağlanamaz — yani teyitli varyant sinyalleri KURALIN gereği değil,
+#: VERİNİN eksikliği yüzünden eliyordu.
+#:
+#: Körlemesine varyant bu sınırdan etkilenmez: seviyeye dokunmaya bakıyor,
+#: açılış fiyatına değil. İkisini aynı pencereye sıkıştırmak, düzeltmenin
+#: bedelini gereksizce körlemesine varyanta da ödetirdi.
+GOVDE_BASLANGIC = "2014-01-01"
+
 
 def teyitli(
     df: pd.DataFrame, s: Signal
@@ -156,6 +170,8 @@ def _islemler(
             if yon != "hepsi" and s.direction != yon:
                 continue
             if varyant == "teyit":
+                if s.detected_at < pd.Timestamp(GOVDE_BASLANGIC, tz="UTC"):
+                    continue  # D4: açılış fiyatı güvenilmez
                 ucdu = teyitli(df, s)
                 if ucdu is None:
                     atilan += 1
