@@ -1,24 +1,24 @@
 # golden-zone-r2 — K3 Kalibrasyon · Katman B
 
-**Tarih:** 2026-09-13 · **Gösterge:** `golden_zone_r2`
+**Tarih:** 2026-09-17 · **Gösterge:** `golden_zone_r2`
 **Zaman dilimi:** 1D
 
 **Katman B:** A + (FVG veya bölgedeki Order Block)
 
 | Ölçüt | Değer |
 |---|---|
-| Evren | 543 sembol |
-| Toplam aday | 7427 |
-| **Sıfır aday veren sembol** | **11** (%2.0) |
-| Veri hatası alan sembol | 0 |
-| Sembol başına ortalama | 13.68 |
+| Evren | 625 sembol |
+| Toplam aday | 8620 |
+| **Sıfır aday veren sembol** | **12** (%1.9) |
+| Veri hatası alan sembol | 23 |
+| Sembol başına ortalama | 13.79 |
 | Sembol başına ortanca | 14.0 |
 | Sembol başına en çok | 28 |
 | Dönem | 2010-01-01 – 2026-09-11 |
 
 ## Teşhis
 
-MAKUL: sembol başına ortalama 13.7 aday, sembollerin %2'i sıfır.
+MAKUL: sembol başına ortalama 13.8 aday, sembollerin %2'i sıfır.
 
 ## Eşikler bu ölçümden nasıl türetildi
 
@@ -26,7 +26,7 @@ K0'ın eşik tablosundaki her `K3:` devri burada kapanır.
 
 | Eşik | Değer | Bu ölçümden türetilişi |
 |---|---|---|
-| `fvg_min_atr` | 0.1 | FVG/OB koşulu adayları 19.2'den 13.7'ye indiriyor (%29 eleme) — eşik ne her şeyi geçiriyor ne her şeyi kesiyor. Ama **elediği kısım kalandan daha kötü değildi**; ince ayarın anlamı yok, ayarlanacak bir sinyal bulunamadı. |
+| `fvg_min_atr` | 0.1 | FVG/OB koşulu adayları 19.3'ten 13.8'e indiriyor (%29 eleme) — eşik ne her şeyi geçiriyor ne her şeyi kesiyor. Ama **elediği kısım kalandan daha kötü değildi**; ince ayarın anlamı yok, ayarlanacak bir sinyal bulunamadı. |
 | `bolge_sig` / `bolge_derin` | 0.62 / 0.79 | A ile aynı — türetilemedi |
 | `donus_max_bar` | 20 | A ile aynı |
 

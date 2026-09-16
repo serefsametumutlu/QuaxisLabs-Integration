@@ -1,13 +1,14 @@
 # Strateji Envanteri
 
-> ⚠ **2026-09-14 · Veri denetimi yapıldı ve aşağıdaki bütün ölçümleri
-> etkileyen kusurlar bulundu.** Rapor:
-> [`docs/olcum/veri-denetimi-bist-1D.md`](../olcum/veri-denetimi-bist-1D.md).
-> En önemlisi: adil baz **hacimsiz (bayat fiyatlı) barları dışlamıyor** ve
-> o barlardan girilen işlemler 40 barda ortalama %15.31 getiriyor —
-> normal barlarda %6.93. Ölçümler bu düzeltildikten sonra yenilenmeli.
+> ✅ **2026-09-17 · Veri düzeltmesi yapıldı ve üç ailenin de ölçümü
+> yenilendi.** Denetim:
+> [`veri-denetimi-bist-1D.md`](../olcum/veri-denetimi-bist-1D.md) · ön kayıt
+> ve sonuç: [`onkayit-veri-duzeltme.md`](../olcum/onkayit-veri-duzeltme.md).
+> Hacimsiz barlar artık ne adil baza giriyor ne sinyal doğuruyor; OHLC
+> ihlalinde sembol değil **bar** atılıyor, evren 544 → **625** sembole
+> çıktı. **Üç ailede de verdikt değişmedi.**
 
-**Güncelleme:** 2026-09-13 (harmonikler eklendi)
+**Güncelleme:** 2026-09-17 (üç ailenin ölçümü düzeltilmiş veriyle yenilendi)
 
 Bu dosya tek bir soruya cevap verir: **elimizde ne var, hangisi ne durumda?**
 

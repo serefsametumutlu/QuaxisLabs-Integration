@@ -29,7 +29,7 @@ kapilar:
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/kesitsel_momentum/parametreler.py"] }
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/kesitsel_momentum/dedektor.py", "packages/teknik/tests/test_kesitsel_momentum.py"] }
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md"] }
-  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md", "docs/olcum/kesitsel-momentum_12_1-K3K4-1D-2026-09-13.md"] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/kesitsel-momentum-K3K4-1D-oos-2026-09-17.md", "docs/olcum/kesitsel-momentum_12_1-K3K4-1D-oos-2026-09-17.md", "docs/olcum/kesitsel-momentum-K3K4-1D-2026-09-13.md", "docs/olcum/kesitsel-momentum_12_1-K3K4-1D-2026-09-13.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -180,40 +180,80 @@ testinin neyi kanıtlaması gerektiğini tarif eder.)*
 > permütasyon + BH-FDR. Sonuç dürüstçe yazılır: *kenar var / yok / belirsiz*.
 > **Elenmez — etiketlenir.**
 
-| | |
-|---|---|
-| Ölçüm dosyası | `docs/olcum/<slug>-K4-<tarih>.md` |
-| Evren | *(kaç sembol)* |
-| Bağımsız gözlem | *(kaç sembol — bar değil, SEMBOL)* |
-| Pencere | *(IS/OOS oranı)* |
-| Ufuk | *(kaç bar ileri)* |
-| Adil baza karşı fark | *(%)* |
-| Permütasyon p değeri | |
-| BH-FDR (q=0.05) | *(geçti / geçemedi)* |
-| **Verdikt** | *(künyedeki `verdikt` alanıyla AYNI olmalı)* |
-
-### R-katsayısı (üç bariyer)
-
-> **Strateji bir stop ve hedef bildiriyorsa bu tablo ZORUNLUDUR.** İleri getiri
-> asimetriyi göremez: %35 isabetle 3R kazandıran bir sistem 20 barlık ileri
-> getiride sıfır görünür. ICT/SMC kavramlarını "kenar yok" diye bulan en geniş
-> çalışma (648 backtest) tam olarak bu hatayı yaptı — zaman bazlı çıkış kullandı,
-> stop/hedef koymadı. Aynı barda iki bariyer de vurulduysa **stop** sayılır.
+> **Yenilendi 2026-09-17.** Ölçüm zemininde gerçek veri kusurları bulundu
+> ([`veri-denetimi-bist-1D.md`](../olcum/veri-denetimi-bist-1D.md)), ön
+> kayıtla düzeltildi
+> ([`onkayit-veri-duzeltme.md`](../olcum/onkayit-veri-duzeltme.md)) ve K4
+> **bir kez** yeniden koşuldu. **Verdikt değişmedi.** Aşağıdaki tablo
+> yenilenmiş ölçümündür; 13 Eylül tablosu dosyasında duruyor.
 
 | | |
 |---|---|
-| İşlem sayısı | *(kaç işlem / kaç sembol)* |
-| İsabet | *(%)* |
-| **İşlem başına beklenen R** | |
-| Adil baz (aynı risk, rastgele bar) | |
-| Stop / hedef / zaman çıkış oranı | |
-| Permütasyon p değeri | |
-| **Verdikt (R)** | |
+| Ölçüm dosyaları | [`kesitsel-momentum-K3K4-1D-oos`](../olcum/kesitsel-momentum-K3K4-1D-oos-2026-09-17.md) · [`kesitsel-momentum_12_1-K3K4-1D-oos`](../olcum/kesitsel-momentum_12_1-K3K4-1D-oos-2026-09-17.md) |
+| Evren | 625 BIST sembolü taranıyor; **221**'i en az bir sinyal verdi |
+| Bağımsız gözlem | **200 sembol** — bar değil, SEMBOL |
+| Pencere | ilk %70 IS / son %30 OOS; ölçüm yalnız **OOS** |
+| Ufuk | 25 bar (stratejinin kendi tutuş süresi — araç uydurmadı) |
+| Sinyal getirisi | **%+0.20** |
+| Adil baz (rastgele sembol) | **%+9.82** |
+| Adil baza karşı fark | **%−9.62** — negatif |
+| Permütasyon p değeri | **1.0000** (2000 tur) |
+| BH-FDR (q=0.05) | uygulanmadı — ham p boş dağılımın en alt ucunda |
+| **Verdikt** | **kanitlanmadi** |
+
+### R-katsayısı (üç bariyer) — bu stratejide YOK, sebebiyle
+
+> **Strateji bir stop ve hedef bildiriyorsa bu tablo ZORUNLUDUR.**
+
+Kesitsel momentumda **stop yok**: pozisyon `tutus` bar tutulur ve kapanır
+(Chan s.146). Zorla bir stop uydurmak stratejiyi değiştirmek olurdu; o
+yüzden ölçüt üç bariyerli R değil, stratejinin kendi tutuş süresi kadar
+**ufuk getirisi**dir. Bu bir atlama değil, sözleşmenin sonucu — ve ayrı bir
+koşucuyla (`tools/momentum_olcum.py`) uygulanır.
+
+### Son ayı atlamak (12-1) düzeltmiyor
+
+| | ana varyant | 12-1 varyantı |
+|---|---|---|
+| Bağımsız gözlem | 200 | 220 |
+| Sinyal getirisi | %+0.20 | %+1.75 |
+| Adil baz | %+9.82 | %+9.14 |
+| **Fark** | **%−9.62** | **%−7.39** |
+| p | 1.0000 | 1.0000 |
+
+Akademik standart olan "son ayı atla" varyantı farkı yumuşatıyor, **yönünü
+değiştirmiyor**.
+
+### Düzeltme öncesi/sonrası
+
+Karşılaştırma temiz: 13 Eylül'ün ölçümü de işlem maliyetini içeriyordu,
+araç değişmedi. Değişen tek şey hangi barların ve sembollerin gözlem
+sayıldığı.
+
+| | Önce (09-13) | Sonra (09-17) |
+|---|---|---|
+| Bağımsız gözlem | 163 | **200** |
+| Fark | %−9.98 | **%−9.62** |
+| p | 1.0000 | **1.0000** |
 
 ### Ne çıkarsa o
 
-*(Sonuç olumsuzsa da burada aynı açıklıkla yazılır. "Zarar ettiriyor" ile
-"işe yaradığına dair kanıt yok" farklı şeylerdir — hangisi olduğunu yaz.)*
+**Momentum kenar üretmedi — üstelik güçlü biçimde TERS yönde.** Bu "işe
+yaradığına dair kanıt yok" değil; **ters yönde net bir fark var**: p=1.0000,
+gözlenen fark boş dağılımın en alt ucunda.
+
+Son 12 ayın en çok kazanan %10'unu alıp 25 gün tutmak, aynı dönemde
+rastgele bir hisse almanın 9.6 puan gerisinde kaldı. Kaynağın kendi uyarısı
+(Chan s.152 — momentum 2008–2009 sonrası kayboldu, yerini ortalamaya dönüşe
+bıraktı) BIST'te birebir gerçekleşiyor.
+
+Ön kayıt §5'in birinci maddesi (*fark pozitif*) sağlanmadığı için ikinci ve
+üçüncü maddeye bakılmadı.
+
+**Ters varyant ayrı bir hipotezdir.** "Tersini yap" demek sonuca bakıp yön
+çevirmek olurdu; o yüzden `kesitsel_donus` kendi ön kaydıyla ölçüldü ve
+**reddedildi**: [`onkayit-kesitsel-donus.md`](../olcum/onkayit-kesitsel-donus.md).
+Bu turda ona dokunulmadı.
 
 ---
 

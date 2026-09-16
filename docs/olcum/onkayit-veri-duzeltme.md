@@ -1,9 +1,9 @@
 # Ön kayıt — Veri düzeltmesi ve ölçümlerin yenilenmesi
 
 **Yazıldığı tarih:** 2026-09-14
-**Durum:** 🔶 **KISMEN KOŞULDU.** Belge sonuç görülmeden yazılıp `60b0c19`
-ile commit edildi. Düzeltme uygulandı (`6673b71`); üç aileden **yalnız
-harmonikler** yeniden ölçüldü. Golden Zone ve Kesitsel Momentum bekliyor.
+**Durum:** ✅ **KOŞULDU ve KAPANDI (2026-09-17).** Belge sonuç görülmeden
+yazılıp `60b0c19` ile commit edildi. Düzeltme uygulandı (`6673b71`); üç
+ailenin üçü de yeniden ölçüldü. **Üçünde de verdikt değişmedi.**
 
 > Bu belge, üç olumsuz verdiktten **sonra** yapılan bir veri düzeltmesini
 > tarif ediyor ve tam da bu yüzden var. Olumsuz bir sonucun ardından
@@ -257,7 +257,115 @@ iyileştirdiği için değil."* Kalıyor.
 Dörtte üçünde KURAL-30 bekleme tekniği farkı belirgin biçimde iyileştiriyor
 — ama hiçbirini adil bazdan ayrılacak kadar değil.
 
-### Kalan iş
+---
 
-Ön kayıt §6 **üç ailenin de** yenilenmesini istiyor. Golden Zone ve
-Kesitsel Momentum henüz koşulmadı; bu bölüm onlar koşulunca tamamlanacak.
+## 8. Sonuç — Golden Zone (2026-09-17)
+
+Ölçüm dosyaları:
+[`golden-zone-K4-katmanli-2026-09-17.md`](golden-zone-K4-katmanli-2026-09-17.md)
+(yapısal hedef) ·
+[`golden-zone-r2-K4-katmanli-2026-09-17.md`](golden-zone-r2-K4-katmanli-2026-09-17.md)
+(sabit 2R)
+
+### Evrenin büyümesi
+
+| | Önce | Sonra |
+|---|---|---|
+| A katmanında ölçülen sembol | 518 | **599** |
+| A katmanında işlem | 8 432 | **9 909** |
+
+### ⚠ Ham R sütunları karşılaştırılamaz — ve sebebi
+
+13 Eylül'ün katmanlı tablosu (`2969fa1`) **işlem maliyeti ölçüme girmeden
+önce** üretildi; maliyet aynı gün, o rapordan sonra `b11de50` ile girdi.
+İki tabloyu ham `Ort. R` üzerinden karşılaştırmak, veri düzeltmesinin
+etkisiyle maliyetin etkisini birbirine karıştırmak olur. Bu bir kusur
+değil, bir sıralama kazası — ama sessiz geçilirse yanıltır.
+
+Karşılaştırılabilen büyüklük **fark**tır (strateji − adil baz): maliyet
+hem sinyale hem baza neredeyse aynı kadar biner.
+[`golden-zone-maliyet-duyarliligi`](golden-zone-maliyet-duyarliligi-2026-09-13.md)
+altı maliyet düzeyinde p'yi sabit (0.0093) bularak bunu zaten ölçmüştü.
+
+| Katman | fark · önce | fark · sonra | p · sonra |
+|---|---|---|---|
+| A | −0.026R | **−0.029R** | 0.9820 |
+| B | −0.053R | **−0.049R** | 0.9975 |
+| C | −0.047R | **−0.040R** | 0.6062 |
+
+Sabit 2R hedefle aynı tablo: A −0.022R → **−0.023R**, B −0.046R →
+**−0.040R**, C −0.018R → **−0.007R** (p 0.2679).
+
+### Karar kuralı (§5)
+
+| Madde | Sonuç |
+|---|---|
+| 1 · Fark pozitif | ✘ altı ölçümün altısında da **negatif** |
+| 2 · p ≤ 0.05 **ve** BH-FDR | ✘ en düşük ham p 0.2679 |
+| 3 · ≥ 30 sembol | ✔ 497–599 |
+
+**VERDİKT DEĞİŞMEDİ: `kanıtlanmadı`.**
+
+---
+
+## 9. Sonuç — Kesitsel Momentum (2026-09-17)
+
+Ölçüm dosyaları:
+[`kesitsel-momentum-K3K4-1D-oos-2026-09-17.md`](kesitsel-momentum-K3K4-1D-oos-2026-09-17.md) ·
+[`kesitsel-momentum_12_1-K3K4-1D-oos-2026-09-17.md`](kesitsel-momentum_12_1-K3K4-1D-oos-2026-09-17.md)
+
+Burada karşılaştırma **temiz**: 13 Eylül'ün momentum ölçümü de maliyeti
+içeriyordu, araç değişmedi. Değişen tek şey hangi barların ve sembollerin
+gözlem sayıldığı.
+
+| | `kesitsel_momentum` önce | sonra | `_12_1` önce | sonra |
+|---|---|---|---|---|
+| Bağımsız gözlem | 163 | **200** | 177 | **220** |
+| Sinyal getirisi | %+0.02 | **%+0.20** | %+1.66 | **%+1.75** |
+| Adil baz | %+10.00 | **%+9.82** | %+9.62 | **%+9.14** |
+| **Fark** | %−9.98 | **%−9.62** | %−7.96 | **%−7.39** |
+| p | 1.0000 | **1.0000** | 1.0000 | **1.0000** |
+
+### Karar kuralı (§5)
+
+| Madde | Sonuç |
+|---|---|
+| 1 · Fark pozitif | ✘ **−%9.62** / −%7.39 — güçlü biçimde negatif |
+| 2 · p ≤ 0.05 | ✘ p = 1.0000 (boş dağılımın en alt ucu) |
+| 3 · ≥ 30 sembol | ✔ 200 / 220 |
+
+**VERDİKT DEĞİŞMEDİ: `kanıtlanmadı`.**
+
+`kesitsel_donus` (ters varyant) bu turda koşulmadı: kendi ön kaydı
+([`onkayit-kesitsel-donus.md`](onkayit-kesitsel-donus.md)) ve kendi karar
+kuralı olan ayrı bir hipotez; §6'nın saydığı üç aileden biri değil. Bu bir
+atlama değil, bir kapsam sınırı — ve burada yazılı duruyor.
+
+---
+
+## 10. Kapanış — üç ailenin toplamı
+
+| Aile | Fark (en güçlü aday) | p | Verdikt |
+|---|---|---|---|
+| Harmonik (`abcd·teyit`) | +0.266R | 0.0445 (FDR eşiği 0.00625) | `kanıtlanmadı` |
+| Golden Zone (A katmanı) | −0.029R | 0.9820 | `kanıtlanmadı` |
+| Kesitsel Momentum | −%9.62 | 1.0000 | `kanıtlanmadı` |
+
+**Yayınlanmış (K6) strateji sayısı: 0. Değişmedi.**
+
+### §4'teki tahminim — nihai hesap
+
+| Tahmin | Harmonik | Golden Zone | Momentum |
+|---|---|---|---|
+| Adil baz düşecek | ✘ neredeyse aynı | ✔ düştü | ✔ düştü |
+| Fark yükselecek | ✘ düştü | ~ karışık, hepsi negatif kaldı | ~ daraldı, negatif kaldı |
+
+Tahmin tutmadı ve düzeltme **KALIYOR**. §5'te yazılıydı: *düzeltme doğru
+olduğu için kalır, sonucu iyileştirdiği için değil.* Düzeltme sonucu
+iyileştirmedi — **daha doğru** yaptı; 81 sembol (Migros, Coca-Cola İçecek,
+Logo, Anadolu Grubu, Şekerbank dahil) artık ölçümün içinde.
+
+### §6 kapandı
+
+Üç aile bir kez koşuldu, ne çıktıysa yazıldı. Bu ön kayıt **kapalıdır**.
+Yeni bir veri kusuru bulunursa kendi ön kaydını hak eder.

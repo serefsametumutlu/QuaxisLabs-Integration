@@ -3,6 +3,15 @@
 **Tarih:** 2026-09-13 · **Evren:** 543 BIST sembolü · **Dönem:** 2010–2026
 **Ölçüm penceresi:** son %30 (görülmemiş dönem) · **İşlem maliyeti:** dahil
 
+> ⚠ **2026-09-17 · Bu özetin sayıları düzeltme ÖNCESİ evrendendir (543
+> sembol).** Veri düzeltmesinden sonra K4 bir kez yeniden koşuldu: evren
+> 625 sembol, A katmanı 9909 işlem / 599 sembol, fark −0.029R, p=0.9820.
+> **Verdikt değişmedi (`kanıtlanmadı`).** Yeni tablolar:
+> [`golden-zone-K4-katmanli-2026-09-17.md`](golden-zone-K4-katmanli-2026-09-17.md) ·
+> gerekçe ve karar kuralı:
+> [`onkayit-veri-duzeltme.md`](onkayit-veri-duzeltme.md) §8.
+> Bu özet, o günkü kararın kaydı olarak **olduğu gibi** bırakıldı.
+
 Bu belge, teknik rapor değil **özet**tir. Sayıların nasıl üretildiği
 ayrı dosyalarda; burada ne anlama geldikleri yazıyor.
 

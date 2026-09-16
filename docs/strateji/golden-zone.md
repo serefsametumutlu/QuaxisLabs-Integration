@@ -30,7 +30,7 @@ kapilar:
   K1: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/golden_zone/parametreler.py"] }
   K2: { gecildi: 2026-09-13, kanit: ["packages/teknik/quaxis/teknik/indicators/golden_zone/dedektor.py", "packages/teknik/tests/test_golden_zone.py"] }
   K3: { gecildi: 2026-09-13, kanit: ["docs/olcum/golden-zone-K3-A.md", "docs/olcum/golden-zone-K3-B.md", "docs/olcum/golden-zone-K3-C.md", "docs/olcum/veri-bist-1D-2026-09-13.md"] }
-  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/golden-zone-K4-katmanli-2026-09-13.md", "docs/olcum/golden-zone-r2-K4-katmanli-2026-09-13.md"] }
+  K4: { gecildi: 2026-09-13, kanit: ["docs/olcum/golden-zone-K4-katmanli-2026-09-17.md", "docs/olcum/golden-zone-r2-K4-katmanli-2026-09-17.md", "docs/olcum/golden-zone-K4-katmanli-2026-09-13.md", "docs/olcum/golden-zone-r2-K4-katmanli-2026-09-13.md"] }
   K5: { gecildi: null, kanit: [], onay: null }
   K6: { gecildi: null, kanit: [] }
 ---
@@ -58,6 +58,11 @@ kapilar:
 > dönüldü. Kapı onaysız kapatılmaz.
 >
 > **K6 hiç başlamadı.**
+>
+> **2026-09-17 · Ölçüm yenilendi, karar değişmedi.** Veri düzeltmesinden
+> sonra K4 ön kayıt gereği bir kez yeniden koşuldu (evren 543 → 625 sembol).
+> Fark altı ölçümün altısında da negatif kaldı; durdurma kararı yerinde
+> duruyor.
 
 > **Bu dosya stratejinin kimliğidir.** Kod, ölçüm ve görsel onay buraya
 > bağlanır. Bir kapı geçilmeden sonraki açılmaz; yedisi geçilmeden **sıradaki
@@ -331,16 +336,23 @@ geçmişi kaydıran birine bölgeyi daha bilinemezken çizilmiş gösterirdi.
 > permütasyon + BH-FDR. Sonuç dürüstçe yazılır: *kenar var / yok / belirsiz*.
 > **Elenmez — etiketlenir.**
 
+> **Yenilendi 2026-09-17.** Ölçüm zemininde gerçek veri kusurları bulundu
+> ([`veri-denetimi-bist-1D.md`](../olcum/veri-denetimi-bist-1D.md)),
+> ön kayıtla düzeltildi ([`onkayit-veri-duzeltme.md`](../olcum/onkayit-veri-duzeltme.md))
+> ve K4 **bir kez** yeniden koşuldu. Evren 543 → 625 sembole çıktı.
+> **Verdikt değişmedi.** Aşağıdaki tablo yenilenmiş ölçümündür; 13 Eylül
+> tablosu dosyasında duruyor.
+
 | | |
 |---|---|
-| Ölçüm dosyaları | [`golden-zone-K4-katmanli`](../olcum/golden-zone-K4-katmanli-2026-09-13.md) (yapısal hedef) · [`golden-zone-r2-K4-katmanli`](../olcum/golden-zone-r2-K4-katmanli-2026-09-13.md) (sabit 2R) |
-| Evren | 543 BIST sembolü, 1G |
-| Bağımsız gözlem | **518 sembol** (A katmanı) — bar değil, SEMBOL |
+| Ölçüm dosyaları | [`golden-zone-K4-katmanli`](../olcum/golden-zone-K4-katmanli-2026-09-17.md) (yapısal hedef) · [`golden-zone-r2-K4-katmanli`](../olcum/golden-zone-r2-K4-katmanli-2026-09-17.md) (sabit 2R) |
+| Evren | 625 BIST sembolü, 1G (liste 648; 23'ünde sağlayıcı veri yok) |
+| Bağımsız gözlem | **599 sembol** (A katmanı) — bar değil, SEMBOL |
 | Pencere | ilk %70 IS / son %30 OOS (~4 yıl) |
 | Ufuk | 20 bar (ileri getiri) · 40 bar (zaman bariyeri) |
-| Adil baza karşı fark | **%−0.34** (A) — negatif |
-| Permütasyon p değeri | 0.7981 (ileri getiri) · 0.9530 (R) |
-| BH-FDR (q=0.05) | uygulanmadı — aile tek strateji; hiçbir ham p eşiğin yanından geçmedi |
+| Adil baza karşı fark | **%−0.39** (A, ileri getiri) · **−0.029R** (A, R) — negatif |
+| Permütasyon p değeri | 0.8851 (ileri getiri) · 0.9820 (R) |
+| BH-FDR (q=0.05) | uygulanmadı — hiçbir ham p eşiğin yanından geçmedi (en düşüğü 0.2679) |
 | **Verdikt** | **kanitlanmadi** |
 
 ### R-katsayısı (üç bariyer)
@@ -355,14 +367,32 @@ Katmanlı ölçüm — soru "kenar var mı" değil, **"kenar EKLİYOR mu"**:
 
 | Katman | İşlem | Sembol | İsabet | Ort. R | Adil baz | ΔR | p |
 |---|---|---|---|---|---|---|---|
-| A · BOS + OTE | 8432 | 518 | %40.5 | **+0.045R** | +0.071R | — | 0.9530 |
-| B · + FVG/OB | 6004 | 515 | %39.7 | +0.020R | +0.073R | −0.025R | 0.9960 |
-| C · + süpürme | 1056 | 424 | %39.2 | +0.001R | +0.048R | −0.019R | 0.6442 |
+| A · BOS + OTE | 9909 | 599 | %40.3 | **+0.016R** | +0.045R | — | 0.9820 |
+| B · + FVG/OB | 7081 | 596 | %39.7 | −0.002R | +0.047R | −0.018R | 0.9975 |
+| C · + süpürme | 1242 | 497 | %39.5 | −0.016R | +0.024R | −0.014R | 0.6062 |
 
 Çıkış kırılımı (A): **%37 hedef · %57 stop · %6 zaman.**
 
-Sabit 2R hedefle (`golden_zone_r2`) aynı tablo: A +0.058R (baz +0.080R,
-p=0.9270). Sonuç değişmiyor.
+Sabit 2R hedefle (`golden_zone_r2`) aynı tablo: A +0.032R (baz +0.055R,
+p=0.9565). Sonuç değişmiyor.
+
+#### 13 Eylül tablosuyla karşılaştırma — ham R sütunları karşılaştırılamaz
+
+13 Eylül'ün tablosu **işlem maliyeti ölçüme girmeden önce** üretildi
+(`2969fa1`); maliyet aynı gün, o rapordan sonra `b11de50` ile girdi. Ham
+`Ort. R` yan yana konursa veri düzeltmesinin etkisiyle maliyetin etkisi
+birbirine karışır. Karşılaştırılabilen büyüklük **fark**tır (strateji −
+adil baz) ve fark maliyete neredeyse duyarsızdır
+([maliyet duyarlılığı](../olcum/golden-zone-maliyet-duyarliligi-2026-09-13.md):
+altı maliyet düzeyinde p sabit 0.0093).
+
+| Katman | fark · 09-13 | fark · 09-17 |
+|---|---|---|
+| A | −0.026R | **−0.029R** |
+| B | −0.053R | **−0.049R** |
+| C | −0.047R | **−0.040R** |
+
+Fark altı ölçümün (üç katman × iki hedef modu) altısında da negatif kaldı.
 
 | | |
 |---|---|
@@ -370,15 +400,20 @@ p=0.9270). Sonuç değişmiyor.
 
 ### Ne çıkarsa o
 
-**Kenar bulunamadı, üstelik teyit katmanları değer EKSİLTTİ.**
+**Kenar bulunamadı, üstelik teyit katmanları değer EKSİLTTİ.** Düzeltilmiş
+veri bunu değiştirmedi.
 
 - Sinyaller, aynı risk yapısıyla rastgele barlardan girmekten daha iyi değil.
 - FVG/Order Block katmanı işlemlerin %29'unu eledi; **elediği kısım kalandan
   daha kötü değildi.** Meta-etiketleme hipotezi (LdP s.51–53) doğrulanmadı.
-- Örneklem mazeret değil: en dar katman bile 1056 işlem / 424 sembol.
+- Örneklem mazeret değil: en dar katman bile 1242 işlem / 497 sembol.
+- Ön kayıt §5'in birinci maddesi (*fark pozitif*) sağlanmadığı için ikinci
+  ve üçüncü maddeye bakılmadı. "Yaklaştı" bir sonuç değildir.
 
-**"Kenar yok" ≠ "zarar ettirir".** İşlem başına ortalama R pozitif (+0.045R);
-strateji para kaybettirmiyor, **piyasanın kendi verdiğinin altında kalıyor**.
+**"Kenar yok" ≠ "zarar ettirir".** Yapısal hedefte A katmanının işlem başına
+ortalama R'si maliyet dahil hâlâ pozitif (+0.016R); strateji para
+kaybettirmiyor, **piyasanın kendi verdiğinin altında kalıyor**. Alt
+katmanlarda (B −0.002R, C −0.016R) sıfırın altına iniyor.
 Kurulumun geometrisi gerçekten lehte (0.62 girişte 1.63:1, 0.705'te 2.39:1)
 ama isabet oranı tam o avantajı silecek kadar düşük: %37 hedef × ~1.7R eksi
 %57 stop × 1R ≈ sıfır. **Asimetri gerçek, ama fiyatlanmış.**

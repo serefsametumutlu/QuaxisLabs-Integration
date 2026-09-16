@@ -1,40 +1,39 @@
 # Sonraki oturum — nerede kaldık
 
-**Son güncelleme:** 2026-09-16 · **Son commit:** `6041b42`
-**Depo durumu:** temiz · 287 test yeşil · ruff/tsc/eslint temiz · pasaport
-doğrulayıcı tutarlı
+**Son güncelleme:** 2026-09-17 · **Son commit:** `867131b` üzerine
+**Depo durumu:** temiz · **280 test yeşil** (+3 `network` deselect) · ruff
+temiz · pasaport doğrulayıcı tutarlı
 
 ---
 
 ## Tek cümleyle
 
 Üç strateji ailesi ölçüldü, üçü de elendi; sonra **ölçüm zemininin kendisi
-denetlendi** ve gerçek veri kusurları bulunup düzeltildi. Harmonikler
-düzeltilmiş veriyle yeniden ölçüldü — verdikt değişmedi. **Golden Zone ve
-Kesitsel Momentum'un yenilenmesi kaldı.**
+denetlendi**, gerçek veri kusurları bulunup ön kayıtla düzeltildi ve **üç
+ailenin de ölçümü düzeltilmiş veriyle bir kez yenilendi. Üçünde de verdikt
+değişmedi.** Ön kayıt [`onkayit-veri-duzeltme.md`](olcum/onkayit-veri-duzeltme.md)
+**kapandı**.
 
 ---
 
-## Sıradaki iş — buradan devam et
+## Yenileme sonucu (2026-09-17) — ön kayıt §6 kapandı
 
-Ön kayıt [`docs/olcum/onkayit-veri-duzeltme.md`](olcum/onkayit-veri-duzeltme.md)
-§6 **üç ailenin de** yenilenmesini istiyor. Harmonikler koşuldu, ikisi
-bekliyor:
+| Aile | Fark (en güçlü aday) | p | Verdikt |
+|---|---|---|---|
+| Harmonik (`abcd·teyit`) | +0.266R | 0.0445 (FDR eşiği 0.00625) | `kanıtlanmadı` |
+| Golden Zone (A katmanı) | −0.029R | 0.9820 | `kanıtlanmadı` |
+| Kesitsel Momentum | −%9.62 | 1.0000 | `kanıtlanmadı` |
 
-```bash
-# 1) Golden Zone (katmanlı ölçüm)
-python tools/katmanli_olcum.py --katalog "quaxis.teknik.indicators.katalog:KATALOG" \
-    --gosterge golden_zone --slug golden-zone --zaman-dilimi 1D
+Üç ailede de ön kayıt §5'in şartları sağlanmadı. Ayrıntı:
+[`onkayit-veri-duzeltme.md`](olcum/onkayit-veri-duzeltme.md) §7–§10.
 
-# 2) Kesitsel Momentum
-python tools/momentum_olcum.py
-```
+> **Golden Zone'da bir tuzak var, yazılı:** 13 Eylül'ün katmanlı tablosu
+> işlem maliyeti ölçüme girmeden önce üretildi (`b11de50`). Ham `Ort. R`
+> sütunları 17 Eylül'ünkiyle yan yana konamaz; karşılaştırılabilen büyüklük
+> **fark**tır (strateji − adil baz), o da maliyete neredeyse duyarsızdır.
 
-Sonra ön kaydın **§7 Sonuç** bölümü tamamlanır (harmonik kısmı yazılı,
-diğer ikisi eklenecek) ve iki pasaportun K4 bölümü güncellenir.
-
-**Kural:** ön kayıt §6 — *bir kere koşulacak*. Sonuca bakıp ikinci bir
-düzeltme turu yapılmayacak.
+**Sıradaki iş:** aşağıdaki "açık başlıklar" listesinden seçilir. Yenileme
+işi bitti.
 
 ---
 
@@ -115,15 +114,14 @@ her raporda yazılı.
 
 ## Sonrası için açık başlıklar
 
-1. **Golden Zone + Kesitsel Momentum yenilemesi** ← sıradaki
-2. **"Geçen yılın kazananlarından uzak dur" filtresi** — kendi
-   ölçümümüzden çıkan en güçlü bulgu: momentum üst %10'u rastgeleye göre
-   **−%9.98** (p=1.0000). Açığa satılamaz ama **filtre** olarak
-   kullanılabilir. Ön kaydı yazılmadı, makine hazır, bir turda biter.
-3. **Gerçek tarama motoru** — K6'yı kapatır, üç stratejinin hepsine yarar
-4. **Hayatta kalma yanlılığını sınırlamak** — KAP'tan 2010–2026 BIST
+1. **"Geçen yılın kazananlarından uzak dur" filtresi** ← en güçlü bulgu.
+   Momentum üst %10'u rastgeleye göre düzeltilmiş veride de **−%9.62**
+   (p=1.0000). Açığa satılamaz ama **filtre** olarak kullanılabilir. Ön
+   kaydı yazılmadı, makine hazır, bir turda biter.
+2. **Gerçek tarama motoru** — K6'yı kapatır, üç stratejinin hepsine yarar
+3. **Hayatta kalma yanlılığını sınırlamak** — KAP'tan 2010–2026 BIST
    şirket listesi çekip kaç sembolün eksik olduğunu saymak
-5. **Kalan dört harmonik ekol** (Bat/Crab/Shark · Cypher · 5-0) — ayrı
+4. **Kalan dört harmonik ekol** (Bat/Crab/Shark · Cypher · 5-0) — ayrı
    kitaplar, ayrı K0. **Beklenen değeri en düşük iş.**
 
 ---
